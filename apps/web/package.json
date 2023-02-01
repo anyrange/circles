@@ -1,0 +1,24 @@
+{
+  "name": "@circles/web",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "nuxt": "^3.0.0"
+  },
+  "dependencies": {
+    "@trpc/client": "^10.9.0",
+    "@trpc/server": "^10.9.0",
+    "dotenv": "^16.0.3",
+    "node-fetch": "^3.3.0",
+    "trpc-nuxt": "^0.5.0",
+    "zod": "^3.20.2",
+    "@circles/types": "workspace:*",
+    "@circles/database": "workspace:*"
+  }
+}

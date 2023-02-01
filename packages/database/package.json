@@ -1,0 +1,17 @@
+{
+  "name": "@circles/database",
+  "main": "src/client.ts",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "generate": "dotenv -e ../../.env -- prisma generate",
+    "migrate": "dotenv -e ../../.env -- prisma migrate dev"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.9.0",
+    "@circles/types": "workspace:*"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.0.0",
+    "prisma": "^4.9.0"
+  }
+}

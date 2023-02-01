@@ -1,0 +1,19 @@
+{
+  "name": "circles",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "scripts": {
+    "database": "pnpm --filter database",
+    "web": "pnpm --filter web",
+    "worker": "pnpm --filter worker",
+    "preinstall": "npx only-allow pnpm"
+  },
+  "packageManager": "pnpm@7.25.1",
+  "engines": {
+    "node": ">=16.14.0"
+  },
+  "devDependencies": {
+    "rome": "^11.0.0"
+  }
+}

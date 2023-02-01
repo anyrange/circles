@@ -1,0 +1,127 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["fieldReference", "clientExtensions"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id               String   @id
+    username         String   @unique
+    email            String   @unique @default("")
+    avatar           String
+    country          String
+    accessToken      String
+    refreshToken     String
+    privacy          Privacy  @default(PUBLIC)
+    lastLogin        DateTime @default(now())
+    registrationDate DateTime @default(now())
+
+    history  History[]
+    Follower Follows[] @relation("follower")
+    Followee Follows[] @relation("followee")
+}
+
+model Follows {
+    id         Int    @id @default(autoincrement())
+    follower   User   @relation(name: "follower", fields: [followerId], references: [id], onDelete: Cascade)
+    followerId String
+    followee   User   @relation(name: "followee", fields: [followeeId], references: [id], onDelete: Cascade)
+    followeeId String
+}
+
+model History {
+    id       Int      @id @default(autoincrement())
+    playedAt DateTime
+    track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+    trackId  String
+    user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId   String
+}
+
+model Track {
+    id          String @id
+    name        String
+    duration    Int
+    releaseDate String
+
+    Album         Album         @relation(fields: [albumId], references: [id], onDelete: Cascade)
+    albumId       String
+    Artist        Artist[]
+    Images        Images        @relation(fields: [imagesId], references: [id])
+    imagesId      Int           @unique
+    AudioFeatures AudioFeatures @relation(fields: [featuresId], references: [id])
+    featuresId    Int           @unique
+    History       History[]
+}
+
+model Album {
+    id          String @id
+    name        String
+    label       String
+    releaseDate String
+    totalTracks Int
+
+    genres        Genre[]
+    Images        Images        @relation(fields: [imagesId], references: [id])
+    imagesId      Int           @unique
+    AudioFeatures AudioFeatures @relation(fields: [featuresId], references: [id])
+    featuresId    Int           @unique
+    Track         Track[]
+}
+
+model Artist {
+    id        String @id
+    name      String
+    followers Int
+
+    genres        Genre[]
+    Images        Images        @relation(fields: [imagesId], references: [id])
+    imagesId      Int           @unique
+    AudioFeatures AudioFeatures @relation(fields: [featuresId], references: [id])
+    featuresId    Int           @unique
+    Track         Track[]
+}
+
+model Images {
+    id     Int     @id @default(autoincrement())
+    high   String
+    medium String
+    low    String
+    Artist Artist?
+    Track  Track?
+    Album  Album?
+}
+
+model AudioFeatures {
+    id               Int @id @default(autoincrement())
+    tempo            Int
+    energy           Int
+    loudness         Int
+    dancebility      Int
+    instrumentalness Int
+    acousticness     Int
+    speechiness      Int
+    popularity       Int
+    liveness         Int
+    valence          Int
+
+    Track  Track?
+    Album  Album?
+    Artist Artist?
+}
+
+model Genre {
+    id     Int      @id @default(autoincrement())
+    name   String   @unique
+    Album  Album[]
+    Artist Artist[]
+}
+
+enum Privacy {
+    PUBLIC
+    PRIVATE
+}

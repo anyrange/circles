@@ -1,0 +1,15 @@
+{
+  "javascript": {
+    "formatter": {
+      "trailingComma": "es5",
+      "semicolons": "asNeeded"
+    }
+  },
+  "formatter": { "indentStyle": "space" },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
