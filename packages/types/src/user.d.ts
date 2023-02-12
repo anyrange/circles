@@ -1,14 +1,21 @@
-export type Privacy = "PUBLIC" | "PRIVATE"
+import type {
+  ExplicitContent,
+  ExternalUrls,
+  Followers,
+  Image,
+} from "./utilitary"
 
 export interface User {
-  id: string
-  username: string
-  avatar: string
   country: string
+  display_name: string
   email: string
-  accessToken: string
-  refreshToken: string
-  registrationDate?: string
-  lastLogin?: string
-  privacy?: Privacy
+  explicit_content: ExplicitContent
+  external_urls: ExternalUrls
+  followers: Followers
+  href: string
+  id: string
+  images: Image[]
+  product: string
+  type: string
+  uri: string
 }

@@ -12,13 +12,14 @@
     "nuxt": "^3.0.0"
   },
   "dependencies": {
+    "@circles/worker": "workspace:*",
+    "@circles/database": "workspace:*",
+    "@circles/spotifyAPI": "workspace:*",
+    "@circles/types": "workspace:*",
     "@trpc/client": "^10.9.0",
     "@trpc/server": "^10.9.0",
     "dotenv": "^16.0.3",
-    "node-fetch": "^3.3.0",
     "trpc-nuxt": "^0.5.0",
-    "zod": "^3.20.2",
-    "@circles/types": "workspace:*",
-    "@circles/database": "workspace:*"
+    "zod": "^3.20.2"
   }
 }

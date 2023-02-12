@@ -1,34 +1,24 @@
-export interface ExplicitContent {
-  filter_enabled: boolean
-  filter_locked: boolean
-}
+import type { User, Item, ExtendedAlbum, ExtendedArtist } from "./entities"
+import type { AudioFeature } from "./utilitary"
 
-export interface ExternalUrls {
-  spotify: string
-}
+export type APIMeResponse = User
 
-export interface Followers {
-  href: null
-  total: number
-}
-
-export interface Image {
-  height: null
-  url: string
-  width: null
-}
-
-interface APIMeResponse {
-  country: string
-  display_name: string
-  email: string
-  explicit_content: ExplicitContent
-  external_urls: ExternalUrls
-  followers: Followers
+export interface APIRecentlyPlayedResponse {
+  items: Item[]
+  next: string
+  cursors: Cursors
+  limit: number
   href: string
-  id: string
-  images: Image[]
-  product: string
-  type: string
-  uri: string
+}
+
+export interface APIAudioFeaturesResponse {
+  audio_features: AudioFeature[]
+}
+
+export interface APIAlbumsResponse {
+  albums: ExtendedAlbum[]
+}
+
+export interface APIArtistsResponse {
+  artists: ExtendedArtist[]
 }

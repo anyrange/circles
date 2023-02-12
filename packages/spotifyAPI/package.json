@@ -1,0 +1,12 @@
+{
+  "name": "@circles/spotifyAPI",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@circles/types": "workspace:*",
+    "dotenv": "^16.0.3",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.2"
+  }
+}

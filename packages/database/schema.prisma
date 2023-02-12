@@ -9,81 +9,94 @@ datasource db {
 }
 
 model User {
-    id               String   @id
-    username         String   @unique
-    email            String   @unique @default("")
-    avatar           String
-    country          String
-    accessToken      String
-    refreshToken     String
-    privacy          Privacy  @default(PUBLIC)
-    lastLogin        DateTime @default(now())
-    registrationDate DateTime @default(now())
+    id             String  @id
+    display_name   String  @unique
+    email          String  @default("")
+    avatar         String  @default("")
+    country        String
+    privacy        Privacy @default(public)
+    filter_enabled Boolean
+    url            String
+    product        String
+    type           String
+
+    access_token      String
+    refresh_token     String
+    last_login        DateTime @default(now())
+    registration_date DateTime @default(now())
 
     history  History[]
-    Follower Follows[] @relation("follower")
-    Followee Follows[] @relation("followee")
+    Follows  Follows[] @relation("follower")
+    Followed Follows[] @relation("followee")
 }
 
 model Follows {
-    id         Int    @id @default(autoincrement())
-    follower   User   @relation(name: "follower", fields: [followerId], references: [id], onDelete: Cascade)
-    followerId String
-    followee   User   @relation(name: "followee", fields: [followeeId], references: [id], onDelete: Cascade)
-    followeeId String
+    id          Int    @id @default(autoincrement())
+    follower    User   @relation(name: "follower", fields: [follower_id], references: [id], onDelete: Cascade)
+    follower_id String
+    followee    User   @relation(name: "followee", fields: [followee_id], references: [id], onDelete: Cascade)
+    followee_id String
 }
 
 model History {
-    id       Int      @id @default(autoincrement())
-    playedAt DateTime
-    track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
-    trackId  String
-    user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId   String
+    id        Int      @id @default(autoincrement())
+    played_at DateTime
+    track     Track    @relation(fields: [track_id], references: [id], onDelete: Cascade)
+    track_id  String
+    user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+    user_id   String
 }
 
 model Track {
-    id          String @id
-    name        String
-    duration    Int
-    releaseDate String
+    id           String   @id
+    name         String
+    duration_ms  Int
+    release_date DateTime
+    popularity   Float
+    track_number Int
+    disc_number  Int
+    preview_url  String
+    url          String
+    is_local     Boolean
+    explicit     Boolean
 
-    Album         Album         @relation(fields: [albumId], references: [id], onDelete: Cascade)
-    albumId       String
+    Album         Album          @relation(fields: [album_id], references: [id], onDelete: Cascade)
+    album_id      String
     Artist        Artist[]
-    Images        Images        @relation(fields: [imagesId], references: [id])
-    imagesId      Int           @unique
-    AudioFeatures AudioFeatures @relation(fields: [featuresId], references: [id])
-    featuresId    Int           @unique
+    Images        Images         @relation(fields: [images_id], references: [id])
+    images_id     Int            @unique
+    AudioFeatures AudioFeatures?
     History       History[]
 }
 
 model Album {
-    id          String @id
-    name        String
-    label       String
-    releaseDate String
-    totalTracks Int
+    id                     String    @id
+    name                   String
+    release_date           DateTime
+    release_date_precision String
+    label                  String
+    popularity             Float
+    album_type             AlbumType
+    url                    String
+    total_tracks           Int
 
-    genres        Genre[]
-    Images        Images        @relation(fields: [imagesId], references: [id])
-    imagesId      Int           @unique
-    AudioFeatures AudioFeatures @relation(fields: [featuresId], references: [id])
-    featuresId    Int           @unique
-    Track         Track[]
+    genres    Genre[]
+    Images    Images  @relation(fields: [images_id], references: [id])
+    images_id Int     @unique
+    Track     Track[]
 }
 
 model Artist {
-    id        String @id
-    name      String
-    followers Int
+    id         String @id
+    name       String
+    followers  Int
+    url        String
+    popularity Float
 
-    genres        Genre[]
-    Images        Images        @relation(fields: [imagesId], references: [id])
-    imagesId      Int           @unique
-    AudioFeatures AudioFeatures @relation(fields: [featuresId], references: [id])
-    featuresId    Int           @unique
-    Track         Track[]
+    genres    Genre[]
+    Images    Images  @relation(fields: [images_id], references: [id])
+    images_id Int     @unique
+    Track     Track[]
 }
 
 model Images {
@@ -97,21 +110,18 @@ model Images {
 }
 
 model AudioFeatures {
-    id               Int @id @default(autoincrement())
-    tempo            Int
-    energy           Int
-    loudness         Int
-    dancebility      Int
-    instrumentalness Int
-    acousticness     Int
-    speechiness      Int
-    popularity       Int
-    liveness         Int
-    valence          Int
+    tempo            Float
+    energy           Float
+    loudness         Float
+    dancebility      Float
+    instrumentalness Float
+    acousticness     Float
+    speechiness      Float
+    liveness         Float
+    valence          Float
 
-    Track  Track?
-    Album  Album?
-    Artist Artist?
+    Track    Track? @relation(fields: [track_id], references: [id])
+    track_id String @id
 }
 
 model Genre {
@@ -122,6 +132,12 @@ model Genre {
 }
 
 enum Privacy {
-    PUBLIC
-    PRIVATE
+    public
+    private
+}
+
+enum AlbumType {
+    album
+    single
+    compilation
 }

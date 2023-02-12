@@ -7,7 +7,9 @@
     "database": "pnpm --filter database",
     "web": "pnpm --filter web",
     "worker": "pnpm --filter worker",
-    "preinstall": "npx only-allow pnpm"
+    "api": "pnpm --filter spotifyAPI",
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm --filter database generate"
   },
   "packageManager": "pnpm@7.25.1",
   "engines": {

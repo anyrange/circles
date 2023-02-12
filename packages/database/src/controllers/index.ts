@@ -1,1 +1,5 @@
-export * from "./user"
+export * as user from "./user"
+export * as track from "./track"
+export * as album from "./album"
+export * as artist from "./artist"
+export * as audioFeatures from "./audioFeatures"

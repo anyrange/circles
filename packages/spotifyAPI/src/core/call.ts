@@ -1,4 +1,5 @@
 import fetch, { RequestInit, Response } from "node-fetch"
+import { BASE_ROUTE } from "../config"
 
 function sleep(ms: number) {
   return new Promise((resolve) => {
@@ -20,7 +21,7 @@ interface APIError {
   }
 }
 
-export async function spotifyAPI<T>({
+export async function call<T>({
   route,
   token,
   body,
@@ -35,11 +36,11 @@ export async function spotifyAPI<T>({
     })
 
   const callApi = async (): Promise<Response> => {
-    let res = await fetch(`https://api.spotify.com/v1/${route}`, options)
+    let res = await fetch(`${BASE_ROUTE}${route}`, options)
 
     if (res.status !== 429) return res
 
-    await sleep(2000)
+    await sleep(3000)
 
     return await callApi()
   }
@@ -49,8 +50,7 @@ export async function spotifyAPI<T>({
   if (res.status === 204) throw new Error("")
 
   const json = (await res.json().catch(() => {
-    console.error("API Error:", res.statusText, res.status)
-    console.error(`https://api.spotify.com/v1/${route}`)
+    console.error(`API: ${res.statusText} ${res.status}; (${route})`)
     console.error(options)
     throw new Error("Something went wrong")
   })) as T | APIError
@@ -60,13 +60,12 @@ export async function spotifyAPI<T>({
   }
 
   if (isError(json)) {
-    console.error("API Error:", res.statusText, res.status)
-    console.error(`https://api.spotify.com/v1/${route}`)
-    console.error(json.error)
-    throw new Error(json.error.message)
+    throw new Error(
+      `API: ${res.statusText} ${res.status}; ${json.error.message} (${route})`
+    )
   }
 
   return json
 }
 
-export default spotifyAPI
+export default call
