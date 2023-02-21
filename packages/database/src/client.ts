@@ -1,7 +1,3 @@
 import { PrismaClient } from "@prisma/client"
 
-const prisma = new PrismaClient()
-
-export default prisma
-
-export * as controllers from "./controllers"
+export const prisma = new PrismaClient()

@@ -1,4 +1,4 @@
-import prisma from "../client"
+import { prisma } from "../client"
 
 import type { AudioFeature } from "@circles/types"
 
@@ -22,6 +22,7 @@ export async function create(data: AudioFeature) {
 
 export async function createMany(data: AudioFeature[]) {
   if (!data.length) return []
+
   const features = await prisma.audioFeatures.createMany({
     data: data.map((item) => ({
       track_id: item.id,
@@ -36,5 +37,6 @@ export async function createMany(data: AudioFeature[]) {
       valence: item.valence,
     })),
   })
+
   return features
 }

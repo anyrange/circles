@@ -11,7 +11,7 @@ importers:
   apps/web:
     specifiers:
       '@circles/database': workspace:*
-      '@circles/spotifyAPI': workspace:*
+      '@circles/spotify-api': workspace:*
       '@circles/types': workspace:*
       '@circles/worker': workspace:*
       '@trpc/client': ^10.9.0
@@ -22,7 +22,7 @@ importers:
       zod: ^3.20.2
     dependencies:
       '@circles/database': link:../../packages/database
-      '@circles/spotifyAPI': link:../../packages/spotifyAPI
+      '@circles/spotify-api': link:../../packages/spotify-api
       '@circles/types': link:../../packages/types
       '@circles/worker': link:../worker
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
@@ -36,7 +36,7 @@ importers:
   apps/worker:
     specifiers:
       '@circles/database': workspace:*
-      '@circles/spotifyAPI': workspace:*
+      '@circles/spotify-api': workspace:*
       '@circles/types': workspace:*
       '@types/node': ^18.11.18
       '@types/node-cron': ^3.0.7
@@ -45,7 +45,7 @@ importers:
       typescript: ^4.9.4
     dependencies:
       '@circles/database': link:../../packages/database
-      '@circles/spotifyAPI': link:../../packages/spotifyAPI
+      '@circles/spotify-api': link:../../packages/spotify-api
       '@circles/types': link:../../packages/types
       node-cron: 3.0.2
     devDependencies:
@@ -67,7 +67,7 @@ importers:
       dotenv-cli: 7.0.0
       prisma: 4.10.1
 
-  packages/spotifyAPI:
+  packages/spotify-api:
     specifiers:
       '@circles/types': workspace:*
       '@types/node-fetch': ^2.6.2

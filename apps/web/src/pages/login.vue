@@ -1,11 +1,9 @@
 <template>
     <div @click="login">login</div>
-
 </template>
 
 <script setup lang="ts">
-import { getOAuthURL } from '~~/utils/utils';
-
+import { getOAuthURL } from '~~/utils';
 
 async function login() {
     await navigateTo(getOAuthURL(), {

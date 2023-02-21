@@ -1,5 +1,9 @@
 import fetch from "node-fetch"
-import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "../config"
+import {
+  SPOTIFY_CLIENT_ID,
+  SPOTIFY_CLIENT_SECRET,
+  TOKEN_ROUTE,
+} from "../config"
 
 import type { Tokens, TokensError } from "@circles/types"
 
@@ -17,13 +21,13 @@ export async function fetchTokens(options: CodeOptions | RefreshTokenOptions) {
 
   new URLSearchParams()
 
-  const authToken = `${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`
+  const appAuthToken = `${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`
 
-  const data = (await fetch("https://accounts.spotify.com/api/token", {
+  const data = (await fetch(TOKEN_ROUTE, {
     method: "POST",
     body: params,
     headers: {
-      Authorization: `Basic ${Buffer.from(authToken).toString("base64")}`,
+      Authorization: `Basic ${Buffer.from(appAuthToken).toString("base64")}`,
     },
   }).then((res) => res.json())) as Tokens | TokensError
 
@@ -31,8 +35,6 @@ export async function fetchTokens(options: CodeOptions | RefreshTokenOptions) {
 
   return data
 }
-
-export default fetchTokens
 
 function createParams(data: CodeOptions | RefreshTokenOptions) {
   const params = new URLSearchParams()

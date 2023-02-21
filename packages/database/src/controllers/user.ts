@@ -1,4 +1,4 @@
-import prisma from "../client"
+import { prisma } from "../client"
 
 import type { User, Tokens, HistoryRecord } from "@circles/types"
 
@@ -49,11 +49,13 @@ export async function upsert(data: UserWithTokens) {
       registration_date: true,
     },
   })
+
   return user
 }
 
 export async function getOne(id: User["id"]) {
   const user = await prisma.user.findUnique({ where: { id } })
+
   return user
 }
 
@@ -67,6 +69,7 @@ export async function lastListened(id: User["id"]) {
       },
     },
   })
+
   return user?.history[0] || undefined
 }
 
@@ -78,6 +81,7 @@ export async function getAllTokens() {
       access_token: true,
     },
   })
+
   return user
 }
 
@@ -86,6 +90,7 @@ export async function getUserTokens(id: User["id"]) {
     where: { id },
     select: { id: true, access_token: true },
   })
+
   return user
 }
 
@@ -98,11 +103,13 @@ export async function updateTokens(
     data: { access_token },
     select: { id: true, access_token: true },
   })
+
   return user
 }
 
 export async function updateHistory(id: User["id"], data: HistoryRecord[]) {
   if (!data.length) return []
+
   const user = await prisma.user.update({
     where: { id },
     data: {
@@ -117,5 +124,6 @@ export async function updateHistory(id: User["id"], data: HistoryRecord[]) {
       id: true,
     },
   })
+
   return user
 }

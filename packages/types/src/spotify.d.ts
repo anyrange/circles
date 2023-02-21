@@ -1,4 +1,11 @@
-import type { User, Item, ExtendedAlbum, ExtendedArtist } from "./entities"
+import type {
+  User,
+  Item,
+  ExtendedAlbum,
+  ExtendedArtist,
+  Track,
+} from "./entities"
+
 import type { AudioFeature } from "./utilitary"
 
 export type APIMeResponse = User
@@ -21,4 +28,8 @@ export interface APIAlbumsResponse {
 
 export interface APIArtistsResponse {
   artists: ExtendedArtist[]
+}
+
+export interface APITracksResponse {
+  tracks: Track[]
 }

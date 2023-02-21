@@ -1,5 +1,5 @@
 {
-  "name": "@circles/spotifyAPI",
+  "name": "@circles/spotify-api",
   "main": "src/index.ts",
   "dependencies": {
     "@circles/types": "workspace:*",

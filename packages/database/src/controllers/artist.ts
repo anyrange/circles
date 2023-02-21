@@ -1,4 +1,4 @@
-import prisma from "../client"
+import { prisma } from "../client"
 
 import type { ExtendedArtist } from "@circles/types"
 
@@ -25,11 +25,13 @@ export async function create(data: ExtendedArtist) {
       },
     },
   })
+
   return artist
 }
 
 export async function createMany(data: ExtendedArtist[]) {
   if (!data.length) return []
+
   const artists = await prisma.$transaction(
     data.map((artist) => {
       const high = artist.images.pop()?.url || ""

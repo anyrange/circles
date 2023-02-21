@@ -1,11 +1,6 @@
 import fetch, { RequestInit, Response } from "node-fetch"
-import { BASE_ROUTE } from "../config"
-
-function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
+import { BASE_ROUTE, DEFAULT_RETRY_AFTER } from "../config"
+import { sleep } from "../utils"
 
 interface APIOptions {
   route: string
@@ -27,25 +22,25 @@ export async function call<T>({
   body,
   method = "GET",
 }: APIOptions) {
-  let options = { method }
-  if (method !== "GET") options = Object.assign(options, { body })
+  const options = {
+    method,
+    ...(method !== "GET" && { body }),
+    ...(token && { headers: { Authorization: `Bearer ${token}` } }),
+  }
 
-  if (token)
-    options = Object.assign(options, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-
-  const callApi = async (): Promise<Response> => {
-    let res = await fetch(`${BASE_ROUTE}${route}`, options)
+  const fetchSpotify = async (): Promise<Response> => {
+    const res = await fetch(`${BASE_ROUTE}${route}`, options)
 
     if (res.status !== 429) return res
 
-    await sleep(3000)
+    const retryAfter =
+      Number(res.headers.get("Retry-After")) || DEFAULT_RETRY_AFTER
+    await sleep(retryAfter)
 
-    return await callApi()
+    return await fetchSpotify()
   }
 
-  const res = await callApi()
+  const res = await fetchSpotify()
 
   if (res.status === 204) throw new Error("")
 
@@ -67,5 +62,3 @@ export async function call<T>({
 
   return json
 }
-
-export default call

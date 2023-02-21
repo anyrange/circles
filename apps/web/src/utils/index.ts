@@ -1,4 +1,4 @@
-import { SCOPES } from "~~/config/config"
+import { SCOPES } from "~~/config"
 
 export const getRedirectURI = () => {
   const runtimeConfig = useRuntimeConfig()

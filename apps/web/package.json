@@ -14,7 +14,7 @@
   "dependencies": {
     "@circles/worker": "workspace:*",
     "@circles/database": "workspace:*",
-    "@circles/spotifyAPI": "workspace:*",
+    "@circles/spotify-api": "workspace:*",
     "@circles/types": "workspace:*",
     "@trpc/client": "^10.9.0",
     "@trpc/server": "^10.9.0",
