@@ -3,6 +3,7 @@ import * as track from "./controllers/track"
 import * as album from "./controllers/album"
 import * as artist from "./controllers/artist"
 import * as audioFeatures from "./controllers/audioFeatures"
+import * as task from "./controllers/task"
 
 export const controllers = {
   user,
@@ -10,4 +11,5 @@ export const controllers = {
   album,
   artist,
   audioFeatures,
+  task,
 }

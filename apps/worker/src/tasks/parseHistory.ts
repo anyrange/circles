@@ -15,64 +15,41 @@ import {
 import { createTask } from "../core"
 import { API_ALBUM_CAPACITY } from "../config"
 
-import type { Cursors, HistoryRecord } from "@circles/types"
-import type { TaskOptions } from "../types"
+import type { Cursors } from "@circles/types"
+import type { UserOptions } from "../types"
 
 const tempStorage = createHistoryStorage()
 let lastToken = ""
 
-export async function parseHistory() {
-  try {
-    const collectAllHistories = createTask(collectUserHistory)
-
-    const res = await collectAllHistories()
-
-    await finishHistoryParsing(lastToken)
-
-    return res
-  } catch (err) {
-    console.error(err)
-    return { fullfilled: 0, overall: 0, time: 0 }
-  }
-}
+export const parseHistory = createTask({
+  executeForEachUser: collectUserHistory,
+  onFinished: () => finishHistoryParsing(lastToken),
+})
 
 export async function collectUserHistory(
-  user: TaskOptions,
+  user: UserOptions,
   limit = 5,
-  backtrackingInfo?: {
-    cursors: Cursors
-    lastHistoryRecord: HistoryRecord | undefined
-  }
+  beforeCursor?: Cursors["before"]
 ) {
-  const isBackTracking = !!backtrackingInfo
+  const isBackTracking = !!beforeCursor
 
-  const { items, cursors: newCursors } = await fetchRecentlyPlayed(
+  const { items, cursors } = await fetchRecentlyPlayed(
     user.access_token,
     limit,
-    isBackTracking ? { before: backtrackingInfo.cursors.before } : {}
+    isBackTracking ? { before: beforeCursor } : {}
   )
-  console.log("start:", user.id)
 
   if (!items.length) return
 
-  const lastListened = backtrackingInfo
-    ? backtrackingInfo.lastHistoryRecord
-    : await controllers.user.lastListened(user.id)
+  const lastRecord = user.lastHistoryRecord
 
-  const furtherTrackingInfo = {
-    cursors: newCursors,
-    lastHistoryRecord: lastListened,
-  }
-
-  const unrecordedItems = lastListened
+  const unrecordedItems = lastRecord
     ? items.filter(
-        ({ played_at }) => new Date(played_at) > lastListened.played_at
+        ({ played_at }) => new Date(played_at) > lastRecord.played_at
       )
     : items
 
   if (!unrecordedItems.length) return
-
-  console.log("found:", user.id)
 
   const history = unrecordedItems
     .map((item) => ({
@@ -85,7 +62,7 @@ export async function collectUserHistory(
 
   if (!newItems.length) {
     tempStorage.addHistory(user.id, history)
-    await collectUserHistory(user, limit, furtherTrackingInfo)
+    await collectUserHistory(user, limit, cursors.before)
     return
   }
 
@@ -95,7 +72,8 @@ export async function collectUserHistory(
   tempStorage.addHistory(user.id, history)
 
   lastToken = user.access_token
-  await collectUserHistory(user, limit, furtherTrackingInfo)
+
+  await collectUserHistory(user, limit, cursors.before)
 }
 
 export async function finishHistoryParsing(access_token: string) {
@@ -127,21 +105,15 @@ export async function finishHistoryParsing(access_token: string) {
     ),
   ])
 
-  await Promise.all([
-    controllers.album.createMany(newAlbums),
-    controllers.artist.createMany(newArtists),
-  ])
-
-  await controllers.track.createMany(newTracks)
-  await controllers.audioFeatures.createMany(features)
-
   const histories = tempStorage.getHistories()
 
-  const updateUsers = histories.map(({ userId, history }) =>
-    controllers.user.updateHistory(userId, history)
-  )
-
-  await Promise.all(updateUsers)
+  await controllers.task.updateDatabase({
+    albums: newAlbums,
+    artists: newArtists,
+    tracks: newTracks,
+    features,
+    histories,
+  })
 
   tempStorage.clearStorage()
 }

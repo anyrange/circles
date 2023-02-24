@@ -17,3 +17,15 @@ export function splitArrayOnChunks<T>(arr: T[], chunkSize: number) {
     .fill(0)
     .map((_, i) => arr.slice(i * chunkSize, i * chunkSize + chunkSize))
 }
+
+export function isPromiseRejected(
+  input: PromiseSettledResult<unknown>
+): input is PromiseRejectedResult {
+  return input.status === "rejected"
+}
+
+export function isPromiseFulfilled<T>(
+  input: PromiseSettledResult<T>
+): input is PromiseFulfilledResult<T> {
+  return input.status === "fulfilled"
+}

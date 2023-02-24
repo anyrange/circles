@@ -2,12 +2,15 @@ import { controllers } from "@circles/database"
 import { fetchTokens } from "@circles/spotify-api"
 import { createTask } from "../core"
 
-import type { TaskOptions } from "../types"
+import type { UserOptions } from "../types"
 
-export const refreshTokens = createTask(updateUserTokens)
+export const refreshTokens = createTask({
+  executeForEachUser: getNewToken,
+  handleExecutionResults: controllers.user.updateManyTokens,
+})
 
-export function updateUserTokens({ refresh_token, id }: TaskOptions) {
-  fetchTokens({ refresh_token }).then(({ access_token }) =>
-    controllers.user.updateTokens(id, access_token)
-  )
+export async function getNewToken({ refresh_token, id }: UserOptions) {
+  const { access_token } = await fetchTokens({ refresh_token })
+
+  return { access_token, id }
 }

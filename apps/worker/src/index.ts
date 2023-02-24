@@ -21,5 +21,4 @@ cron.schedule("*/5 * * * *", async () => {
 export {
   collectUserHistory,
   finishHistoryParsing,
-  updateUserTokens,
 } from "./tasks"

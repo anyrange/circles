@@ -73,18 +73,6 @@ export async function lastListened(id: User["id"]) {
   return user?.history[0] || undefined
 }
 
-export async function getAllTokens() {
-  const user = await prisma.user.findMany({
-    select: {
-      id: true,
-      refresh_token: true,
-      access_token: true,
-    },
-  })
-
-  return user
-}
-
 export async function getUserTokens(id: User["id"]) {
   const user = await prisma.user.findUnique({
     where: { id },
@@ -107,18 +95,30 @@ export async function updateTokens(
   return user
 }
 
-export async function updateHistory(id: User["id"], data: HistoryRecord[]) {
-  if (!data.length) return []
+export async function updateManyTokens(
+  users: { id: User["id"]; access_token: Tokens["access_token"] }[]
+) {
+  if (!users.length) return []
+
+  const results = await prisma.$transaction(
+    users.map(({ id, access_token }) =>
+      prisma.user.update({
+        where: { id },
+        data: { access_token },
+        select: { id: true, access_token: true },
+      })
+    )
+  )
+
+  return results
+}
+
+export async function updateHistory(id: User["id"], history: HistoryRecord[]) {
+  if (!history.length) return []
 
   const user = await prisma.user.update({
     where: { id },
-    data: {
-      history: {
-        createMany: {
-          data,
-        },
-      },
-    },
+    data: { history: { createMany: { data: history } } },
     select: {
       history: { select: { track_id: true, played_at: true } },
       id: true,

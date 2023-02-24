@@ -1,22 +1,37 @@
 import { controllers } from "@circles/database"
-import { getTimeDiffSeconds } from "../utils"
+import {
+  getTimeDiffSeconds,
+  isPromiseFulfilled,
+  isPromiseRejected,
+} from "../utils"
 
-import type { TaskFn } from "../types"
+import type { TaskOptions } from "../types"
 
-const isRejected = (
-  input: PromiseSettledResult<unknown>
-): input is PromiseRejectedResult => input.status === "rejected"
-
-export function createTask<T>(fn: TaskFn<T>) {
+export function createTask<T>({
+  executeForEachUser,
+  handleExecutionResults,
+  onFinished,
+}: TaskOptions<T>) {
   return async () => {
     try {
-      const users = await controllers.user.getAllTokens()
+      const users = await controllers.task.getInfoForTask()
 
       const start = new Date()
-      const results = await Promise.allSettled(users.map((user) => fn(user)))
+
+      const results = await Promise.allSettled(
+        users.map((user) => executeForEachUser(user))
+      )
+
+      if (handleExecutionResults)
+        await handleExecutionResults(
+          results.filter(isPromiseFulfilled).map(({ value }) => value)
+        )
+
+      if (onFinished) await onFinished()
+
       const end = new Date()
 
-      const failedTasks = results.filter(isRejected)
+      const failedTasks = results.filter(isPromiseRejected)
 
       failedTasks.forEach(({ reason }) => console.error(reason))
 
