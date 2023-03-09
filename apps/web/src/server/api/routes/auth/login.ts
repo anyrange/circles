@@ -3,7 +3,7 @@ import { fetchMe, fetchTokens } from "@circles/spotify-api"
 import { controllers } from "@circles/database"
 import { collectUserHistory, finishHistoryParsing } from "@circles/worker"
 import { publicProcedure } from "~~/server/trpc"
-import { getRedirectURI } from "~~/utils"
+import { getRedirectURI } from "~~/helpers"
 
 export default publicProcedure
   .input(
