@@ -57,6 +57,7 @@ CREATE TABLE "Track" (
     "is_local" BOOLEAN NOT NULL,
     "explicit" BOOLEAN NOT NULL,
     "album_id" TEXT NOT NULL,
+    "artist_id" TEXT NOT NULL,
     "images_id" INTEGER NOT NULL,
 
     CONSTRAINT "Track_pkey" PRIMARY KEY ("id")
@@ -136,12 +137,6 @@ CREATE TABLE "_ArtistToGenre" (
     "B" INTEGER NOT NULL
 );
 
--- CreateTable
-CREATE TABLE "_ArtistToTrack" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "User_display_name_key" ON "User"("display_name");
 
@@ -169,12 +164,6 @@ CREATE UNIQUE INDEX "_ArtistToGenre_AB_unique" ON "_ArtistToGenre"("A", "B");
 -- CreateIndex
 CREATE INDEX "_ArtistToGenre_B_index" ON "_ArtistToGenre"("B");
 
--- CreateIndex
-CREATE UNIQUE INDEX "_ArtistToTrack_AB_unique" ON "_ArtistToTrack"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_ArtistToTrack_B_index" ON "_ArtistToTrack"("B");
-
 -- AddForeignKey
 ALTER TABLE "Follows" ADD CONSTRAINT "Follows_follower_id_fkey" FOREIGN KEY ("follower_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -191,6 +180,9 @@ ALTER TABLE "History" ADD CONSTRAINT "History_user_id_fkey" FOREIGN KEY ("user_i
 ALTER TABLE "Track" ADD CONSTRAINT "Track_album_id_fkey" FOREIGN KEY ("album_id") REFERENCES "Album"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Track" ADD CONSTRAINT "Track_artist_id_fkey" FOREIGN KEY ("artist_id") REFERENCES "Artist"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Track" ADD CONSTRAINT "Track_images_id_fkey" FOREIGN KEY ("images_id") REFERENCES "Images"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -200,7 +192,7 @@ ALTER TABLE "Album" ADD CONSTRAINT "Album_images_id_fkey" FOREIGN KEY ("images_i
 ALTER TABLE "Artist" ADD CONSTRAINT "Artist_images_id_fkey" FOREIGN KEY ("images_id") REFERENCES "Images"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AudioFeatures" ADD CONSTRAINT "AudioFeatures_track_id_fkey" FOREIGN KEY ("track_id") REFERENCES "Track"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AudioFeatures" ADD CONSTRAINT "AudioFeatures_track_id_fkey" FOREIGN KEY ("track_id") REFERENCES "Track"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_AlbumToGenre" ADD CONSTRAINT "_AlbumToGenre_A_fkey" FOREIGN KEY ("A") REFERENCES "Album"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -213,9 +205,3 @@ ALTER TABLE "_ArtistToGenre" ADD CONSTRAINT "_ArtistToGenre_A_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "_ArtistToGenre" ADD CONSTRAINT "_ArtistToGenre_B_fkey" FOREIGN KEY ("B") REFERENCES "Genre"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_ArtistToTrack" ADD CONSTRAINT "_ArtistToTrack_A_fkey" FOREIGN KEY ("A") REFERENCES "Artist"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_ArtistToTrack" ADD CONSTRAINT "_ArtistToTrack_B_fkey" FOREIGN KEY ("B") REFERENCES "Track"("id") ON DELETE CASCADE ON UPDATE CASCADE;

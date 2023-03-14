@@ -62,7 +62,8 @@ model Track {
 
     Album         Album          @relation(fields: [album_id], references: [id], onDelete: Cascade)
     album_id      String
-    Artist        Artist[]
+    Artist        Artist         @relation(fields: [artist_id], references: [id], onDelete: Cascade)
+    artist_id     String
     Images        Images         @relation(fields: [images_id], references: [id])
     images_id     Int            @unique
     AudioFeatures AudioFeatures?
@@ -120,7 +121,7 @@ model AudioFeatures {
     liveness         Float
     valence          Float
 
-    Track    Track? @relation(fields: [track_id], references: [id])
+    Track    Track  @relation(fields: [track_id], references: [id], onDelete: Cascade)
     track_id String @id
 }
 

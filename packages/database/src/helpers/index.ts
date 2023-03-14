@@ -88,7 +88,9 @@ export function sanitizeTrack(track: Track) {
         },
       },
       Artist: {
-        connect: track.artists.map(({ id }) => ({ id })),
+        connect: {
+          id: track.artists[0].id,
+        },
       },
     },
   }

@@ -1,8 +1,21 @@
-export function log(text: string) {
+export function getTimeStamp() {
   const time = new Date()
   const timestamp = time.toISOString().split(".")[0]
+  return timestamp
+}
 
-  console.log(`[${timestamp}] ${text}`)
+export function log(text: string) {
+  console.log(`[${getTimeStamp()}]`, text)
+}
+
+export function error(text: unknown) {
+  console.error(`[${getTimeStamp()}]`, text)
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
 }
 
 export function getTimeDiffSeconds(start: Date, end: Date) {

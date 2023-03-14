@@ -1,5 +1,5 @@
 import cron from "node-cron"
-import { log } from "./utils"
+import { log } from "@circles/utils"
 import { refreshTokens, parseHistory } from "./tasks"
 
 log("Starting workers")
@@ -18,7 +18,4 @@ cron.schedule("*/5 * * * *", async () => {
   log(`Parsing tracks: ${res.fullfilled}/${res.overall} in ${res.time}s`)
 })
 
-export {
-  collectUserHistory,
-  finishHistoryParsing,
-} from "./tasks"
+export { collectUserHistory } from "./tasks"

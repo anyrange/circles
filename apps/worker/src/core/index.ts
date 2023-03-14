@@ -1,46 +1,26 @@
 import { controllers } from "@circles/database"
-import {
-  getTimeDiffSeconds,
-  isPromiseFulfilled,
-  isPromiseRejected,
-} from "../utils"
+import { getTimeDiffSeconds, error } from "@circles/utils"
 
-import type { TaskOptions } from "../types"
+import type { TaskFn } from "../types"
 
-export function createTask<T>({
-  executeForEachUser,
-  handleExecutionResults,
-  onFinished,
-}: TaskOptions<T>) {
+export function createTask(taskFn: TaskFn) {
   return async () => {
     try {
-      const users = await controllers.task.getInfoForTask()
+      const users = await controllers.task.getUsersInfo()
 
       const start = new Date()
 
-      const results = await Promise.allSettled(
-        users.map((user) => executeForEachUser(user))
-      )
-
-      if (handleExecutionResults)
-        await handleExecutionResults(
-          results.filter(isPromiseFulfilled).map(({ value }) => value)
-        )
-
-      if (onFinished) await onFinished()
+      const { fullfilled, failedTasks } = await taskFn(users)
 
       const end = new Date()
 
-      const failedTasks = results.filter(isPromiseRejected)
+      failedTasks.forEach(({ reason }) => error(reason))
 
-      failedTasks.forEach(({ reason }) => console.error(reason))
-
-      const fullfilled = results.length - failedTasks.length
       const time = getTimeDiffSeconds(start, end)
 
-      return { fullfilled, overall: results.length, time }
+      return { fullfilled, overall: users.length, time }
     } catch (err) {
-      console.error(err)
+      error(err)
       return { fullfilled: 0, overall: 0, time: 0 }
     }
   }

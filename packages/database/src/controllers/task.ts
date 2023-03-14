@@ -15,7 +15,7 @@ import type {
   User,
 } from "@circles/types"
 
-export async function getInfoForTask() {
+export async function getUsersInfo() {
   const users = await prisma.user.findMany({
     select: {
       id: true,

@@ -1,32 +1,30 @@
 import { HistoryRecord } from "@circles/types"
 
-export interface UserOptions {
+export interface UserInfo {
   id: string
   refresh_token: string
   access_token: string
-  lastHistoryRecord: HistoryRecord | undefined
+  lastHistoryRecord?: HistoryRecord
 }
 
-export interface PerUserFn<T> {
-  (user: UserOptions): Promise<T>
-}
-
-export interface EveryUserFn<T> {
-  (perUserResults: T[]): void
-}
-
-export interface FinalFn {
-  (args: void): void
-}
-
-export interface TaskOptions<T> {
-  executeForEachUser: PerUserFn<T>
-  handleExecutionResults?: EveryUserFn<T>
-  onFinished?: FinalFn
+export interface TaskFn {
+  (user: UserInfo[]): Promise<{
+    fullfilled: number
+    failedTasks: PromiseRejectedResult[]
+  }>
 }
 
 export interface EntitiesIds {
+  userId: string
   trackIds: string[]
   albumIds: string[]
   artistIds: string[]
+}
+
+export interface StorageItem {
+  trackIds: EntitiesIds["trackIds"]
+  albumIds: EntitiesIds["albumIds"]
+  artistIds: EntitiesIds["artistIds"]
+  history: HistoryRecord[]
+  token: string
 }

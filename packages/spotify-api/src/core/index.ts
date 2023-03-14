@@ -1,6 +1,6 @@
 import fetch, { RequestInit, Response } from "node-fetch"
+import { sleep } from "@circles/utils"
 import { BASE_ROUTE, DEFAULT_RETRY_AFTER } from "../config"
-import { sleep } from "../utils"
 
 interface APIOptions {
   route: string
@@ -45,9 +45,7 @@ export async function call<T>({
   if (res.status === 204) throw new Error("")
 
   const json = (await res.json().catch(() => {
-    console.error(`API: ${res.statusText} ${res.status}; (${route})`)
-    console.error(options)
-    throw new Error("Something went wrong")
+    throw new Error(`API: ${res.statusText} ${res.status}; (${route})`)
   })) as T | APIError
 
   const isError = (data: T | APIError): data is APIError => {

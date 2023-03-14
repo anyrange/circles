@@ -8,6 +8,7 @@
   "dependencies": {
     "@circles/database": "workspace:*",
     "@circles/spotify-api": "workspace:*",
+    "@circles/utils": "workspace:*",
     "@circles/types": "workspace:*",
     "node-cron": "^3.0.2"
   },
