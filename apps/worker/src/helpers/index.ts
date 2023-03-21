@@ -1,21 +1,7 @@
 import { controllers } from "@circles/database"
-import { splitArrayOnChunks } from "@circles/utils"
-import { API_DEFAULT_CAPACITY } from "../config"
 
 import type { Item, HistoryRecord } from "@circles/types"
 import type { EntitiesIds, StorageItem } from "../types"
-
-export async function makeBatchRequests<
-  F extends (ids: string[]) => ReturnType<F>
->(fn: F, ids: string[], chunkSize = API_DEFAULT_CAPACITY) {
-  if (!ids.length) return []
-
-  const results = await Promise.all(
-    splitArrayOnChunks(ids, chunkSize).map((chunk) => fn(chunk))
-  )
-
-  return results.flat(1)
-}
 
 export async function extractEntitiesIds(items: Item[]) {
   const trackIds = items.map(({ track }) => track.id)

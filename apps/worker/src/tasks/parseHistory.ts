@@ -1,20 +1,12 @@
 import { controllers } from "@circles/database"
 import { isPromiseFulfilled, isPromiseRejected } from "@circles/utils"
-import {
-  fetchRecentlyPlayed,
-  fetchTracks,
-  fetchAlbums,
-  fetchArtists,
-  fetchAudioFeatures,
-} from "@circles/spotify-api"
+import { fetchRecentlyPlayed, fetchEntities } from "@circles/spotify-api"
 import {
   removeStoredTracks,
-  makeBatchRequests,
   extractEntitiesIds,
   createHistoryStorage,
 } from "../helpers"
 import { createTask } from "../core"
-import { API_ALBUM_CAPACITY } from "../config"
 
 import type {
   Cursors,
@@ -23,7 +15,7 @@ import type {
   AudioFeature,
   Track,
 } from "@circles/types"
-import type { UserInfo, StorageItem } from "../types"
+import type { UserInfo } from "../types"
 
 const tempStorage = createHistoryStorage()
 
@@ -37,7 +29,9 @@ export const parseHistory = createTask(async (usersInfo) => {
   await tempStorage.cleanEntityDuplicates()
 
   const newInfo = await Promise.allSettled(
-    tempStorage.getEntitiesUpdates().map((update) => fetchEntities(update))
+    tempStorage
+      .getEntitiesUpdates()
+      .map((update) => fetchEntities(update.token, update))
   )
 
   failedTasks.push(...newInfo.filter(isPromiseRejected))
@@ -49,9 +43,9 @@ export const parseHistory = createTask(async (usersInfo) => {
 
   newInfo.filter(isPromiseFulfilled).forEach(({ value }) => {
     features.push(...value.features)
-    tracks.push(...value.newTracks)
-    albums.push(...value.newAlbums)
-    artists.push(...value.newArtists)
+    tracks.push(...value.tracks)
+    albums.push(...value.albums)
+    artists.push(...value.artists)
   })
 
   const histories = tempStorage.getHistories()
@@ -115,36 +109,4 @@ export async function collectUserHistory(
   tempStorage.addEntities({ trackIds, albumIds, artistIds, userId: user.id })
 
   await collectUserHistory(user, limit, cursors.before)
-}
-
-export async function fetchEntities({
-  token,
-  trackIds,
-  albumIds,
-  artistIds,
-}: Omit<StorageItem, "history">) {
-  const [features, newTracks, newAlbums, newArtists] = await Promise.all([
-    makeBatchRequests(
-      async (ids) =>
-        fetchAudioFeatures(token, ids).then(
-          ({ audio_features }) => audio_features
-        ),
-      trackIds
-    ),
-    makeBatchRequests(
-      async (ids) => fetchTracks(token, ids).then(({ tracks }) => tracks),
-      trackIds
-    ),
-    makeBatchRequests(
-      async (ids) => fetchAlbums(token, ids).then(({ albums }) => albums),
-      albumIds,
-      API_ALBUM_CAPACITY
-    ),
-    makeBatchRequests(
-      async (ids) => fetchArtists(token, ids).then(({ artists }) => artists),
-      artistIds
-    ),
-  ])
-
-  return { features, newTracks, newAlbums, newArtists }
 }
