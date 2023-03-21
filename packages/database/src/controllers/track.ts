@@ -1,7 +1,7 @@
 import { prisma } from "../client"
 import { sanitizeTrack } from "../helpers"
 
-import type { Track } from "@circles/types"
+import type { Track, Item } from "@circles/types"
 
 export async function create(data: Track) {
   const track = await prisma.track.create(sanitizeTrack(data))
@@ -19,8 +19,10 @@ export async function createMany(data: Track[]) {
   return tracks
 }
 
-export async function checkMany(ids: Track["id"][]) {
-  if (!ids.length) return []
+async function findExistingIds(ids: Track["id"][]) {
+  const existingTracks = new Set<Track["id"]>()
+
+  if (!ids.length) return existingTracks
 
   const results = await prisma.$transaction(
     ids.map((id) =>
@@ -31,7 +33,23 @@ export async function checkMany(ids: Track["id"][]) {
     )
   )
 
-  const tracks = results.filter((track) => track !== null) as { id: string }[]
+  results.forEach((track) => {
+    if (track !== null) existingTracks.add(track.id)
+  })
 
-  return tracks.map(({ id }) => id)
+  return existingTracks
+}
+
+export async function filterExistingTrackIds(ids: Track["id"][]) {
+  const existingTracks = await findExistingIds(ids)
+
+  return ids.filter((track) => !existingTracks.has(track))
+}
+
+export async function filterExistingItems(items: Item[]) {
+  const ids = items.map(({ track }) => track.id)
+
+  const existingTracks = await findExistingIds(ids)
+
+  return items.filter(({ track }) => !existingTracks.has(track.id))
 }

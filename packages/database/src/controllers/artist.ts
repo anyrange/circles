@@ -19,7 +19,7 @@ export async function createMany(data: ExtendedArtist[]) {
   return artists
 }
 
-export async function checkMany(ids: ExtendedArtist["id"][]) {
+export async function filterExistingArtistIds(ids: ExtendedArtist["id"][]) {
   if (!ids.length) return []
 
   const results = await prisma.$transaction(
@@ -30,10 +30,11 @@ export async function checkMany(ids: ExtendedArtist["id"][]) {
       })
     )
   )
+  const existingArtists = new Set<ExtendedArtist["id"]>()
 
-  const artists = results.filter((artist) => artist !== null) as {
-    id: string
-  }[]
+  results.forEach((artist) => {
+    if (artist !== null) existingArtists.add(artist.id)
+  })
 
-  return artists.map(({ id }) => id)
+  return ids.filter((artist) => !existingArtists.has(artist))
 }

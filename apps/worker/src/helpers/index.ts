@@ -14,26 +14,6 @@ export async function extractEntitiesIds(items: Item[]) {
   return { trackIds, albumIds, artistIds }
 }
 
-export async function removeStoredTracks(items: Item[]) {
-  const tracks = items.map(({ track }) => track.id)
-
-  const existingItems = new Set(await controllers.track.checkMany(tracks))
-
-  return items.filter(({ track }) => !existingItems.has(track.id))
-}
-
-export async function removeStoredAlbums(albums: string[]) {
-  const existingAlbums = new Set(await controllers.album.checkMany(albums))
-
-  return albums.filter((album) => !existingAlbums.has(album))
-}
-
-export async function removeStoredArtists(artists: string[]) {
-  const existingArtists = new Set(await controllers.artist.checkMany(artists))
-
-  return artists.filter((artist) => !existingArtists.has(artist))
-}
-
 export function createHistoryStorage() {
   const trackIdsAcc: Set<string> = new Set([])
   const albumIdsAcc: Set<string> = new Set([])
@@ -101,8 +81,8 @@ export function createHistoryStorage() {
     const uniqArtists = [...artistIdsAcc]
 
     const [albumIds, artistIds] = await Promise.all([
-      removeStoredAlbums(uniqAlbums),
-      removeStoredArtists(uniqArtists),
+      controllers.album.filterExistingAlbumIds(uniqAlbums),
+      controllers.artist.filterExistingArtistIds(uniqArtists),
     ])
 
     albumIdsAcc.clear()

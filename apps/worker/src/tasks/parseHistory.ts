@@ -1,11 +1,7 @@
 import { controllers } from "@circles/database"
 import { isPromiseFulfilled, isPromiseRejected } from "@circles/utils"
 import { fetchRecentlyPlayed, fetchEntities } from "@circles/spotify-api"
-import {
-  removeStoredTracks,
-  extractEntitiesIds,
-  createHistoryStorage,
-} from "../helpers"
+import { extractEntitiesIds, createHistoryStorage } from "../helpers"
 import { createTask } from "../core"
 
 import type {
@@ -95,7 +91,7 @@ export async function collectUserHistory(
     }))
     .reverse()
 
-  const newItems = await removeStoredTracks(unrecordedItems)
+  const newItems = await controllers.track.filterExistingItems(unrecordedItems)
 
   if (!newItems.length) {
     tempStorage.addHistory(user.id, history, user.access_token)
