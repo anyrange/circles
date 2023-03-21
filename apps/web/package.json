@@ -12,7 +12,6 @@
     "nuxt": "^3.0.0"
   },
   "dependencies": {
-    "@circles/worker": "workspace:*",
     "@circles/database": "workspace:*",
     "@circles/spotify-api": "workspace:*",
     "@circles/types": "workspace:*",

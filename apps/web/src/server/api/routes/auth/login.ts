@@ -1,9 +1,13 @@
 import { z } from "zod"
-import { fetchMe, fetchTokens } from "@circles/spotify-api"
+import {
+  fetchMe,
+  fetchTokens,
+  fetchRecentlyPlayed,
+  fetchEntities,
+} from "@circles/spotify-api"
 import { controllers } from "@circles/database"
-// import { collectUserHistory } from "@circles/worker"
 import { publicProcedure } from "~~/server/trpc"
-import { getRedirectURI } from "~~/helpers"
+import { extractEntitiesIds, getRedirectURI } from "~~/helpers"
 
 export default publicProcedure
   .input(
@@ -28,27 +32,47 @@ export default publicProcedure
     const isNewUser =
       user.last_login.getTime() === user.registration_date.getTime()
 
-    // if (isNewUser)
-    //   await parseUserHistory(user.id, access_token, user.display_name)
+    if (isNewUser)
+      await parseUserHistory(user.id, access_token).catch((e) =>
+        console.error(`Couldn't parse ${user.display_name}: ${e}`)
+      )
 
     return user
   })
 
-// async function parseUserHistory(
-//   id: string,
-//   access_token: string,
-//   display_name: string
-// ) {
-//   try {
-//     const taskOptions = {
-//       id,
-//       access_token,
-//       refresh_token: "",
-//     }
+const PARSE_LIMIT = 50
 
-//     // await collectUserHistory(taskOptions, 10)
-//     // await finishHistoryParsing(access_token)
-//   } catch (e) {
-//     console.error(`Couldn't parse ${display_name}: ${e}`)
-//   }
-// }
+async function parseUserHistory(id: string, token: string) {
+  const { items } = await fetchRecentlyPlayed(token, PARSE_LIMIT)
+
+  if (!items.length) return
+
+  const history = items
+    .map((item) => ({
+      played_at: new Date(item.played_at),
+      track_id: item.track.id,
+    }))
+    .reverse()
+
+  const uniqItems = await controllers.track.filterExistingItems(items)
+  const entitiesIds = await extractEntitiesIds(uniqItems)
+
+  const [albumIds, artistIds] = await Promise.all([
+    controllers.album.filterExistingAlbumIds(entitiesIds.albumIds),
+    controllers.artist.filterExistingArtistIds(entitiesIds.artistIds),
+  ])
+
+  const { features, tracks, albums, artists } = await fetchEntities(token, {
+    trackIds: entitiesIds.trackIds,
+    albumIds,
+    artistIds,
+  })
+
+  await controllers.task.updateDatabase({
+    histories: [{ userId: id, history }],
+    features,
+    tracks,
+    albums,
+    artists,
+  })
+}
