@@ -58,12 +58,16 @@ async function parseUserHistory(id: string, token: string) {
   const entitiesIds = await extractEntitiesIds(uniqItems)
 
   const [albumIds, artistIds] = await Promise.all([
-    controllers.album.filterExistingAlbumIds(entitiesIds.albumIds),
-    controllers.artist.filterExistingArtistIds(entitiesIds.artistIds),
+    controllers.album.filterExistingAlbumIds([
+      ...new Set(entitiesIds.albumIds),
+    ]),
+    controllers.artist.filterExistingArtistIds([
+      ...new Set(entitiesIds.artistIds),
+    ]),
   ])
 
   const { features, tracks, albums, artists } = await fetchEntities(token, {
-    trackIds: entitiesIds.trackIds,
+    trackIds: [...new Set(entitiesIds.trackIds)],
     albumIds,
     artistIds,
   })
