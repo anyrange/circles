@@ -6,6 +6,7 @@ import {
   fetchEntities,
 } from "@circles/spotify-api"
 import { controllers } from "@circles/database"
+import { uniquifyArray } from "@circles/utils"
 import { publicProcedure } from "~~/server/trpc"
 import { extractEntitiesIds, getRedirectURI } from "~~/helpers"
 
@@ -58,16 +59,16 @@ async function parseUserHistory(id: string, token: string) {
   const entitiesIds = await extractEntitiesIds(uniqItems)
 
   const [albumIds, artistIds] = await Promise.all([
-    controllers.album.filterExistingAlbumIds([
-      ...new Set(entitiesIds.albumIds),
-    ]),
-    controllers.artist.filterExistingArtistIds([
-      ...new Set(entitiesIds.artistIds),
-    ]),
+    controllers.album.filterExistingAlbumIds(
+      uniquifyArray(entitiesIds.albumIds)
+    ),
+    controllers.artist.filterExistingArtistIds(
+      uniquifyArray(entitiesIds.artistIds)
+    ),
   ])
 
   const { features, tracks, albums, artists } = await fetchEntities(token, {
-    trackIds: [...new Set(entitiesIds.trackIds)],
+    trackIds: uniquifyArray(entitiesIds.trackIds),
     albumIds,
     artistIds,
   })

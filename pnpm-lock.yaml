@@ -13,6 +13,7 @@ importers:
       '@circles/database': workspace:*
       '@circles/spotify-api': workspace:*
       '@circles/types': workspace:*
+      '@circles/utils': workspace:*
       '@trpc/client': ^10.9.0
       '@trpc/server': ^10.9.0
       dotenv: ^16.0.3
@@ -23,6 +24,7 @@ importers:
       '@circles/database': link:../../packages/database
       '@circles/spotify-api': link:../../packages/spotify-api
       '@circles/types': link:../../packages/types
+      '@circles/utils': link:../../packages/utils
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
       '@trpc/server': 10.9.0
       dotenv: 16.0.3

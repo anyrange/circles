@@ -15,9 +15,9 @@ export async function extractEntitiesIds(items: Item[]) {
 }
 
 export function createHistoryStorage() {
-  const trackIdsAcc: Set<string> = new Set([])
-  const albumIdsAcc: Set<string> = new Set([])
-  const artistIdsAcc: Set<string> = new Set([])
+  const trackIdsAcc = new Set<string>([])
+  const albumIdsAcc = new Set<string>([])
+  const artistIdsAcc = new Set<string>([])
 
   const storage: {
     [key: EntitiesIds["userId"]]: StorageItem

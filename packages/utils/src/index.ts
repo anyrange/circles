@@ -42,3 +42,7 @@ export function isPromiseFulfilled<T>(
 ): input is PromiseFulfilledResult<T> {
   return input.status === "fulfilled"
 }
+
+export function uniquifyArray<T>(arr: T[]) {
+  return [...new Set(arr)]
+}
