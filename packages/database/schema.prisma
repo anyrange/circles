@@ -22,6 +22,7 @@ model User {
 
     access_token      String
     refresh_token     String
+    refresh_is_valid  Boolean  @default(true)
     last_login        DateTime @default(now())
     registration_date DateTime @default(now())
 

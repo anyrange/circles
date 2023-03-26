@@ -96,15 +96,19 @@ export async function updateTokens(
 }
 
 export async function updateManyTokens(
-  users: { id: User["id"]; access_token: Tokens["access_token"] }[]
+  users: {
+    id: User["id"]
+    access_token: Tokens["access_token"]
+    refresh_is_valid: boolean
+  }[]
 ) {
   if (!users.length) return []
 
   const results = await prisma.$transaction(
-    users.map(({ id, access_token }) =>
+    users.map(({ id, access_token, refresh_is_valid }) =>
       prisma.user.update({
         where: { id },
-        data: { access_token },
+        data: { access_token, refresh_is_valid },
         select: { id: true, access_token: true },
       })
     )

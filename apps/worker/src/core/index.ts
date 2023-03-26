@@ -14,13 +14,13 @@ export function createTask(taskFn: TaskFn) {
 
       const end = new Date()
 
-      failedTasks.forEach(({ reason }) => error(reason))
+      failedTasks.forEach(({ reason }) => error((reason as Error).message))
 
       const time = getTimeDiffSeconds(start, end)
 
       return { fullfilled, overall: users.length, time }
-    } catch (err) {
-      error(err)
+    } catch (e) {
+      error((e as Error).message)
       return { fullfilled: 0, overall: 0, time: 0 }
     }
   }

@@ -26,6 +26,9 @@ export async function getUsersInfo() {
         take: 1,
       },
     },
+    where: {
+      refresh_is_valid: true,
+    },
   })
 
   return users.map((user) => ({

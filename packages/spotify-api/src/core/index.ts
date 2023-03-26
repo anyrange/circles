@@ -16,15 +16,20 @@ interface APIError {
   }
 }
 
+const isAPIError = (data: unknown | APIError): data is APIError =>
+  (data as APIError).error !== undefined
+
 export async function call<T>({
   route,
   token,
   body,
   method = "GET",
 }: APIOptions) {
+  const isGET = method === "GET"
+
   const options = {
     method,
-    ...(method !== "GET" && { body }),
+    ...(!isGET && { body }),
     ...(token && { headers: { Authorization: `Bearer ${token}` } }),
   }
 
@@ -35,6 +40,7 @@ export async function call<T>({
 
     const retryAfter =
       Number(res.headers.get("Retry-After")) || DEFAULT_RETRY_AFTER
+
     await sleep(retryAfter)
 
     return await fetchSpotify()
@@ -42,21 +48,15 @@ export async function call<T>({
 
   const res = await fetchSpotify()
 
-  if (res.status === 204) throw new Error("")
+  const errMsg = `API: ${res.statusText} ${res.status} (${route});`
+
+  if (res.status === 204) throw new Error(errMsg)
 
   const json = (await res.json().catch(() => {
-    throw new Error(`API: ${res.statusText} ${res.status}; (${route})`)
+    throw new Error(errMsg)
   })) as T | APIError
 
-  const isError = (data: T | APIError): data is APIError => {
-    return (data as APIError).error !== undefined
-  }
-
-  if (isError(json)) {
-    throw new Error(
-      `API: ${res.statusText} ${res.status}; ${json.error.message} (${route})`
-    )
-  }
+  if (isAPIError(json)) throw new Error(`${errMsg} ${json.error.message}`)
 
   return json
 }
