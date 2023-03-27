@@ -1,12 +1,16 @@
 node_modules
-*.log*
 .nuxt
 .nitro
+
+*.log*
 .cache
 .output
+
 .env
 .env.production
+
 dist
 build
+
 .idea
 .vscode

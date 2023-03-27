@@ -1,7 +1,6 @@
+import type { ExtendedArtist } from "@circles/types"
 import { prisma } from "../client"
 import { sanitizeArtist } from "../helpers"
-
-import type { ExtendedArtist } from "@circles/types"
 
 export async function create(data: ExtendedArtist) {
   const artist = await prisma.artist.create(sanitizeArtist(data))

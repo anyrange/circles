@@ -1,14 +1,13 @@
 <template>
-    <div @click="login">login</div>
+  <div @click="login">login</div>
 </template>
 
 <script setup lang="ts">
-import { getOAuthURL } from '~~/helpers';
+import { getOAuthURL } from "~~/helpers"
 
 async function login() {
-    await navigateTo(getOAuthURL(), {
-        external: true
-    })
+  await navigateTo(getOAuthURL(), {
+    external: true,
+  })
 }
-
 </script>

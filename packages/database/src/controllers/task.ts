@@ -1,11 +1,3 @@
-import { prisma } from "../client"
-import {
-  sanitizeAlbum,
-  sanitizeArtist,
-  sanitizeTrack,
-  sanitizeAudioFeatures,
-} from "../helpers"
-
 import type {
   ExtendedAlbum,
   ExtendedArtist,
@@ -14,6 +6,13 @@ import type {
   HistoryRecord,
   User,
 } from "@circles/types"
+import { prisma } from "../client"
+import {
+  sanitizeAlbum,
+  sanitizeArtist,
+  sanitizeTrack,
+  sanitizeAudioFeatures,
+} from "../helpers"
 
 export async function getUsersInfo() {
   const users = await prisma.user.findMany({

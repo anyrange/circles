@@ -1,6 +1,5 @@
-import { prisma } from "../client"
-
 import type { User, Tokens, HistoryRecord } from "@circles/types"
+import { prisma } from "../client"
 
 type UserWithTokens = User & {
   access_token: Tokens["access_token"]

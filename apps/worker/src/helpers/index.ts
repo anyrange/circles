@@ -3,7 +3,7 @@ import { controllers } from "@circles/database"
 import type { Item, HistoryRecord } from "@circles/types"
 import type { EntitiesIds, StorageItem } from "../types"
 
-export async function extractEntitiesIds(items: Item[]) {
+export function extractEntitiesIds(items: Item[]) {
   const trackIds = items.map(({ track }) => track.id)
   const albumIds = items.map(({ track }) => track.album.id)
   const artistIds = items.flatMap(({ track }) => [

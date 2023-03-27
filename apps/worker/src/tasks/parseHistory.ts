@@ -1,9 +1,6 @@
 import { controllers } from "@circles/database"
 import { isPromiseFulfilled, isPromiseRejected } from "@circles/utils"
 import { fetchRecentlyPlayed, fetchEntities } from "@circles/spotify-api"
-import { extractEntitiesIds, createHistoryStorage } from "../helpers"
-import { createTask } from "../core"
-
 import type {
   Cursors,
   ExtendedAlbum,
@@ -11,6 +8,8 @@ import type {
   AudioFeature,
   Track,
 } from "@circles/types"
+import { extractEntitiesIds, createHistoryStorage } from "../helpers"
+import { createTask } from "../core"
 import type { UserInfo } from "../types"
 
 const tempStorage = createHistoryStorage()
@@ -99,7 +98,7 @@ export async function collectUserHistory(
     return
   }
 
-  const { trackIds, albumIds, artistIds } = await extractEntitiesIds(newItems)
+  const { trackIds, albumIds, artistIds } = extractEntitiesIds(newItems)
 
   tempStorage.addHistory(user.id, history, user.access_token)
   tempStorage.addEntities({ trackIds, albumIds, artistIds, userId: user.id })

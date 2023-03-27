@@ -1,7 +1,6 @@
+import type { ExtendedAlbum } from "@circles/types"
 import { prisma } from "../client"
 import { sanitizeAlbum } from "../helpers"
-
-import type { ExtendedAlbum } from "@circles/types"
 
 export async function create(data: ExtendedAlbum) {
   const album = await prisma.album.create(sanitizeAlbum(data))

@@ -1,7 +1,6 @@
+import type { Track, Item } from "@circles/types"
 import { prisma } from "../client"
 import { sanitizeTrack } from "../helpers"
-
-import type { Track, Item } from "@circles/types"
 
 export async function create(data: Track) {
   const track = await prisma.track.create(sanitizeTrack(data))

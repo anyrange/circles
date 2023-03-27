@@ -1,6 +1,5 @@
-import { SCOPES } from "~~/config"
-
 import type { Item } from "@circles/types"
+import { SCOPES } from "~~/config"
 
 export const getRedirectURI = () => {
   const runtimeConfig = useRuntimeConfig()
@@ -14,7 +13,7 @@ export const getOAuthURL = () => {
   }&scope=${SCOPES.join(" ")}&redirect_uri=${getRedirectURI()}`
 }
 
-export async function extractEntitiesIds(items: Item[]) {
+export function extractEntitiesIds(items: Item[]) {
   const trackIds = items.map(({ track }) => track.id)
   const albumIds = items.map(({ track }) => track.album.id)
   const artistIds = items.flatMap(({ track }) => [

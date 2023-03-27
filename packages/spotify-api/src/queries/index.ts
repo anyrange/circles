@@ -1,7 +1,3 @@
-import { call } from "../core"
-import { makeBatchedRequest } from "../helpers"
-import { API_ALBUM_CAPACITY } from "../config"
-
 import type {
   APIMeResponse,
   APIRecentlyPlayedResponse,
@@ -11,6 +7,9 @@ import type {
   APITracksResponse,
   Cursors,
 } from "@circles/types"
+import { call } from "../core"
+import { makeBatchedRequest } from "../helpers"
+import { API_ALBUM_CAPACITY } from "../config"
 
 export function fetchMe(token: string) {
   return call<APIMeResponse>({ route: "me", token })
@@ -31,7 +30,7 @@ export function fetchRecentlyPlayed(
 }
 
 export function fetchAudioFeatures(token: string, ids: string[]) {
-  const request = async (idsBatch: string[]) =>
+  const request = (idsBatch: string[]) =>
     call<APIAudioFeaturesResponse>({
       route: `audio-features?ids=${idsBatch.join(",")}`,
       token,
@@ -43,7 +42,7 @@ export function fetchAudioFeatures(token: string, ids: string[]) {
 }
 
 export function fetchAlbums(token: string, ids: string[]) {
-  const request = async (idsBatch: string[]) =>
+  const request = (idsBatch: string[]) =>
     call<APIAlbumsResponse>({
       route: `albums?ids=${idsBatch.join(",")}`,
       token,
@@ -55,7 +54,7 @@ export function fetchAlbums(token: string, ids: string[]) {
 }
 
 export function fetchArtists(token: string, ids: string[]) {
-  const request = async (idsBatch: string[]) =>
+  const request = (idsBatch: string[]) =>
     call<APIArtistsResponse>({
       route: `artists?ids=${idsBatch.join(",")}`,
       token,
@@ -67,7 +66,7 @@ export function fetchArtists(token: string, ids: string[]) {
 }
 
 export function fetchTracks(token: string, ids: string[]) {
-  const request = async (idsBatch: string[]) =>
+  const request = (idsBatch: string[]) =>
     call<APITracksResponse>({
       route: `tracks?ids=${idsBatch.join(",")}`,
       token,

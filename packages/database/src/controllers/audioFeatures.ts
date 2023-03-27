@@ -1,7 +1,6 @@
+import type { AudioFeature } from "@circles/types"
 import { prisma } from "../client"
 import { sanitizeAudioFeatures } from "../helpers"
-
-import type { AudioFeature } from "@circles/types"
 
 export async function create(data: AudioFeature) {
   const features = await prisma.audioFeatures.create(

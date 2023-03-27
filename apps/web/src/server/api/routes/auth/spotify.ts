@@ -6,7 +6,7 @@ import {
   fetchEntities,
 } from "@circles/spotify-api"
 import { controllers } from "@circles/database"
-import { uniquifyArray } from "@circles/utils"
+import { uniquifyArray, error } from "@circles/utils"
 import { publicProcedure } from "~~/server/trpc"
 import { extractEntitiesIds, getRedirectURI } from "~~/helpers"
 
@@ -35,7 +35,7 @@ export default publicProcedure
 
     if (isNewUser)
       await parseUserHistory(user.id, access_token).catch((e) =>
-        console.error(`Couldn't parse ${user.display_name}: ${e}`)
+        error(`Couldn't parse ${user.display_name}: ${e}`)
       )
 
     return user
@@ -56,7 +56,7 @@ async function parseUserHistory(id: string, token: string) {
     .reverse()
 
   const uniqItems = await controllers.track.filterExistingItems(items)
-  const entitiesIds = await extractEntitiesIds(uniqItems)
+  const entitiesIds = extractEntitiesIds(uniqItems)
 
   const [albumIds, artistIds] = await Promise.all([
     controllers.album.filterExistingAlbumIds(

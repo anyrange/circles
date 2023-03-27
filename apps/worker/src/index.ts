@@ -1,4 +1,4 @@
-import cron from "node-cron"
+import { schedule } from "node-cron"
 import { log } from "@circles/utils"
 import { refreshTokens, parseHistory } from "./tasks"
 
@@ -8,12 +8,12 @@ refreshTokens().then((res) =>
   log(`Initial refresh: ${res.fullfilled}/${res.overall} in ${res.time}s`)
 )
 
-cron.schedule("*/30 * * * *", async () => {
+schedule("*/30 * * * *", async () => {
   const res = await refreshTokens()
   log(`Refreshing tokens: ${res.fullfilled}/${res.overall} in ${res.time}s`)
 })
 
-cron.schedule("*/5 * * * *", async () => {
+schedule("*/5 * * * *", async () => {
   const res = await parseHistory()
   log(`Parsing tracks: ${res.fullfilled}/${res.overall} in ${res.time}s`)
 })

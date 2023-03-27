@@ -1,11 +1,10 @@
 import fetch from "node-fetch"
+import type { Tokens, TokensError } from "@circles/types"
 import {
   SPOTIFY_CLIENT_ID,
   SPOTIFY_CLIENT_SECRET,
   TOKEN_ROUTE,
 } from "../config"
-
-import type { Tokens, TokensError } from "@circles/types"
 
 interface CodeOptions {
   code: string
@@ -18,8 +17,6 @@ interface RefreshTokenOptions {
 
 export async function fetchTokens(options: CodeOptions | RefreshTokenOptions) {
   const params = createParams(options)
-
-  new URLSearchParams()
 
   const appAuthToken = `${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`
 
