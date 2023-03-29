@@ -11,10 +11,9 @@
     "lint": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
     "format": "prettier --check .",
     "lint:fix": "prettier --write --list-different . && pnpm lint --fix",
-    "preinstall": "npx only-allow pnpm",
-    "postinstall": "pnpm --filter database generate"
+    "preinstall": "npx only-allow pnpm"
   },
-  "packageManager": "pnpm@7.25.1",
+  "packageManager": "pnpm@8.0.0",
   "engines": {
     "node": ">=16.14.0"
   },
