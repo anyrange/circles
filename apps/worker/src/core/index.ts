@@ -10,7 +10,10 @@ export function createTask(taskFn: TaskFn) {
 
       const start = new Date()
 
-      const { fullfilled, failedTasks } = await taskFn(users)
+      const { fullfilled, failedTasks } = await taskFn(users).catch((e) => {
+        error((e as Error).message)
+        return { fullfilled: 0, failedTasks: [] }
+      })
 
       const end = new Date()
 

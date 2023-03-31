@@ -15,6 +15,8 @@ import type { UserInfo } from "../types"
 const tempStorage = createHistoryStorage()
 
 export const parseHistory = createTask(async (usersInfo) => {
+  tempStorage.clearStorage()
+
   const results = await Promise.allSettled(
     usersInfo.map((user) => collectUserHistory(user))
   )
@@ -52,8 +54,6 @@ export const parseHistory = createTask(async (usersInfo) => {
     albums,
     artists,
   })
-
-  tempStorage.clearStorage()
 
   return { failedTasks, fullfilled: usersInfo.length - failedTasks.length }
 })
