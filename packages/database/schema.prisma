@@ -82,7 +82,6 @@ model Album {
     url                    String
     total_tracks           Int
 
-    genres    Genre[]
     Images    Images  @relation(fields: [images_id], references: [id])
     images_id Int     @unique
     Track     Track[]
@@ -129,7 +128,6 @@ model AudioFeatures {
 model Genre {
     id     Int      @id @default(autoincrement())
     name   String   @unique
-    Album  Album[]
     Artist Artist[]
 }
 

@@ -9,7 +9,7 @@
 const { $client } = useNuxtApp()
 const route = useRoute()
 
-const hello = await $client.authSpotify.useQuery({
+const hello = await $client.auth.spotify.useQuery({
   code: route.query.code as string,
 })
 </script>

@@ -10,7 +10,7 @@ import { uniquifyArray, error } from "@circles/utils"
 import { publicProcedure } from "~~/server/trpc"
 import { extractEntitiesIds, getRedirectURI } from "~~/helpers"
 
-export default publicProcedure
+export const spotify = publicProcedure
   .input(
     z.object({
       code: z.string(),

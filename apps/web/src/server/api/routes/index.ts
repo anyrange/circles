@@ -1,5 +1,7 @@
-import authSpotify from "./auth/spotify"
+import { auth } from "./auth"
+import { user } from "./user"
 
 export const routes = {
-  authSpotify,
+  auth,
+  user,
 }

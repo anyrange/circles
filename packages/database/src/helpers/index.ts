@@ -112,3 +112,62 @@ export function sanitizeAudioFeatures(features: AudioFeature) {
     },
   }
 }
+
+export const selectImage = {
+  select: {
+    medium: true,
+    low: true,
+    high: true,
+  },
+} as const
+
+export const selectArtistShort = {
+  select: {
+    url: true,
+    popularity: true,
+    name: true,
+    id: true,
+    followers: true,
+  },
+} as const
+
+export const selectAlbumShort = {
+  select: {
+    name: true,
+    label: true,
+    release_date: true,
+    release_date_precision: true,
+    url: true,
+    total_tracks: true,
+    popularity: true,
+    id: true,
+    album_type: true,
+  },
+} as const
+
+export const selectAlbum = {
+  select: { ...selectAlbumShort.select, Images: selectImage },
+} as const
+
+export const selectArtist = {
+  select: { ...selectArtistShort.select, Images: selectImage },
+} as const
+
+export const selectTrackShort = {
+  select: {
+    is_local: true,
+    url: true,
+    track_number: true,
+    release_date: true,
+    preview_url: true,
+    popularity: true,
+    name: true,
+    id: true,
+    explicit: true,
+    duration_ms: true,
+    disc_number: true,
+    Images: selectImage,
+    Album: selectAlbumShort,
+    Artist: selectArtistShort,
+  },
+} as const
