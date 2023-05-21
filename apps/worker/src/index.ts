@@ -5,17 +5,17 @@ import { refreshTokens, parseHistory } from "./tasks"
 log("Starting workers")
 
 refreshTokens().then((res) =>
-  log(`Initial refresh: ${res.fullfilled}/${res.overall} in ${res.time}s`)
+  log(`Initial refresh: ${res.fulfilled}/${res.overall} in ${res.time}s`)
 )
 
 schedule("*/30 * * * *", async () => {
   const res = await refreshTokens()
-  log(`Refreshing tokens: ${res.fullfilled}/${res.overall} in ${res.time}s`)
+  log(`Refreshing tokens: ${res.fulfilled}/${res.overall} in ${res.time}s`)
 })
 
 schedule("*/5 * * * *", async () => {
   const res = await parseHistory()
-  log(`Parsing tracks: ${res.fullfilled}/${res.overall} in ${res.time}s`)
+  log(`Parsing tracks: ${res.fulfilled}/${res.overall} in ${res.time}s`)
 })
 
 export { collectUserHistory } from "./tasks"

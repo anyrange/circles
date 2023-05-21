@@ -55,7 +55,7 @@ export const parseHistory = createTask(async (usersInfo) => {
     artists,
   })
 
-  return { failedTasks, fullfilled: usersInfo.length - failedTasks.length }
+  return { failedTasks, fulfilled: usersInfo.length - failedTasks.length }
 })
 
 export async function collectUserHistory(

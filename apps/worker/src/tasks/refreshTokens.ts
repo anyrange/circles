@@ -17,7 +17,7 @@ export const refreshTokens = createTask(async (usersInfo) => {
 
   await controllers.user.updateManyTokens(newTokens)
 
-  return { failedTasks, fullfilled: newTokens.length }
+  return { failedTasks, fulfilled: newTokens.length }
 })
 
 export async function getNewToken({ refresh_token, id }: UserInfo) {

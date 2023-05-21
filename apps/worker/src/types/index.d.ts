@@ -9,7 +9,7 @@ export interface UserInfo {
 
 export interface TaskFn {
   (user: UserInfo[]): Promise<{
-    fullfilled: number
+    fulfilled: number
     failedTasks: PromiseRejectedResult[]
   }>
 }
