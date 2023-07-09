@@ -1,6 +1,7 @@
 {
   "name": "@circles/database",
   "main": "src/index.ts",
+  "version": "0.0.1",
   "scripts": {
     "build": "rm -rf dist && tsc",
     "generate": "dotenv -e ../../.env -- prisma generate",
@@ -8,10 +9,11 @@
     "deploy": "dotenv -e ../../.env -- prisma migrate deploy"
   },
   "dependencies": {
-    "@circles/types": "workspace:*",
+    "@circles/types": "*",
     "@prisma/client": "^4.10.1"
   },
   "devDependencies": {
+    "@circles/tsconfig": "*",
     "dotenv-cli": "^7.0.0",
     "prisma": "^4.10.1"
   }

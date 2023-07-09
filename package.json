@@ -1,30 +1,33 @@
 {
   "name": "circles",
-  "version": "1.0.0",
-  "description": "",
+  "private": true,
+  "description": "circles",
   "license": "MIT",
   "scripts": {
-    "start": "pnpm --filter web build & pnpm --filter web start",
-    "dev": "pnpm --filter web run dev",
-    "worker:start": "pnpm --filter worker start",
-    "database:generate": "pnpm --filter database generate",
-    "database:migrate": "pnpm --filter database migrate",
-    "lint": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
-    "format": "prettier --check .",
-    "lint:fix": "prettier --write --list-different . && pnpm lint --fix",
-    "preinstall": "npx only-allow pnpm"
+    "start": "turbo --filter @circles/web build & turbo --filter @circles/web start",
+    "dev": "turbo --filter @circles/web run dev",
+    "worker:start": "turbo --filter @circles/worker start",
+    "database:generate": "turbo --filter @circles/database generate",
+    "database:migrate": "turbo --filter @circles/database migrate",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "lint:check": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
+    "lint": "prettier --write --list-different . && turbo lint --fix"
   },
-  "packageManager": "pnpm@8.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
     "node": ">=16.14.0"
   },
   "devDependencies": {
-    "@nuxtjs/eslint-config-typescript": "^12.0.0",
-    "@typescript-eslint/parser": "^5.57.0",
-    "eslint": "^8.36.0",
+    "@typescript-eslint/parser": "^5.61.0",
+    "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "prettier": "^2.8.7",
-    "typescript": "^4.9.4"
+    "prettier": "^3.0.0",
+    "turbo": "^1.10.3",
+    "typescript": "^5.1.6"
   }
 }

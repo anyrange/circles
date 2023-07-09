@@ -12,12 +12,4 @@ module.exports = {
   rules: {
     camelcase: "off",
   },
-  overrides: [
-    {
-      files: ["packages/utils/src/index.ts"],
-      rules: {
-        "no-console": "off",
-      },
-    },
-  ],
 }

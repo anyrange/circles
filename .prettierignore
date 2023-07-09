@@ -1,6 +1,0 @@
-node_modules
-*.lock
-*.yaml
-dist
-build
-.nuxt

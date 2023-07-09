@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@circles/tsconfig/base.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2021"
+    "noEmit": true
   },
-  "include": ["src/**/*"]
+  "include": ["**/*.ts"]
 }

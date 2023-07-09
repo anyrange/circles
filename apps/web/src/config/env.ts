@@ -1,5 +1,6 @@
 import { error } from "@circles/utils"
 import * as dotenv from "dotenv"
+
 dotenv.config({ path: "../../.env" })
 
 if (typeof process.env.SPOTIFY_CLIENT_SECRET !== "string") {

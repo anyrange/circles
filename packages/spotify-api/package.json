@@ -1,13 +1,15 @@
 {
   "name": "@circles/spotify-api",
   "main": "src/index.ts",
+  "version": "0.0.1",
   "dependencies": {
-    "@circles/types": "workspace:*",
-    "@circles/utils": "workspace:*",
+    "@circles/types": "*",
+    "@circles/utils": "*",
     "dotenv": "^16.0.3",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
-    "@types/node-fetch": "^2.6.2"
+    "@types/node-fetch": "^2.6.2",
+    "@circles/tsconfig": "*"
   }
 }

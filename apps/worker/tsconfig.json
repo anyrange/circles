@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@circles/tsconfig/base.json",
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2021",
@@ -7,7 +7,8 @@
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*", "src/types/*"]
-    }
+    },
+    "noEmit": true
   },
-  "include": ["src/**/*"]
+  "include": ["**/*.ts"]
 }
