@@ -4,15 +4,15 @@
   "description": "circles",
   "license": "MIT",
   "scripts": {
-    "start": "turbo --filter @circles/web build & turbo --filter @circles/web start",
-    "dev": "turbo --filter @circles/web run dev",
-    "worker:start": "turbo --filter @circles/worker start",
-    "database:generate": "turbo --filter @circles/database generate",
-    "database:migrate": "turbo --filter @circles/database migrate",
+    "start": "turbo build -- --filter @circles/web  & turbo start -- --filter @circles/web",
+    "dev": "turbo dev",
+    "worker:start": "turbo start -- --filter @circles/worker",
+    "database:generate": "yarn workspace @circles/database generate",
+    "database:migrate": "yarn workspace @circles/database migrate",
     "format:check": "prettier --check .",
-    "format": "prettier --write .",
-    "lint:check": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
-    "lint": "prettier --write --list-different . && turbo lint --fix"
+    "format:write": "prettier --write --list-different .",
+    "lint": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
+    "lint:fix": "yarn lint --fix"
   },
   "workspaces": [
     "apps/*",
