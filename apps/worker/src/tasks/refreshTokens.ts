@@ -1,5 +1,5 @@
 import { controllers } from "@circles/database"
-import { fetchTokens } from "@circles/spotify-api"
+import { spotifyAPI } from "../services/spotify-api"
 import { isPromiseFulfilled, isPromiseRejected, error } from "@circles/utils"
 import { createTask } from "../core"
 
@@ -22,7 +22,7 @@ export const refreshTokens = createTask(async (usersInfo) => {
 
 export async function getNewToken({ refresh_token, id }: UserInfo) {
   try {
-    const { access_token } = await fetchTokens({ refresh_token })
+    const { access_token } = await spotifyAPI.fetchTokens({ refresh_token })
 
     return { access_token, id, refresh_is_valid: true }
   } catch (e) {

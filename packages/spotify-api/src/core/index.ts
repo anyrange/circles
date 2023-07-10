@@ -1,6 +1,6 @@
 import fetch, { RequestInit, Response } from "node-fetch"
 import { sleep } from "@circles/utils"
-import { BASE_ROUTE, DEFAULT_RETRY_AFTER } from "../config"
+import { BASE_ROUTE, DEFAULT_RETRY_AFTER, MAXIMUM_RETRY_COUNT } from "../config"
 
 interface APIOptions {
   route: string
@@ -33,10 +33,16 @@ export async function call<T>({
     ...(token && { headers: { Authorization: `Bearer ${token}` } }),
   }
 
+  let retryCount = 0
+
   const fetchSpotify = async (): Promise<Response> => {
     const res = await fetch(`${BASE_ROUTE}${route}`, options)
 
     if (res.status !== 429) return res
+
+    if (retryCount >= MAXIMUM_RETRY_COUNT) return res
+
+    retryCount += 1
 
     const retryAfter =
       Number(res.headers.get("Retry-After")) || DEFAULT_RETRY_AFTER

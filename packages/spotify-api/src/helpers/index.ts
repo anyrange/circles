@@ -1,4 +1,6 @@
 import { splitArrayOnChunks } from "@circles/utils"
+import type { Tokens, TokensError } from "@circles/types"
+import type { CodeOptions, RefreshTokenOptions } from "../types"
 import { API_DEFAULT_CAPACITY } from "../config"
 
 export async function makeBatchedRequest<
@@ -11,4 +13,29 @@ export async function makeBatchedRequest<
   )
 
   return results.flat(1)
+}
+
+export function createParams(data: CodeOptions | RefreshTokenOptions) {
+  const params = new URLSearchParams()
+
+  if (isCodeOptions(data)) {
+    params.append("grant_type", "authorization_code")
+    params.append("code", data.code)
+    params.append("redirect_uri", `${data.redirectURI}`)
+  } else {
+    params.append("grant_type", "refresh_token")
+    params.append("refresh_token", data.refresh_token)
+  }
+
+  return params
+}
+
+export function isError(data: Tokens | TokensError): data is TokensError {
+  return (data as TokensError).error !== undefined
+}
+
+export function isCodeOptions(
+  data: CodeOptions | RefreshTokenOptions
+): data is CodeOptions {
+  return (data as CodeOptions).code !== undefined
 }

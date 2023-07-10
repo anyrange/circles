@@ -1,6 +1,6 @@
 import { controllers } from "@circles/database"
 import { isPromiseFulfilled, isPromiseRejected } from "@circles/utils"
-import { fetchRecentlyPlayed, fetchEntities } from "@circles/spotify-api"
+import { spotifyAPI } from "../services/spotify-api"
 import type {
   Cursors,
   ExtendedAlbum,
@@ -28,7 +28,7 @@ export const parseHistory = createTask(async (usersInfo) => {
   const newInfo = await Promise.allSettled(
     tempStorage
       .getEntitiesUpdates()
-      .map((update) => fetchEntities(update.token, update))
+      .map((update) => spotifyAPI.fetchEntities(update.token, update))
   )
 
   failedTasks.push(...newInfo.filter(isPromiseRejected))
@@ -65,7 +65,7 @@ export async function collectUserHistory(
 ) {
   const isBackTracking = !!beforeCursor
 
-  const { items, cursors } = await fetchRecentlyPlayed(
+  const { items, cursors } = await spotifyAPI.fetchRecentlyPlayed(
     user.access_token,
     limit,
     isBackTracking ? { before: beforeCursor } : {}
