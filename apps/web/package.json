@@ -11,8 +11,8 @@
   "dependencies": {
     "@circles/database": "*",
     "@circles/spotify-api": "*",
-    "@circles/utils": "*",
     "@circles/types": "*",
+    "@circles/utils": "*",
     "@trpc/client": "^10.9.0",
     "@trpc/server": "^10.9.0",
     "dotenv": "^16.0.3",
@@ -20,7 +20,8 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
-    "nuxt": "^3.0.0",
-    "@nuxtjs/eslint-config-typescript": "^12.0.0"
+    "@nuxtjs/eslint-config-typescript": "^12.0.0",
+    "@types/node": "^20.4.1",
+    "nuxt": "^3.0.0"
   }
 }

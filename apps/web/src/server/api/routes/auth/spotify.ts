@@ -1,12 +1,7 @@
 import { z } from "zod"
-import {
-  fetchMe,
-  fetchTokens,
-  fetchRecentlyPlayed,
-  fetchEntities,
-} from "@circles/spotify-api"
 import { controllers } from "@circles/database"
 import { uniquifyArray, error } from "@circles/utils"
+import { spotifyAPI } from "~~/server/services/spotify-api"
 import { publicProcedure } from "~~/server/trpc"
 import { extractEntitiesIds, getRedirectURI } from "~~/helpers"
 
@@ -17,12 +12,12 @@ export const spotify = publicProcedure
     })
   )
   .query(async ({ input }) => {
-    const { access_token, refresh_token } = await fetchTokens({
+    const { access_token, refresh_token } = await spotifyAPI.fetchTokens({
       code: input.code,
       redirectURI: getRedirectURI(),
     })
 
-    const me = await fetchMe(access_token)
+    const me = await spotifyAPI.fetchMe(access_token)
 
     const user = await controllers.user.upsert({
       ...me,
@@ -44,7 +39,7 @@ export const spotify = publicProcedure
 const PARSE_LIMIT = 50
 
 async function parseUserHistory(id: string, token: string) {
-  const { items } = await fetchRecentlyPlayed(token, PARSE_LIMIT)
+  const { items } = await spotifyAPI.fetchRecentlyPlayed(token, PARSE_LIMIT)
 
   if (!items.length) return
 
@@ -67,11 +62,14 @@ async function parseUserHistory(id: string, token: string) {
     ),
   ])
 
-  const { features, tracks, albums, artists } = await fetchEntities(token, {
-    trackIds: uniquifyArray(entitiesIds.trackIds),
-    albumIds,
-    artistIds,
-  })
+  const { features, tracks, albums, artists } = await spotifyAPI.fetchEntities(
+    token,
+    {
+      trackIds: uniquifyArray(entitiesIds.trackIds),
+      albumIds,
+      artistIds,
+    }
+  )
 
   await controllers.task.updateDatabase({
     histories: [{ userId: id, history }],

@@ -4,9 +4,9 @@
   "description": "circles",
   "license": "MIT",
   "scripts": {
-    "start": "turbo build -- --filter @circles/web  & turbo start -- --filter @circles/web",
+    "start": "yarn workspace @circles/web build & yarn workspace @circles/web start",
     "dev": "turbo dev",
-    "worker:start": "turbo start -- --filter @circles/worker",
+    "worker:start": "yarn workspace @circles/worker start",
     "database:generate": "yarn workspace @circles/database generate",
     "database:migrate": "yarn workspace @circles/database migrate",
     "format:check": "prettier --check .",
