@@ -75,12 +75,8 @@
           "name": "albums_images_id_images_id_fk",
           "tableFrom": "albums",
           "tableTo": "images",
-          "columnsFrom": [
-            "images_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["images_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -134,12 +130,8 @@
           "name": "artists_images_id_images_id_fk",
           "tableFrom": "artists",
           "tableTo": "images",
-          "columnsFrom": [
-            "images_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["images_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -169,12 +161,8 @@
           "name": "artists_to_genres_artist_id_artists_id_fk",
           "tableFrom": "artists_to_genres",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -182,12 +170,8 @@
           "name": "artists_to_genres_genre_id_genres_id_fk",
           "tableFrom": "artists_to_genres",
           "tableTo": "genres",
-          "columnsFrom": [
-            "genre_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["genre_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -195,10 +179,7 @@
       "compositePrimaryKeys": {
         "artists_to_genres_artist_id_genre_id": {
           "name": "artists_to_genres_artist_id_genre_id",
-          "columns": [
-            "artist_id",
-            "genre_id"
-          ]
+          "columns": ["artist_id", "genre_id"]
         }
       }
     },
@@ -273,12 +254,8 @@
           "name": "audio_features_id_tracks_id_fk",
           "tableFrom": "audio_features",
           "tableTo": "tracks",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -314,12 +291,8 @@
           "name": "follows_follower_id_users_id_fk",
           "tableFrom": "follows",
           "tableTo": "users",
-          "columnsFrom": [
-            "follower_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["follower_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -327,12 +300,8 @@
           "name": "follows_followee_id_users_id_fk",
           "tableFrom": "follows",
           "tableTo": "users",
-          "columnsFrom": [
-            "followee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["followee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -395,12 +364,8 @@
           "name": "history_track_id_tracks_id_fk",
           "tableFrom": "history",
           "tableTo": "tracks",
-          "columnsFrom": [
-            "track_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["track_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -408,12 +373,8 @@
           "name": "history_user_id_users_id_fk",
           "tableFrom": "history",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -549,12 +510,8 @@
           "name": "tracks_images_id_images_id_fk",
           "tableFrom": "tracks",
           "tableTo": "images",
-          "columnsFrom": [
-            "images_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["images_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -562,12 +519,8 @@
           "name": "tracks_album_id_albums_id_fk",
           "tableFrom": "tracks",
           "tableTo": "albums",
-          "columnsFrom": [
-            "album_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["album_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -575,12 +528,8 @@
           "name": "tracks_artist_id_artists_id_fk",
           "tableFrom": "tracks",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
