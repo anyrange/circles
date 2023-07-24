@@ -22,7 +22,7 @@ export const albumTypeEnum = pgEnum("album_type", [
 ])
 
 export const users = pgTable("users", {
-  id: varchar("id", { length: 22 }).primaryKey(),
+  id: varchar("id", { length: 30 }).primaryKey(),
   display_name: text("display_name").notNull(),
   email: text("email").default("").notNull(),
   avatar: text("avatar").default("").notNull(),
@@ -48,10 +48,10 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const follows = pgTable("follows", {
   id: serial("id").primaryKey(),
-  follower_id: varchar("follower_id", { length: 22 })
+  follower_id: varchar("follower_id", { length: 30 })
     .references(() => users.id)
     .notNull(),
-  followee_id: varchar("followee_id", { length: 22 })
+  followee_id: varchar("followee_id", { length: 30 })
     .references(() => users.id)
     .notNull(),
 })
@@ -84,7 +84,7 @@ export const images = pgTable("images", {
 })
 
 export const albums = pgTable("albums", {
-  id: varchar("id", { length: 22 }).primaryKey(),
+  id: varchar("id", { length: 30 }).primaryKey(),
   name: text("name").notNull(),
   release_date: timestamp("release_date").notNull(),
   release_date_precision: text("release_date_precision").notNull(),
@@ -99,7 +99,7 @@ export const albums = pgTable("albums", {
 })
 
 export const artists = pgTable("artists", {
-  id: varchar("id", { length: 22 }).primaryKey(),
+  id: varchar("id", { length: 30 }).primaryKey(),
   name: text("name").notNull(),
   followers: doublePrecision("followers").notNull(),
   url: text("url").notNull(),
@@ -116,7 +116,7 @@ export const artistsRelations = relations(artists, ({ many }) => ({
 export const artistsToGenres = pgTable(
   "artists_to_genres",
   {
-    artist_id: varchar("artist_id", { length: 22 })
+    artist_id: varchar("artist_id", { length: 30 })
       .references(() => artists.id)
       .notNull(),
     genre_id: integer("genre_id")
@@ -145,7 +145,7 @@ export const artistsToGenresRelations = relations(
 )
 
 export const tracks = pgTable("tracks", {
-  id: varchar("id", { length: 22 }).primaryKey(),
+  id: varchar("id", { length: 30 }).primaryKey(),
   name: text("name").notNull(),
   duration_ms: integer("duration_ms").notNull(),
   release_date: timestamp("release_date").notNull(),
@@ -159,10 +159,10 @@ export const tracks = pgTable("tracks", {
   images_id: integer("images_id")
     .references(() => images.id)
     .notNull(),
-  album_id: varchar("album_id", { length: 22 })
+  album_id: varchar("album_id", { length: 30 })
     .references(() => albums.id)
     .notNull(),
-  artist_id: varchar("artist_id", { length: 22 })
+  artist_id: varchar("artist_id", { length: 30 })
     .references(() => artists.id)
     .notNull(),
 })
@@ -188,7 +188,7 @@ export const tracksRelations = relations(tracks, ({ one, many }) => ({
 }))
 
 export const audioFeatures = pgTable("audio_features", {
-  track_id: varchar("id", { length: 22 })
+  track_id: varchar("id", { length: 30 })
     .primaryKey()
     .references(() => tracks.id),
   tempo: doublePrecision("tempo").notNull(),
@@ -205,10 +205,10 @@ export const audioFeatures = pgTable("audio_features", {
 export const history = pgTable("history", {
   id: serial("id").primaryKey(),
   played_at: timestamp("played_at").notNull(),
-  track_id: varchar("track_id", { length: 22 })
+  track_id: varchar("track_id", { length: 30 })
     .references(() => tracks.id)
     .notNull(),
-  user_id: varchar("user_id", { length: 22 })
+  user_id: varchar("user_id", { length: 30 })
     .references(() => users.id)
     .notNull(),
 })

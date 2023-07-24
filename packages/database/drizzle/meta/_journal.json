@@ -15,6 +15,13 @@
       "when": 1690222521803,
       "tag": "0001_parched_marvel_zombies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1690223210918,
+      "tag": "0002_panoramic_shard",
+      "breakpoints": true
     }
   ]
 }
