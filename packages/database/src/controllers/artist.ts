@@ -13,18 +13,20 @@ export const createArtistController = (db: DB) => {
         .returning({ images_id: images.id })
         .then((item) => item[0])
 
-      const genres_ids = await tx
-        .insert(genres)
-        .values(data.genres.map((name) => ({ name })))
-        .returning({ id: genres.id })
-        .onConflictDoNothing()
+      if (data.genres.length) {
+        const genres_ids = await tx
+          .insert(genres)
+          .values(data.genres.map((name) => ({ name })))
+          .returning({ id: genres.id })
+          .onConflictDoNothing()
 
-      await tx.insert(artistsToGenres).values(
-        genres_ids.map(({ id }) => ({
-          genre_id: id,
-          artist_id: data.id,
-        }))
-      )
+        await tx.insert(artistsToGenres).values(
+          genres_ids.map(({ id }) => ({
+            genre_id: id,
+            artist_id: data.id,
+          }))
+        )
+      }
 
       return await tx
         .insert(artists)
@@ -40,33 +42,33 @@ export const createArtistController = (db: DB) => {
     return db.transaction(async (tx) => {
       const images_ids = await tx
         .insert(images)
-        .values(data.map((album) => extractImages(album)))
+        .values(data.map((artist) => extractImages(artist)))
         .returning({ images_id: images.id })
 
-      await Promise.all(
-        data.map((album) =>
-          tx.transaction(async (tx2) => {
-            const genres_ids = await tx2
-              .insert(genres)
-              .values(album.genres.map((name) => ({ name })))
-              .returning({ id: genres.id })
-              .onConflictDoNothing()
+      data.forEach((artist) => {
+        if (!artist.genres.length) return
 
-            await tx2.insert(artistsToGenres).values(
-              genres_ids.map(({ id }) => ({
-                genre_id: id,
-                artist_id: album.id,
-              }))
-            )
-          })
-        )
-      )
+        tx.transaction(async (tx2) => {
+          const genres_ids = await tx2
+            .insert(genres)
+            .values(artist.genres.map((name) => ({ name })))
+            .returning({ id: genres.id })
+            .onConflictDoNothing()
+
+          await tx2.insert(artistsToGenres).values(
+            genres_ids.map(({ id }) => ({
+              genre_id: id,
+              artist_id: artist.id,
+            }))
+          )
+        })
+      })
 
       return await tx
         .insert(artists)
         .values(
-          data.map((album, id) => ({
-            ...formatArtist(album),
+          data.map((artist, id) => ({
+            ...formatArtist(artist),
             ...images_ids[id],
           }))
         )

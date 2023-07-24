@@ -8,8 +8,8 @@ export function log(text: string) {
   console.log(`[${getTimeStamp()}]`, text)
 }
 
-export function error(text: unknown) {
-  console.error(`[${getTimeStamp()}]`, text)
+export function error(...errs: unknown[]) {
+  console.error(`[${getTimeStamp()}]`, ...errs)
 }
 
 export function sleep(ms: number) {

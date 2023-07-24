@@ -46,15 +46,18 @@ export const createTaskController = (db: DB) => {
     if (isEmpty) return
 
     return db.transaction(async (tx) => {
-      const albums = createAlbumController(tx)
-      const artists = createArtistController(tx)
-      const tracks = createTrackController(tx)
-      const audioFeatures = createAudioFeaturesController(tx)
-
-      await albums.createMany(data.albums)
-      await artists.createMany(data.artists)
-      await tracks.createMany(data.tracks)
-      await audioFeatures.createMany(data.features)
+      if (data.albums.length) {
+        await createAlbumController(tx).createMany(data.albums)
+      }
+      if (data.artists.length) {
+        await createArtistController(tx).createMany(data.artists)
+      }
+      if (data.tracks.length) {
+        await createTrackController(tx).createMany(data.tracks)
+      }
+      if (data.features.length) {
+        await createAudioFeaturesController(tx).createMany(data.features)
+      }
 
       await Promise.all(
         newRecords.map(({ userId, history: listeningHistory }) =>

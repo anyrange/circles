@@ -30,7 +30,7 @@ export const spotify = publicProcedure
 
     if (isNewUser)
       await parseUserHistory(user.id, access_token).catch((e) =>
-        error(`Couldn't parse ${user.display_name}: ${e}`)
+        error(`Couldn't parse ${user.display_name}:`, e)
       )
 
     return user
