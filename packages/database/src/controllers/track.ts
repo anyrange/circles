@@ -1,54 +1,76 @@
 import type { Track, Item } from "@circles/types"
-import { prisma } from "../client"
-import { sanitizeTrack } from "../helpers"
+import { tracks, images } from "../schema"
+import type { DB } from "../schema"
+import { extractImages, formatTrack } from "../helpers"
+import { inArray } from "drizzle-orm"
 
-export async function create(data: Track) {
-  const track = await prisma.track.create(sanitizeTrack(data))
+export const createTrackController = (db: DB) => {
+  const create = async (data: Track) => {
+    return db.transaction(async (tx) => {
+      const { images_id } = await tx
+        .insert(images)
+        .values(extractImages(data.album))
+        .returning({ images_id: images.id })
+        .then((item) => item[0])
 
-  return track
-}
+      return await tx
+        .insert(tracks)
+        .values({ ...formatTrack(data), images_id })
+        .returning()
+        .then((item) => item[0])
+    })
+  }
 
-export async function createMany(data: Track[]) {
-  if (!data.length) return []
+  const createMany = async (data: Track[]) => {
+    if (!data.length) return []
 
-  const tracks = await prisma.$transaction(
-    data.map((track) => prisma.track.create(sanitizeTrack(track)))
-  )
+    return db.transaction(async (tx) => {
+      const images_ids = await tx
+        .insert(images)
+        .values(data.map((track) => extractImages(track.album)))
+        .returning({ images_id: images.id })
 
-  return tracks
-}
+      return await tx
+        .insert(tracks)
+        .values(
+          data.map((track, id) => ({
+            ...formatTrack(track),
+            ...images_ids[id],
+          }))
+        )
+        .returning()
+    })
+  }
 
-async function findExistingIds(ids: Track["id"][]) {
-  const existingTracks = new Set<Track["id"]>()
+  async function findExistingIds(ids: Track["id"][]) {
+    if (!ids.length) return []
 
-  if (!ids.length) return existingTracks
+    const results = await db
+      .select({ id: tracks.id })
+      .from(tracks)
+      .where(inArray(tracks.id, ids))
 
-  const results = await prisma.$transaction(
-    ids.map((id) =>
-      prisma.track.findUnique({
-        select: { id: true },
-        where: { id },
-      })
-    )
-  )
+    return results.map(({ id }) => id)
+  }
 
-  results.forEach((track) => {
-    if (track !== null) existingTracks.add(track.id)
-  })
+  const filterExistingTrackIds = async (ids: Track["id"][]) => {
+    const existingTracks = new Set<Track["id"]>(await findExistingIds(ids))
 
-  return existingTracks
-}
+    return ids.filter((track) => !existingTracks.has(track))
+  }
 
-export async function filterExistingTrackIds(ids: Track["id"][]) {
-  const existingTracks = await findExistingIds(ids)
+  const filterExistingItems = async (items: Item[]) => {
+    const ids = items.map(({ track }) => track.id)
 
-  return ids.filter((track) => !existingTracks.has(track))
-}
+    const existingTracks = new Set<Track["id"]>(await findExistingIds(ids))
 
-export async function filterExistingItems(items: Item[]) {
-  const ids = items.map(({ track }) => track.id)
+    return items.filter(({ track }) => !existingTracks.has(track.id))
+  }
 
-  const existingTracks = await findExistingIds(ids)
-
-  return items.filter(({ track }) => !existingTracks.has(track.id))
+  return {
+    create,
+    createMany,
+    filterExistingTrackIds,
+    filterExistingItems,
+  }
 }

@@ -4,18 +4,20 @@
   "version": "0.0.1",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "generate": "dotenv -e ../../.env -- prisma generate",
-    "migrate": "dotenv -e ../../.env -- prisma migrate dev",
-    "deploy": "dotenv -e ../../.env -- prisma migrate deploy"
+    "generate": "drizzle-kit generate:pg --schema=./src/schema.ts --out=./drizzle",
+    "migrate": "dotenv -e ../../.env -- prisma migrate dev"
   },
   "dependencies": {
     "@circles/types": "*",
-    "@prisma/client": "^4.10.1"
+    "@prisma/client": "^4.10.1",
+    "drizzle-orm": "^0.27.0",
+    "postgres": "^3.3.5"
   },
   "devDependencies": {
     "@circles/tsconfig": "*",
     "@types/node": "^20.4.1",
     "dotenv-cli": "^7.0.0",
+    "drizzle-kit": "^0.19.3",
     "prisma": "^4.10.1"
   }
 }

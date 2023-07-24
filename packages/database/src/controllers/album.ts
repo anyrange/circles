@@ -1,39 +1,64 @@
+import { inArray } from "drizzle-orm"
 import type { ExtendedAlbum } from "@circles/types"
-import { prisma } from "../client"
-import { sanitizeAlbum } from "../helpers"
+import { albums, images } from "../schema"
+import type { DB } from "../schema"
+import { extractImages, formatAlbum } from "../helpers"
 
-export async function create(data: ExtendedAlbum) {
-  const album = await prisma.album.create(sanitizeAlbum(data))
+export const createAlbumController = (db: DB) => {
+  const create = async (data: ExtendedAlbum) => {
+    return db.transaction(async (tx) => {
+      const { images_id } = await tx
+        .insert(images)
+        .values(extractImages(data))
+        .returning({ images_id: images.id })
+        .then((item) => item[0])
+      return await tx
+        .insert(albums)
+        .values({ ...formatAlbum(data), images_id })
+        .returning()
+        .then((item) => item[0])
+    })
+  }
 
-  return album
-}
+  const createMany = async (data: ExtendedAlbum[]) => {
+    if (!data.length) return []
 
-export async function createMany(data: ExtendedAlbum[]) {
-  if (!data.length) return []
+    return db.transaction(async (tx) => {
+      const images_ids = await tx
+        .insert(images)
+        .values(data.map((album) => extractImages(album)))
+        .returning({ images_id: images.id })
 
-  const albums = await prisma.$transaction(
-    data.map((album) => prisma.album.create(sanitizeAlbum(album)))
-  )
+      return await tx
+        .insert(albums)
+        .values(
+          data.map((album, id) => ({
+            ...formatAlbum(album),
+            ...images_ids[id],
+          }))
+        )
+        .returning()
+    })
+  }
 
-  return albums
-}
+  const filterExistingAlbumIds = async (ids: ExtendedAlbum["id"][]) => {
+    if (!ids.length) return []
 
-export async function filterExistingAlbumIds(ids: ExtendedAlbum["id"][]) {
-  if (!ids.length) return []
+    const results = await db
+      .select({ id: albums.id })
+      .from(albums)
+      .where(inArray(albums.id, ids))
 
-  const results = await prisma.$transaction(
-    ids.map((id) =>
-      prisma.album.findUnique({
-        select: { id: true },
-        where: { id },
-      })
+    const existingAlbums = new Set<ExtendedAlbum["id"]>(
+      results.map(({ id }) => id)
     )
-  )
-  const existingAlbums = new Set<ExtendedAlbum["id"]>()
 
-  results.forEach((album) => {
-    if (album !== null) existingAlbums.add(album.id)
-  })
+    return ids.filter((album) => !existingAlbums.has(album))
+  }
 
-  return ids.filter((album) => !existingAlbums.has(album))
+  return {
+    create,
+    createMany,
+    filterExistingAlbumIds,
+  }
 }

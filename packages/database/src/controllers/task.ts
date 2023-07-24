@@ -1,95 +1,77 @@
-import type {
-  ExtendedAlbum,
-  ExtendedArtist,
-  Track,
-  AudioFeature,
-  HistoryRecord,
-  User,
-} from "@circles/types"
-import { prisma } from "../client"
-import {
-  sanitizeAlbum,
-  sanitizeArtist,
-  sanitizeTrack,
-  sanitizeAudioFeatures,
-} from "../helpers"
+import { desc, eq } from "drizzle-orm"
+import { history } from "../schema"
+import type { DB } from "../schema"
+import type { UpdateInfo } from "../types"
+import { createAlbumController } from "./album"
+import { createArtistController } from "./artist"
+import { createTrackController } from "./track"
+import { createAudioFeaturesController } from "./audioFeatures"
 
-export async function getUsersInfo() {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      refresh_token: true,
-      access_token: true,
-      history: {
-        orderBy: { played_at: "desc" },
-        take: 1,
+export const createTaskController = (db: DB) => {
+  const getUsersInfo = async () => {
+    const usersList = await db.query.users.findMany({
+      columns: {
+        id: true,
+        access_token: true,
+        refresh_token: true,
       },
-    },
-    where: {
-      refresh_is_valid: true,
-    },
-  })
-
-  return users.map((user) => ({
-    id: user.id,
-    refresh_token: user.refresh_token,
-    access_token: user.access_token,
-    lastHistoryRecord: user.history[0] || undefined,
-  }))
-}
-
-interface UpdateInfo {
-  albums: ExtendedAlbum[]
-  artists: ExtendedArtist[]
-  tracks: Track[]
-  features: AudioFeature[]
-  histories: {
-    userId: User["id"]
-    history: HistoryRecord[]
-  }[]
-}
-
-export async function updateDatabase(data: UpdateInfo) {
-  const { albums, artists, tracks, features, histories } = data
-
-  const newRecords = histories.filter(({ history }) => history.length)
-
-  const isEmpty = !(
-    albums.length ||
-    artists.length ||
-    tracks.length ||
-    features.length ||
-    newRecords.length
-  )
-
-  if (isEmpty) return []
-
-  const result = await prisma.$transaction([
-    ...albums.map((album) => prisma.album.create(sanitizeAlbum(album))),
-    ...artists.map((artist) => prisma.artist.create(sanitizeArtist(artist))),
-    ...tracks.map((track) => prisma.track.create(sanitizeTrack(track))),
-
-    prisma.audioFeatures.createMany({
-      data: features.map((item) => sanitizeAudioFeatures(item).data),
-    }),
-
-    ...newRecords.map(({ userId, history }) =>
-      prisma.user.update({
-        where: { id: userId },
-        data: {
-          history: {
-            createMany: {
-              data: history,
-            },
-          },
+      with: {
+        history: {
+          limit: 1,
+          orderBy: desc(history.played_at),
         },
-        select: {
-          history: { select: { track_id: true, played_at: true } },
-          id: true,
-        },
-      })
-    ),
-  ])
+      },
+      where: (users) => eq(users.refresh_is_valid, true),
+    })
 
-  return result
+    return usersList.map((user) => ({
+      id: user.id,
+      refresh_token: user.refresh_token,
+      access_token: user.access_token,
+      lastHistoryRecord: user.history[0] || undefined,
+    }))
+  }
+
+  const updateDatabase = async (data: UpdateInfo) => {
+    const newRecords = data.histories.filter(({ history }) => history.length)
+
+    const isEmpty = !(
+      data.albums.length ||
+      data.artists.length ||
+      data.tracks.length ||
+      data.features.length ||
+      newRecords.length
+    )
+
+    if (isEmpty) return
+
+    return db.transaction(async (tx) => {
+      const albums = createAlbumController(tx)
+      const artists = createArtistController(tx)
+      const tracks = createTrackController(tx)
+      const audioFeatures = createAudioFeaturesController(tx)
+
+      await albums.createMany(data.albums)
+      await artists.createMany(data.artists)
+      await tracks.createMany(data.tracks)
+      await audioFeatures.createMany(data.features)
+
+      await Promise.all(
+        newRecords.map(({ userId, history: listeningHistory }) =>
+          db.insert(history).values(
+            listeningHistory.map(({ played_at, track_id }) => ({
+              user_id: userId,
+              played_at,
+              track_id,
+            }))
+          )
+        )
+      )
+    })
+  }
+
+  return {
+    getUsersInfo,
+    updateDatabase,
+  }
 }

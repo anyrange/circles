@@ -1,4 +1,4 @@
-import { controllers } from "@circles/database"
+import { controllers } from "../services/database"
 import { getTimeDiffSeconds, error } from "@circles/utils"
 
 import type { TaskFn } from "../types"

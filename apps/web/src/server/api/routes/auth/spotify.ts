@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { controllers } from "@circles/database"
 import { uniquifyArray, error } from "@circles/utils"
+import { controllers } from "~~/server/services/database"
 import { spotifyAPI } from "~~/server/services/spotify-api"
 import { publicProcedure } from "~~/server/trpc"
 import { extractEntitiesIds, getRedirectURI } from "~~/helpers"

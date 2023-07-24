@@ -1,6 +1,6 @@
-import { controllers } from "@circles/database"
-import { spotifyAPI } from "../services/spotify-api"
 import { isPromiseFulfilled, isPromiseRejected, error } from "@circles/utils"
+import { controllers } from "../services/database"
+import { spotifyAPI } from "../services/spotify-api"
 import { createTask } from "../core"
 
 import type { UserInfo } from "../types"
@@ -15,7 +15,7 @@ export const refreshTokens = createTask(async (usersInfo) => {
   const failedTasks = results.filter(isPromiseRejected)
   const newTokens = results.filter(isPromiseFulfilled).map(({ value }) => value)
 
-  await controllers.user.updateManyTokens(newTokens)
+  await controllers.user.updateAccessTokens(newTokens)
 
   return { failedTasks, fulfilled: newTokens.length }
 })

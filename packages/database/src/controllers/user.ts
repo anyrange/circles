@@ -1,245 +1,313 @@
+import { eq, desc, and, lt, sql, gte, lte } from "drizzle-orm"
 import type { User, Tokens, HistoryRecord } from "@circles/types"
-import { prisma } from "../client"
-import { selectTrackShort, selectAlbum, selectArtist } from "../helpers"
+import { albums, artists, history, tracks, users } from "../schema"
+import type { DB } from "../schema"
 
 type UserWithTokens = User & {
   access_token: Tokens["access_token"]
   refresh_token: Tokens["refresh_token"]
 }
 
-export async function upsert(data: UserWithTokens) {
-  const changingInfo = {
-    display_name: data.display_name,
-    avatar: data.images[0].url || "",
-    country: data.country,
-    email: data.email,
-    product: data.product,
-    filter_enabled: data.explicit_content.filter_enabled,
-    access_token: data.access_token,
-    refresh_token: data.refresh_token,
+export const createUserController = (db: DB) => {
+  const upsert = async (data: UserWithTokens) => {
+    const changingInfo = {
+      display_name: data.display_name,
+      avatar: data.images[0].url || "",
+      country: data.country,
+      email: data.email,
+      product: data.product,
+      filter_enabled: data.explicit_content.filter_enabled,
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+    }
+
+    const user = await db
+      .insert(users)
+      .values({
+        id: data.id,
+        ...changingInfo,
+        url: data.external_urls.spotify,
+        type: data.type,
+      })
+      .onConflictDoUpdate({
+        target: users.id,
+        set: { ...changingInfo, last_login: new Date() },
+      })
+      .returning({
+        id: users.id,
+        display_name: users.display_name,
+        avatar: users.avatar,
+        country: users.country,
+        email: users.email,
+        product: users.product,
+        filter_enabled: users.filter_enabled,
+        url: users.url,
+        type: users.type,
+        privacy: users.privacy,
+        last_login: users.last_login,
+        registration_date: users.registration_date,
+      })
+
+    return user
   }
 
-  const user = await prisma.user.upsert({
-    where: { id: data.id },
-    create: {
-      id: data.id,
-      ...changingInfo,
-      url: data.external_urls.spotify,
-      type: data.type,
-    },
-    update: {
-      ...changingInfo,
-      last_login: new Date(),
-    },
-    select: {
-      id: true,
-      display_name: true,
-      avatar: true,
-      country: true,
-      email: true,
-      product: true,
-      filter_enabled: true,
-      url: true,
-      type: true,
-      privacy: true,
-      last_login: true,
-      registration_date: true,
-    },
-  })
+  const getOne = async (id: User["id"]) => {
+    return db.query.users.findFirst({
+      where: eq(users.id, id),
+    })
+  }
 
-  return user
-}
-
-export async function getOne(id: User["id"]) {
-  const user = await prisma.user.findUnique({ where: { id } })
-
-  return user
-}
-
-export async function lastListened(id: User["id"]) {
-  const user = await prisma.user.findUnique({
-    where: { id },
-    select: {
-      history: {
-        orderBy: { played_at: "desc" },
-        take: 1,
+  const lastListened = async (id: User["id"]) => {
+    const user = await db.query.users.findFirst({
+      columns: { id: true },
+      where: eq(users.id, id),
+      with: {
+        history: {
+          limit: 1,
+          orderBy: desc(history.played_at),
+        },
       },
-    },
-  })
+    })
 
-  return user?.history[0] || undefined
-}
+    return user?.history[0] || undefined
+  }
 
-export async function getUserTokens(id: User["id"]) {
-  const user = await prisma.user.findUnique({
-    where: { id },
-    select: { id: true, access_token: true },
-  })
+  const getUserTokens = async (id: User["id"]) => {
+    return db.query.users.findFirst({
+      columns: { id: true, access_token: true },
+      where: eq(users.id, id),
+    })
+  }
 
-  return user
-}
-
-export async function updateTokens(
-  id: User["id"],
-  access_token: Tokens["access_token"]
-) {
-  const user = await prisma.user.update({
-    where: { id },
-    data: { access_token },
-    select: { id: true, access_token: true },
-  })
-
-  return user
-}
-
-export async function updateManyTokens(
-  users: {
-    id: User["id"]
+  const updateAccessToken = async (
+    id: User["id"],
     access_token: Tokens["access_token"]
-    refresh_is_valid: boolean
-  }[]
-) {
-  if (!users.length) return []
-
-  const results = await prisma.$transaction(
-    users.map(({ id, access_token, refresh_is_valid }) =>
-      prisma.user.update({
-        where: { id },
-        data: { access_token, refresh_is_valid },
-        select: { id: true, access_token: true },
+  ) => {
+    return db
+      .update(users)
+      .set({
+        access_token,
       })
-    )
-  )
-
-  return results
-}
-
-export async function updateHistory(id: User["id"], history: HistoryRecord[]) {
-  if (!history.length) return []
-
-  const user = await prisma.user.update({
-    where: { id },
-    data: { history: { createMany: { data: history } } },
-    select: {
-      history: { select: { track_id: true, played_at: true } },
-      id: true,
-    },
-  })
-
-  return user
-}
-
-export async function getHistory(id: User["id"], limit: number, cursorId = 0) {
-  if (limit < 1) return []
-
-  const history = await prisma.history.findMany({
-    where: { user_id: id },
-    orderBy: { played_at: "desc" },
-    ...(cursorId && { cursor: { id: cursorId }, skip: 1 }),
-    select: {
-      id: true,
-      track_id: true,
-      played_at: true,
-      track: selectTrackShort,
-    },
-    take: limit,
-  })
-
-  return history
-}
-
-export async function getTracks(
-  id: User["id"],
-  limit: number,
-  page = 1,
-  start?: Date,
-  end?: Date
-) {
-  if (limit < 1) return []
-
-  const tracks = await prisma.history.groupBy({
-    where: { user_id: id },
-    by: ["track_id"],
-    _count: { track_id: true },
-    orderBy: { _count: { track_id: "desc" } },
-    ...(start && { where: { played_at: { gte: start } } }),
-    ...(end && { where: { played_at: { lte: end } } }),
-
-    skip: (page - 1) * limit,
-    take: limit,
-  })
-
-  const info = await prisma.$transaction(
-    tracks.map(({ track_id }) =>
-      prisma.track.findUniqueOrThrow({
-        where: { id: track_id },
-        select: selectTrackShort.select,
+      .where(eq(users.id, id))
+      .returning({
+        id: users.id,
+        access_token: users.access_token,
       })
+  }
+
+  const updateAccessTokens = async (
+    usersList: {
+      id: User["id"]
+      access_token: Tokens["access_token"]
+      refresh_is_valid: boolean
+    }[]
+  ) => {
+    if (!usersList.length) return []
+
+    return db.transaction(async (tx) => {
+      await Promise.all(
+        usersList.map(({ id, access_token, refresh_is_valid }) =>
+          tx
+            .update(users)
+            .set({
+              access_token,
+              refresh_is_valid,
+            })
+            .where(eq(users.id, id))
+            .returning({
+              id: users.id,
+              access_token: users.access_token,
+            })
+        )
+      )
+    })
+  }
+
+  const updateHistory = async (
+    id: User["id"],
+    listeningHistory: HistoryRecord[]
+  ) => {
+    if (!listeningHistory.length) return
+
+    return db.insert(history).values(
+      listeningHistory.map(({ played_at, track_id }) => ({
+        user_id: id,
+        played_at,
+        track_id,
+      }))
     )
-  )
+  }
 
-  return tracks.map(({ _count }, id) => ({
-    count: _count.track_id,
-    track: info[id],
-  }))
-}
+  const getHistory = async (
+    id: User["id"],
+    options = { limit: 10, cursorId: 0 }
+  ) => {
+    const { limit, cursorId } = options
 
-export async function getAlbums(
-  id: User["id"],
-  limit: number,
-  page = 1
-  // start?: Date,
-  // end?: Date
-) {
-  if (limit < 1) return []
+    if (limit < 1) return []
 
-  const albums = await prisma.$queryRaw<
-    { album_id: string; c: BigInt }[]
-  >`SELECT album_id, count(album_id) c FROM "History" 
-    JOIN "Track" as T ON track_id=T.id WHERE user_id=${id} GROUP BY album_id
-    ORDER BY c DESC LIMIT ${limit} OFFSET ${(page - 1) * limit}`
+    return db.query.history.findMany({
+      columns: {
+        id: true,
+        track_id: true,
+        played_at: true,
+      },
+      where: cursorId
+        ? and(eq(history.user_id, id), lt(history.id, cursorId))
+        : eq(history.user_id, id),
+      orderBy: desc(history.played_at),
+      limit,
+      with: {
+        track: {
+          columns: {
+            is_local: true,
+            url: true,
+            track_number: true,
+            release_date: true,
+            preview_url: true,
+            popularity: true,
+            name: true,
+            id: true,
+            explicit: true,
+            duration_ms: true,
+            disc_number: true,
+          },
+          with: {
+            images: {
+              columns: {
+                id: false,
+              },
+            },
+            album: {
+              columns: {
+                images_id: false,
+              },
+            },
+            artist: {
+              columns: {
+                images_id: false,
+              },
+            },
+          },
+        },
+      },
+    })
+  }
 
-  const info = await prisma.$transaction(
-    albums.map(({ album_id }) =>
-      prisma.album.findUniqueOrThrow({
-        where: { id: album_id },
-        select: selectAlbum.select,
+  const topTracks = async (
+    id: User["id"],
+    options: { limit: number; page: number; start?: Date; end?: Date } = {
+      page: 1,
+      limit: 10,
+    }
+  ) => {
+    const { limit, page, start = new Date(0), end = new Date() } = options
+
+    if (limit < 1) return []
+
+    return db
+      .select({
+        count: sql<number>`count(${history.id})`,
+        track_id: history.track_id,
+        track: tracks,
       })
-    )
-  )
+      .from(history)
+      .where(
+        and(
+          gte(history.played_at, start),
+          lte(history.played_at, end),
+          eq(history.user_id, id)
+        )
+      )
+      .groupBy(({ track_id }) => track_id)
+      .having(({ count }) => count)
+      .orderBy(({ count }) => count)
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .innerJoin(tracks, eq(history.track_id, tracks.id))
+  }
 
-  return albums.map(({ c }, id) => ({
-    count: Number(c),
-    track: info[id],
-  }))
-}
+  const topAlbums = async (
+    id: User["id"],
+    options: { limit: number; page: number; start?: Date; end?: Date } = {
+      page: 1,
+      limit: 10,
+    }
+  ) => {
+    const { limit, page, start = new Date(0), end = new Date() } = options
 
-export async function getArtists(
-  id: User["id"],
-  limit: number,
-  page = 1
-  // start?: Date,
-  // end?: Date
-) {
-  if (limit < 1) return []
+    if (limit < 1) return []
 
-  const artists = await prisma.$queryRaw<
-    { artist_id: string; c: BigInt }[]
-  >`SELECT artist_id, count(artist_id) c FROM "History" 
-    JOIN "Track" as T ON track_id=T.id WHERE user_id=${id} GROUP BY artist_id
-    ORDER BY c DESC LIMIT ${limit} OFFSET ${(page - 1) * limit}`
-
-  const info = await prisma.$transaction(
-    artists.map(({ artist_id }) =>
-      prisma.artist.findUniqueOrThrow({
-        where: { id: artist_id },
-        select: selectArtist.select,
+    return db
+      .select({
+        count: sql<number>`count(${history.id})`,
+        track_id: history.track_id,
+        album_id: tracks.album_id,
+        album: albums,
       })
-    )
-  )
+      .from(history)
+      .where(
+        and(
+          gte(history.played_at, start),
+          lte(history.played_at, end),
+          eq(history.user_id, id)
+        )
+      )
+      .innerJoin(tracks, eq(history.track_id, tracks.id))
+      .groupBy(({ album_id }) => album_id)
+      .having(({ count }) => count)
+      .orderBy(({ count }) => count)
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .innerJoin(albums, eq(tracks.album_id, albums.id))
+  }
 
-  return artists.map(({ c }, id) => ({
-    count: Number(c),
-    track: info[id],
-  }))
+  const topArtists = async (
+    id: User["id"],
+    options: { limit: number; page: number; start?: Date; end?: Date } = {
+      page: 1,
+      limit: 10,
+    }
+  ) => {
+    const { limit, page, start = new Date(0), end = new Date() } = options
+
+    if (limit < 1) return []
+
+    return db
+      .select({
+        count: sql<number>`count(${history.id})`,
+        track_id: history.track_id,
+        artist_id: tracks.artist_id,
+        album: albums,
+      })
+      .from(history)
+      .where(
+        and(
+          gte(history.played_at, start),
+          lte(history.played_at, end),
+          eq(history.user_id, id)
+        )
+      )
+      .innerJoin(tracks, eq(history.track_id, tracks.id))
+      .groupBy(({ artist_id }) => artist_id)
+      .having(({ count }) => count)
+      .orderBy(({ count }) => count)
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .innerJoin(artists, eq(tracks.artist_id, artists.id))
+  }
+
+  return {
+    upsert,
+    getOne,
+    lastListened,
+    getUserTokens,
+    updateAccessToken,
+    updateAccessTokens,
+    updateHistory,
+    getHistory,
+    topTracks,
+    topAlbums,
+    topArtists,
+  }
 }

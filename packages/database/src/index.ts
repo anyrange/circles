@@ -1,15 +1,24 @@
-import * as user from "./controllers/user"
-import * as track from "./controllers/track"
-import * as album from "./controllers/album"
-import * as artist from "./controllers/artist"
-import * as audioFeatures from "./controllers/audioFeatures"
-import * as task from "./controllers/task"
+import { drizzle } from "drizzle-orm/postgres-js"
+import postgres from "postgres"
+import * as schema from "./schema"
 
-export const controllers = {
-  user,
-  track,
-  album,
-  artist,
-  audioFeatures,
-  task,
+import { createUserController } from "./controllers/user"
+import { createTrackController } from "./controllers/track"
+import { createAlbumController } from "./controllers/album"
+import { createArtistController } from "./controllers/artist"
+import { createAudioFeaturesController } from "./controllers/audioFeatures"
+import { createTaskController } from "./controllers/task"
+
+export const createDBClient = (connectionString: string) => {
+  const queryClient = postgres(connectionString)
+  const db = drizzle(queryClient, { schema })
+
+  return {
+    user: createUserController(db),
+    album: createAlbumController(db),
+    artist: createArtistController(db),
+    track: createTrackController(db),
+    audioFeatures: createAudioFeaturesController(db),
+    task: createTaskController(db),
+  }
 }

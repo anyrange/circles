@@ -13,4 +13,10 @@ if (typeof process.env.SPOTIFY_CLIENT_ID !== "string") {
   process.exit(1)
 }
 
-export const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } = process.env
+if (typeof process.env.DATABASE_URL !== "string") {
+  error("SPOTIFY_CLIENT_ID must be defined in env")
+  process.exit(1)
+}
+
+export const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, DATABASE_URL } =
+  process.env

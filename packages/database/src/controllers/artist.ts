@@ -1,39 +1,97 @@
+import { inArray } from "drizzle-orm"
 import type { ExtendedArtist } from "@circles/types"
-import { prisma } from "../client"
-import { sanitizeArtist } from "../helpers"
+import { artists, images, genres, artistsToGenres } from "../schema"
+import type { DB } from "../schema"
+import { extractImages, formatArtist } from "../helpers"
 
-export async function create(data: ExtendedArtist) {
-  const artist = await prisma.artist.create(sanitizeArtist(data))
+export const createArtistController = (db: DB) => {
+  const create = async (data: ExtendedArtist) => {
+    return db.transaction(async (tx) => {
+      const { images_id } = await tx
+        .insert(images)
+        .values(extractImages(data))
+        .returning({ images_id: images.id })
+        .then((item) => item[0])
 
-  return artist
-}
+      const genres_ids = await tx
+        .insert(genres)
+        .values(data.genres.map((name) => ({ name })))
+        .returning({ id: genres.id })
+        .onConflictDoNothing()
 
-export async function createMany(data: ExtendedArtist[]) {
-  if (!data.length) return []
+      await tx.insert(artistsToGenres).values(
+        genres_ids.map(({ id }) => ({
+          genre_id: id,
+          artist_id: data.id,
+        }))
+      )
 
-  const artists = await prisma.$transaction(
-    data.map((artist) => prisma.artist.create(sanitizeArtist(artist)))
-  )
+      return await tx
+        .insert(artists)
+        .values({ ...formatArtist(data), images_id })
+        .returning()
+        .then((item) => item[0])
+    })
+  }
 
-  return artists
-}
+  const createMany = async (data: ExtendedArtist[]) => {
+    if (!data.length) return []
 
-export async function filterExistingArtistIds(ids: ExtendedArtist["id"][]) {
-  if (!ids.length) return []
+    return db.transaction(async (tx) => {
+      const images_ids = await tx
+        .insert(images)
+        .values(data.map((album) => extractImages(album)))
+        .returning({ images_id: images.id })
 
-  const results = await prisma.$transaction(
-    ids.map((id) =>
-      prisma.artist.findUnique({
-        select: { id: true },
-        where: { id },
-      })
+      await Promise.all(
+        data.map((album) =>
+          tx.transaction(async (tx2) => {
+            const genres_ids = await tx2
+              .insert(genres)
+              .values(album.genres.map((name) => ({ name })))
+              .returning({ id: genres.id })
+              .onConflictDoNothing()
+
+            await tx2.insert(artistsToGenres).values(
+              genres_ids.map(({ id }) => ({
+                genre_id: id,
+                artist_id: album.id,
+              }))
+            )
+          })
+        )
+      )
+
+      return await tx
+        .insert(artists)
+        .values(
+          data.map((album, id) => ({
+            ...formatArtist(album),
+            ...images_ids[id],
+          }))
+        )
+        .returning()
+    })
+  }
+
+  const filterExistingArtistIds = async (ids: ExtendedArtist["id"][]) => {
+    if (!ids.length) return []
+
+    const results = await db
+      .select({ id: artists.id })
+      .from(artists)
+      .where(inArray(artists.id, ids))
+
+    const existingArtists = new Set<ExtendedArtist["id"]>(
+      results.map(({ id }) => id)
     )
-  )
-  const existingArtists = new Set<ExtendedArtist["id"]>()
 
-  results.forEach((artist) => {
-    if (artist !== null) existingArtists.add(artist.id)
-  })
+    return ids.filter((album) => !existingArtists.has(album))
+  }
 
-  return ids.filter((artist) => !existingArtists.has(artist))
+  return {
+    create,
+    createMany,
+    filterExistingArtistIds,
+  }
 }

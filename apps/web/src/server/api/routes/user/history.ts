@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { controllers } from "@circles/database"
+import { controllers } from "~~/server/services/database"
 import { publicProcedure } from "~~/server/trpc"
 
 export const history = publicProcedure

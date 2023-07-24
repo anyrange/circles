@@ -1,4 +1,4 @@
-import { controllers } from "@circles/database"
+import { controllers } from "../services/database"
 
 import type { Item, HistoryRecord } from "@circles/types"
 import type { EntitiesIds, StorageItem } from "../types"

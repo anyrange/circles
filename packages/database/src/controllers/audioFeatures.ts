@@ -1,20 +1,28 @@
 import type { AudioFeature } from "@circles/types"
-import { prisma } from "../client"
-import { sanitizeAudioFeatures } from "../helpers"
+import { audioFeatures } from "../schema"
+import type { DB } from "../schema"
+import { formatAudioFeatures } from "../helpers"
 
-export async function create(data: AudioFeature) {
-  const features = await prisma.audioFeatures.create(
-    sanitizeAudioFeatures(data)
-  )
-  return features
-}
+export const createAudioFeaturesController = (db: DB) => {
+  const create = async (data: AudioFeature) => {
+    return db
+      .insert(audioFeatures)
+      .values(formatAudioFeatures(data))
+      .returning()
+      .then((item) => item[0])
+  }
 
-export async function createMany(data: AudioFeature[]) {
-  if (!data.length) return []
+  const createMany = async (data: AudioFeature[]) => {
+    if (!data.length) return []
 
-  const features = await prisma.audioFeatures.createMany({
-    data: data.map((item) => sanitizeAudioFeatures(item).data),
-  })
+    return db
+      .insert(audioFeatures)
+      .values(data.map((features) => formatAudioFeatures(features)))
+      .returning()
+  }
 
-  return features
+  return {
+    create,
+    createMany,
+  }
 }

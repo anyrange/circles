@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { controllers } from "@circles/database"
+import { controllers } from "~~/server/services/database"
 import { publicProcedure } from "~~/server/trpc"
 
 export const artists = publicProcedure
@@ -15,7 +15,7 @@ export const artists = publicProcedure
   .query(async ({ input }) => {
     const { id, limit } = input
 
-    const artists = await controllers.user.getArtists(id, limit)
+    const artists = await controllers.user.topArtists(id, limit)
     const isEnd = 0
 
     return {
