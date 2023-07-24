@@ -6,7 +6,7 @@
     "dev": "nuxt dev",
     "start": "node src/.output/server/index.mjs",
     "generate": "nuxt generate",
-    "postinstall": "nuxt prepare"
+    "prepare": "nuxt prepare"
   },
   "dependencies": {
     "@circles/database": "*",

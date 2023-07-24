@@ -5,7 +5,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "generate": "drizzle-kit generate:pg --schema=./src/schema.ts --out=./drizzle",
-    "migrate": "dotenv -e ../../.env -- prisma migrate dev"
+    "migrate": "dotenv -e ../../.env -- ts-node ./src/migrate.ts"
   },
   "dependencies": {
     "@circles/types": "*",
@@ -18,6 +18,6 @@
     "@types/node": "^20.4.1",
     "dotenv-cli": "^7.0.0",
     "drizzle-kit": "^0.19.3",
-    "prisma": "^4.10.1"
+    "ts-node": "^10.9.1"
   }
 }

@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "format:write": "prettier --write --list-different .",
     "lint": "eslint --ext \".ts,.vue\" --ignore-path .gitignore .",
-    "lint:fix": "yarn lint --fix"
+    "lint:fix": "yarn lint --fix",
+    "postinstall": "yarn workspace @circles/web prepare"
   },
   "workspaces": [
     "apps/*",
