@@ -1,9 +1,4 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
-  "extends": "./src/.nuxt/tsconfig.json",
-  "compilerOptions": {
-    "paths": {
-      "~~/*": ["src/*"]
-    }
-  }
+  "extends": "./src/.nuxt/tsconfig.json"
 }
