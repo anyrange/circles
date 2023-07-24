@@ -278,7 +278,7 @@ export const createUserController = (db: DB) => {
         count: sql<number>`count(${history.id})`,
         track_id: history.track_id,
         artist_id: tracks.artist_id,
-        album: albums,
+        artist: artists,
       })
       .from(history)
       .where(
