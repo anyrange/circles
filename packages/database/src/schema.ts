@@ -24,10 +24,10 @@ export const albumTypeEnum = pgEnum("album_type", [
 export const users = pgTable("users", {
   id: varchar("id", { length: 22 }).primaryKey(),
   display_name: text("display_name").notNull(),
-  email: text("email").default(""),
-  avatar: text("avatar").default(""),
+  email: text("email").default("").notNull(),
+  avatar: text("avatar").default("").notNull(),
   country: text("country").notNull(),
-  privacy: privacyEnum("privacy").default("public"),
+  privacy: privacyEnum("privacy").default("public").notNull(),
   filter_enabled: boolean("filter_enabled").notNull(),
   url: text("url").notNull(),
   product: text("product").notNull(),
@@ -35,9 +35,9 @@ export const users = pgTable("users", {
 
   access_token: text("access_token").notNull(),
   refresh_token: text("refresh_token").notNull(),
-  refresh_is_valid: boolean("refresh_is_valid").default(true),
-  last_login: timestamp("last_login").defaultNow(),
-  registration_date: timestamp("registration_date").defaultNow(),
+  refresh_is_valid: boolean("refresh_is_valid").default(true).notNull(),
+  last_login: timestamp("last_login").defaultNow().notNull(),
+  registration_date: timestamp("registration_date").defaultNow().notNull(),
 })
 
 export const usersRelations = relations(users, ({ many }) => ({

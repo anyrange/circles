@@ -13,9 +13,9 @@ export const tracks = publicProcedure
     })
   )
   .query(async ({ input }) => {
-    const { id, limit, page, start, end } = input
+    const { id, ...options } = input
 
-    const tracks = await controllers.user.topTracks(id, limit, page, start, end)
+    const tracks = await controllers.user.topTracks(id, options)
     const isEnd = tracks.length === 0
 
     return {

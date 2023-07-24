@@ -13,9 +13,9 @@ export const albums = publicProcedure
     })
   )
   .query(async ({ input }) => {
-    const { id, limit } = input
+    const { id, ...options } = input
 
-    const albums = await controllers.user.topAlbums(id, limit)
+    const albums = await controllers.user.topAlbums(id, options)
     const isEnd = 0
 
     return {

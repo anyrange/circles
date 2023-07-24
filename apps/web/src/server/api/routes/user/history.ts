@@ -11,9 +11,9 @@ export const history = publicProcedure
     })
   )
   .query(async ({ input }) => {
-    const { id, limit, cursor } = input
+    const { id, ...options } = input
 
-    const history = await controllers.user.getHistory(id, limit, cursor)
+    const history = await controllers.user.getHistory(id, options)
     const isEnd = !history.length
 
     return {

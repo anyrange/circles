@@ -47,6 +47,7 @@ export const createUserController = (db: DB) => {
         last_login: users.last_login,
         registration_date: users.registration_date,
       })
+      .then((item) => item[0])
 
     return user
   }
@@ -140,9 +141,9 @@ export const createUserController = (db: DB) => {
 
   const getHistory = async (
     id: User["id"],
-    options = { limit: 10, cursorId: 0 }
+    options = { limit: 10, cursor: 0 }
   ) => {
-    const { limit, cursorId } = options
+    const { limit, cursor } = options
 
     if (limit < 1) return []
 
@@ -152,8 +153,8 @@ export const createUserController = (db: DB) => {
         track_id: true,
         played_at: true,
       },
-      where: cursorId
-        ? and(eq(history.user_id, id), lt(history.id, cursorId))
+      where: cursor
+        ? and(eq(history.user_id, id), lt(history.id, cursor))
         : eq(history.user_id, id),
       orderBy: desc(history.played_at),
       limit,
