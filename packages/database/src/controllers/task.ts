@@ -59,17 +59,15 @@ export const createTaskController = (db: DB) => {
         await createAudioFeaturesController(tx).createMany(data.features)
       }
 
-      await Promise.all(
-        newRecords.map(({ userId, history: listeningHistory }) =>
-          db.insert(history).values(
-            listeningHistory.map(({ played_at, track_id }) => ({
-              user_id: userId,
-              played_at,
-              track_id,
-            }))
-          )
+      newRecords.forEach(async ({ userId, history: listeningHistory }) => {
+        await db.insert(history).values(
+          listeningHistory.map(({ played_at, track_id }) => ({
+            user_id: userId,
+            played_at,
+            track_id,
+          }))
         )
-      )
+      })
     })
   }
 

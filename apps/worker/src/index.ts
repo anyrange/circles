@@ -5,7 +5,7 @@ import { refreshTokens, parseHistory } from "./tasks"
 log("Starting workers")
 
 refreshTokens().then((res) =>
-  log(`Initial refresh: ${res.fulfilled}/${res.overall} in ${res.time}s`)
+  log(`Initial token refresh: ${res.fulfilled}/${res.overall} in ${res.time}s`)
 )
 
 schedule("*/30 * * * *", async () => {

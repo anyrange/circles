@@ -5,8 +5,6 @@ import type {
   Track,
   AudioFeature,
 } from "@circles/types"
-import { getTableColumns } from "drizzle-orm"
-import { albums, artists, images, tracks } from "../schema"
 
 export function extractImages(entity: Album | ExtendedAlbum | ExtendedArtist) {
   const high = entity.images.pop()?.url || ""

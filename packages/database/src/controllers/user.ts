@@ -106,21 +106,19 @@ export const createUserController = (db: DB) => {
     if (!usersList.length) return []
 
     return db.transaction(async (tx) => {
-      await Promise.all(
-        usersList.map(({ id, access_token, refresh_is_valid }) =>
-          tx
-            .update(users)
-            .set({
-              access_token,
-              refresh_is_valid,
-            })
-            .where(eq(users.id, id))
-            .returning({
-              id: users.id,
-              access_token: users.access_token,
-            })
-        )
-      )
+      usersList.forEach(async ({ id, access_token, refresh_is_valid }) => {
+        await tx
+          .update(users)
+          .set({
+            access_token,
+            refresh_is_valid,
+          })
+          .where(eq(users.id, id))
+          .returning({
+            id: users.id,
+            access_token: users.access_token,
+          })
+      })
     })
   }
 

@@ -11,19 +11,19 @@ export function createTask(taskFn: TaskFn) {
       const start = new Date()
 
       const { fulfilled, failedTasks } = await taskFn(users).catch((e) => {
-        error((e as Error).message)
+        error(e)
         return { fulfilled: 0, failedTasks: [] }
       })
 
       const end = new Date()
 
-      failedTasks.forEach(({ reason }) => error((reason as Error).message))
+      failedTasks.forEach(({ reason }) => error(reason))
 
       const time = getTimeDiffSeconds(start, end)
 
       return { fulfilled, overall: users.length, time }
     } catch (e) {
-      error((e as Error).message)
+      error(e)
       return { fulfilled: 0, overall: 0, time: 0 }
     }
   }
