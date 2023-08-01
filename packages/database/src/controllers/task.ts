@@ -45,30 +45,27 @@ export const createTaskController = (db: DB) => {
 
     if (isEmpty) return
 
-    return db.transaction(async (tx) => {
-      if (data.albums.length) {
+    return db.transaction(
+      async (tx) => {
         await createAlbumController(tx).createMany(data.albums)
-      }
-      if (data.artists.length) {
         await createArtistController(tx).createMany(data.artists)
-      }
-      if (data.tracks.length) {
         await createTrackController(tx).createMany(data.tracks)
-      }
-      if (data.features.length) {
         await createAudioFeaturesController(tx).createMany(data.features)
-      }
 
-      newRecords.forEach(async ({ userId, history: listeningHistory }) => {
-        await db.insert(history).values(
-          listeningHistory.map(({ played_at, track_id }) => ({
-            user_id: userId,
-            played_at,
-            track_id,
-          }))
-        )
-      })
-    })
+        newRecords.forEach(async ({ userId, history: listeningHistory }) => {
+          await db.insert(history).values(
+            listeningHistory.map(({ played_at, track_id }) => ({
+              user_id: userId,
+              played_at,
+              track_id,
+            }))
+          )
+        })
+      },
+      {
+        deferrable: true,
+      }
+    )
   }
 
   return {
