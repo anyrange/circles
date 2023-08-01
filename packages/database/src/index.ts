@@ -8,6 +8,7 @@ import { createAlbumController } from "./controllers/album"
 import { createArtistController } from "./controllers/artist"
 import { createAudioFeaturesController } from "./controllers/audioFeatures"
 import { createTaskController } from "./controllers/task"
+import { createGenreController } from "./controllers/genre"
 
 export const createDBClient = (connectionString: string) => {
   const queryClient = postgres(connectionString)
@@ -20,5 +21,6 @@ export const createDBClient = (connectionString: string) => {
     track: createTrackController(db),
     audioFeatures: createAudioFeaturesController(db),
     task: createTaskController(db),
+    genre: createGenreController(db),
   }
 }

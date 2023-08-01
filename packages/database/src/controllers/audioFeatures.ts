@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm"
 import type { AudioFeature } from "@circles/types"
 import { audioFeatures } from "../schema"
 import type { DB } from "../schema"
@@ -21,8 +22,16 @@ export const createAudioFeaturesController = (db: DB) => {
       .returning()
   }
 
+  const count = async () => {
+    return await db
+      .select({ count: sql<number>`count(*)` })
+      .from(audioFeatures)
+      .then((res) => res[0].count)
+  }
+
   return {
     create,
     createMany,
+    count,
   }
 }

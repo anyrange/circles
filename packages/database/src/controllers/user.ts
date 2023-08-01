@@ -73,6 +73,13 @@ export const createUserController = (db: DB) => {
     return user?.history[0] || undefined
   }
 
+  const count = async () => {
+    return await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .then((res) => res[0].count)
+  }
+
   const getUserTokens = async (id: User["id"]) => {
     return db.query.users.findFirst({
       columns: { id: true, access_token: true },
@@ -299,6 +306,7 @@ export const createUserController = (db: DB) => {
   return {
     upsert,
     getOne,
+    count,
     lastListened,
     getUserTokens,
     updateAccessToken,

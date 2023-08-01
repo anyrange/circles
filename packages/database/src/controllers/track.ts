@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm"
 import type { Track, Item } from "@circles/types"
 import { tracks, images } from "../schema"
 import type { DB } from "../schema"
@@ -67,9 +68,17 @@ export const createTrackController = (db: DB) => {
     return items.filter(({ track }) => !existingTracks.has(track.id))
   }
 
+  const count = async () => {
+    return await db
+      .select({ count: sql<number>`count(*)` })
+      .from(tracks)
+      .then((res) => res[0].count)
+  }
+
   return {
     create,
     createMany,
+    count,
     filterExistingTrackIds,
     filterExistingItems,
   }

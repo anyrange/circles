@@ -1,4 +1,4 @@
-import { inArray } from "drizzle-orm"
+import { inArray, sql } from "drizzle-orm"
 import type { ExtendedAlbum } from "@circles/types"
 import { albums, images } from "../schema"
 import type { DB } from "../schema"
@@ -56,9 +56,17 @@ export const createAlbumController = (db: DB) => {
     return ids.filter((album) => !existingAlbums.has(album))
   }
 
+  const count = async () => {
+    return await db
+      .select({ count: sql<number>`count(*)` })
+      .from(albums)
+      .then((res) => res[0].count)
+  }
+
   return {
     create,
     createMany,
+    count,
     filterExistingAlbumIds,
   }
 }
