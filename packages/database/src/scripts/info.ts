@@ -26,4 +26,7 @@ Genres: ${genresNum}
 `)
 }
 
-printInfo().then()
+printInfo()
+  .then()
+  .catch((err) => console.log(err))
+  .finally(() => process.exit(0))
