@@ -33,39 +33,35 @@ export const createTaskController = (db: DB) => {
   }
 
   const updateDatabase = async (data: UpdateInfo) => {
-    const newRecords = data.histories.filter(({ history }) => history.length)
+    const newHistories = data.histories.filter(({ history }) => history.length)
 
     const isEmpty = !(
       data.albums.length ||
       data.artists.length ||
       data.tracks.length ||
       data.features.length ||
-      newRecords.length
+      newHistories.length
     )
 
     if (isEmpty) return
 
-    return db.transaction(
-      async (tx) => {
-        await createAlbumController(tx).createMany(data.albums)
-        await createArtistController(tx).createMany(data.artists)
-        await createTrackController(tx).createMany(data.tracks)
-        await createAudioFeaturesController(tx).createMany(data.features)
+    return db.transaction(async (tx) => {
+      await createAlbumController(tx).createMany(data.albums)
+      await createArtistController(tx).createMany(data.artists)
+      await createTrackController(tx).createMany(data.tracks)
+      await createAudioFeaturesController(tx).createMany(data.features)
 
-        newRecords.forEach(async ({ userId, history: listeningHistory }) => {
-          await db.insert(history).values(
-            listeningHistory.map(({ played_at, track_id }) => ({
-              user_id: userId,
-              played_at,
-              track_id,
-            }))
-          )
-        })
-      },
-      {
-        deferrable: true,
-      }
-    )
+      const historyRecords = newHistories.flatMap(
+        ({ userId, history: listeningHistory }) =>
+          listeningHistory.map(({ played_at, track_id }) => ({
+            user_id: userId,
+            played_at,
+            track_id,
+          }))
+      )
+
+      await tx.insert(history).values(historyRecords)
+    })
   }
 
   return {
