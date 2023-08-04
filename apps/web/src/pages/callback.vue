@@ -1,10 +1,3 @@
-<template>
-  <div>
-    <h1>Welcome to the callback</h1>
-    {{ data }}
-  </div>
-</template>
-
 <script setup lang="ts">
 const { $client } = useNuxtApp()
 const { update } = await useSession()
@@ -16,3 +9,10 @@ const data = await $client.auth.spotify.useQuery({
 
 update({ authToken: data.data.value.authToken })
 </script>
+
+<template>
+  <div>
+    <h1>Welcome to the callback</h1>
+    {{ data }}
+  </div>
+</template>
