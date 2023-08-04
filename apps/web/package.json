@@ -16,11 +16,14 @@
     "@trpc/client": "^10.9.0",
     "@trpc/server": "^10.9.0",
     "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.1",
     "trpc-nuxt": "^0.5.0",
     "zod": "^3.20.2"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "^12.0.0",
+    "@sidebase/nuxt-session": "^0.2.7",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.4.1",
     "nuxt": "^3.0.0"
   }

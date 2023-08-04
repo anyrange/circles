@@ -5,6 +5,7 @@ import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "./src/config/env"
 
 export default defineNuxtConfig({
   rootDir: "./src",
+  modules: ["@sidebase/nuxt-session"],
   build: {
     transpile: ["trpc-nuxt"],
   },

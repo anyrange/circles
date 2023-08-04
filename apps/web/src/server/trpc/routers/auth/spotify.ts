@@ -2,6 +2,7 @@ import { z } from "zod"
 import { uniquifyArray, error } from "@circles/utils"
 import { controllers } from "~~/server/services/database"
 import { spotifyAPI } from "~~/server/services/spotify-api"
+import { sign } from "~~/server/services/jwt"
 import { publicProcedure } from "~~/server/trpc"
 import { extractEntitiesIds, getRedirectURI } from "~~/helpers"
 
@@ -33,7 +34,9 @@ export const spotify = publicProcedure
         error(`Couldn't parse ${user.display_name}:`, e)
       )
 
-    return user
+    const authToken = await sign({ id: user.id })
+
+    return { user, authToken }
   })
 
 const PARSE_LIMIT = 50
