@@ -35,7 +35,7 @@ export const users = pgTable("users", {
 
   access_token: text("access_token").notNull(),
   refresh_token: text("refresh_token").notNull(),
-  refresh_is_valid: boolean("refresh_is_valid").default(true).notNull(),
+  is_active: boolean("refresh_is_valid").default(true).notNull(),
   last_login: timestamp("last_login").defaultNow().notNull(),
   registration_date: timestamp("registration_date").defaultNow().notNull(),
 })

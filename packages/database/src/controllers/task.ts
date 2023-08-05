@@ -21,7 +21,7 @@ export const createTaskController = (db: DB) => {
           orderBy: desc(history.played_at),
         },
       },
-      where: (users) => eq(users.refresh_is_valid, true),
+      where: (users) => eq(users.is_active, true),
     })
 
     return usersList.map((user) => ({

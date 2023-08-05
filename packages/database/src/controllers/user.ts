@@ -107,18 +107,18 @@ export const createUserController = (db: DB) => {
     usersList: {
       id: User["id"]
       access_token: Tokens["access_token"]
-      refresh_is_valid: boolean
+      is_active: boolean
     }[]
   ) => {
     if (!usersList.length) return []
 
     return db.transaction(async (tx) => {
-      usersList.forEach(async ({ id, access_token, refresh_is_valid }) => {
+      usersList.forEach(async ({ id, access_token, is_active }) => {
         await tx
           .update(users)
           .set({
             access_token,
-            refresh_is_valid,
+            is_active,
           })
           .where(eq(users.id, id))
           .returning({
