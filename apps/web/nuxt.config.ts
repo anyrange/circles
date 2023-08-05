@@ -5,7 +5,7 @@ import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "./src/config/env"
 
 export default defineNuxtConfig({
   rootDir: "./src",
-  modules: ["@vueuse/nuxt", "@pinia/nuxt"],
+  modules: ["@vueuse/nuxt", "@pinia/nuxt", "@pinia-plugin-persistedstate/nuxt"],
   build: {
     transpile: ["trpc-nuxt"],
   },

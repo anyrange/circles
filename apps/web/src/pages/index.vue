@@ -1,7 +1,14 @@
-<script setup type="ts"></script>
+<script setup type="ts">
+import { useUserStore } from "~~/stores/user"
+const userStore = useUserStore()
+const { $client } = useNuxtApp()
+
+const data = await $client.user.library.albums.useQuery({ id: userStore.user.id })
+</script>
 
 <template>
   <div>
     <h1>Welcome to the homepage</h1>
+    {{ data }}
   </div>
 </template>

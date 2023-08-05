@@ -1,6 +1,6 @@
 import { eq, desc, and, lt, sql, gte, lte } from "drizzle-orm"
 import type { User, Tokens, HistoryRecord } from "@circles/types"
-import { albums, artists, history, tracks, users } from "../schema"
+import { albums, artists, history, tracks, users, images } from "../schema"
 import type { DB } from "../schema"
 
 type UserWithTokens = User & {
@@ -56,6 +56,19 @@ export const createUserController = (db: DB) => {
     return db.query.users.findFirst({
       where: eq(users.id, id),
     })
+  }
+
+  const isPublic = async (id: User["id"]) => {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      columns: {
+        privacy: true,
+      },
+    })
+
+    if (!user) return null
+
+    return user.privacy === "public"
   }
 
   const lastListened = async (id: User["id"]) => {
@@ -247,8 +260,6 @@ export const createUserController = (db: DB) => {
     return db
       .select({
         count: sql<number>`count(${history.id})`,
-        track_id: history.track_id,
-        album_id: tracks.album_id,
         album: albums,
       })
       .from(history)
@@ -260,8 +271,7 @@ export const createUserController = (db: DB) => {
         )
       )
       .innerJoin(tracks, eq(history.track_id, tracks.id))
-      .groupBy(({ album_id }) => album_id)
-      .having(({ count }) => count)
+      .groupBy(({ album }) => album.id)
       .orderBy(({ count }) => count)
       .offset((page - 1) * limit)
       .limit(limit)
@@ -360,6 +370,7 @@ export const createUserController = (db: DB) => {
   return {
     upsert,
     getOne,
+    isPublic,
     count,
     lastListened,
     getUserTokens,

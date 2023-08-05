@@ -1,7 +1,7 @@
 import { z } from "zod"
+import { TRPCError } from "@trpc/server"
 import { controllers } from "~~/server/services/database"
 import { publicProcedure } from "~~/server/trpc"
-import { TRPCError } from "@trpc/server"
 
 export const followers = publicProcedure
   .input(
