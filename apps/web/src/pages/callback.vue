@@ -1,17 +1,16 @@
 <script setup lang="ts">
+import { useUserStore } from "~~/stores/user"
+
 const { $client } = useNuxtApp()
 const route = useRoute()
-const authToken = useCookie("authToken", {
-  sameSite: true,
-  httpOnly: true,
-  secure: true,
-})
+const userStore = useUserStore()
 
 const { data } = await $client.auth.spotify.useQuery({
   code: route.query.code as string,
 })
 
-authToken.value = data.value.authToken
+userStore.login(data.value.authToken)
+userStore.updateUser(data.value.user)
 </script>
 
 <template>
