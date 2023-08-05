@@ -61,7 +61,7 @@ export const followsRelations = relations(follows, ({ one }) => ({
     fields: [follows.follower_id],
     references: [users.id],
   }),
-  folowee: one(users, {
+  followee: one(users, {
     fields: [follows.followee_id],
     references: [users.id],
   }),

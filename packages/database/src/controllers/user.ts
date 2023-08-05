@@ -303,6 +303,60 @@ export const createUserController = (db: DB) => {
       .innerJoin(artists, eq(tracks.artist_id, artists.id))
   }
 
+  const getFollowers = async (id: User["id"]) => {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: {
+        followed: {
+          with: {
+            follower: {
+              columns: {
+                id: true,
+                display_name: true,
+                privacy: true,
+                avatar: true,
+                is_active: true,
+                last_login: true,
+                url: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!user) return null
+
+    return user.followed.map(({ follower }) => follower)
+  }
+
+  const getFollows = async (id: User["id"]) => {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: {
+        follows: {
+          with: {
+            followee: {
+              columns: {
+                id: true,
+                display_name: true,
+                privacy: true,
+                avatar: true,
+                is_active: true,
+                last_login: true,
+                url: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!user) return null
+
+    return user.follows.map(({ followee }) => followee)
+  }
+
   return {
     upsert,
     getOne,
@@ -316,5 +370,7 @@ export const createUserController = (db: DB) => {
     topTracks,
     topAlbums,
     topArtists,
+    getFollowers,
+    getFollows,
   }
 }
