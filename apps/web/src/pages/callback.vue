@@ -1,13 +1,17 @@
 <script setup lang="ts">
 const { $client } = useNuxtApp()
-const { update } = await useSession()
 const route = useRoute()
+const authToken = useCookie("authToken", {
+  sameSite: true,
+  httpOnly: true,
+  secure: true,
+})
 
-const data = await $client.auth.spotify.useQuery({
+const { data } = await $client.auth.spotify.useQuery({
   code: route.query.code as string,
 })
 
-update({ authToken: data.data.value.authToken })
+authToken.value = data.value.authToken
 </script>
 
 <template>

@@ -8,7 +8,11 @@ const authMiddleware = t.middleware(({ next, ctx }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
-  return next({ ctx })
+  return next({
+    ctx: {
+      user: ctx.user,
+    },
+  })
 })
 
 export const publicProcedure = t.procedure

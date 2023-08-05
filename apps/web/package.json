@@ -22,7 +22,6 @@
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "^12.0.0",
-    "@sidebase/nuxt-session": "^0.2.7",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.4.1",
     "nuxt": "^3.0.0"

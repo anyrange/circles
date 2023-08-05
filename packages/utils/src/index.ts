@@ -46,3 +46,13 @@ export function isPromiseFulfilled<T>(
 export function uniquifyArray<T>(arr: T[]) {
   return [...new Set(arr)]
 }
+
+export function getKeys<T extends Record<string, unknown>>(obj: T) {
+  return Object.keys(obj) as (keyof T)[]
+}
+
+export function fromEntries<T extends Array<[PropertyKey, unknown]>>(
+  entries: T
+) {
+  return Object.fromEntries(entries) as { [K in T[number] as K[0]]: K[1] }
+}
