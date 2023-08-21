@@ -1,6 +1,14 @@
 import { eq, desc, and, lt, sql, gte, lte } from "drizzle-orm"
 import type { User, Tokens, HistoryRecord } from "@circles/types"
-import { albums, artists, history, tracks, users, images } from "../schema"
+import {
+  albums,
+  artists,
+  history,
+  tracks,
+  users,
+  images,
+  userSocials,
+} from "../schema"
 import type { DB } from "../schema"
 
 type UserWithTokens = User & {
@@ -21,40 +29,59 @@ export const createUserController = (db: DB) => {
       refresh_token: data.refresh_token,
     }
 
-    const user = await db
-      .insert(users)
-      .values({
-        id: data.id,
-        ...changingInfo,
-        url: data.external_urls.spotify,
-        type: data.type,
-      })
-      .onConflictDoUpdate({
-        target: users.id,
-        set: { ...changingInfo, last_login: new Date() },
-      })
-      .returning({
-        id: users.id,
-        display_name: users.display_name,
-        avatar: users.avatar,
-        country: users.country,
-        email: users.email,
-        product: users.product,
-        filter_enabled: users.filter_enabled,
-        url: users.url,
-        type: users.type,
-        privacy: users.privacy,
-        last_login: users.last_login,
-        registration_date: users.registration_date,
-      })
-      .then((item) => item[0])
+    return await db.transaction(async (tx) => {
+      const user = await tx
+        .insert(users)
+        .values({
+          id: data.id,
+          ...changingInfo,
+          type: data.type,
+        })
+        .onConflictDoUpdate({
+          target: users.id,
+          set: { ...changingInfo, last_login: new Date() },
+        })
+        .returning({
+          id: users.id,
+          display_name: users.display_name,
+          avatar: users.avatar,
+          country: users.country,
+          email: users.email,
+          product: users.product,
+          filter_enabled: users.filter_enabled,
+          type: users.type,
+          privacy: users.privacy,
+          last_login: users.last_login,
+          registration_date: users.registration_date,
+        })
+        .then((item) => item[0])
 
-    return user
+      if (user.registration_date.getTime() === user.last_login.getTime())
+        db.insert(userSocials)
+          .values({
+            user_id: data.id,
+            spotify: data.external_urls.spotify,
+          })
+          .then()
+
+      return user
+    })
   }
 
   const getOne = async (id: User["id"]) => {
     return db.query.users.findFirst({
       where: eq(users.id, id),
+      with: {
+        socials: {
+          columns: {
+            twitter: true,
+            spotify: true,
+            youtube: true,
+            telegram: true,
+            apple: true,
+          },
+        },
+      },
     })
   }
 
@@ -261,6 +288,7 @@ export const createUserController = (db: DB) => {
       .select({
         count: sql<number>`count(${history.id})`,
         album: albums,
+        images: images,
       })
       .from(history)
       .where(
@@ -276,6 +304,7 @@ export const createUserController = (db: DB) => {
       .offset((page - 1) * limit)
       .limit(limit)
       .innerJoin(albums, eq(tracks.album_id, albums.id))
+      .innerJoin(images, eq(albums.images_id, images.id))
   }
 
   const topArtists = async (
@@ -327,7 +356,6 @@ export const createUserController = (db: DB) => {
                 avatar: true,
                 is_active: true,
                 last_login: true,
-                url: true,
               },
             },
           },
@@ -354,7 +382,6 @@ export const createUserController = (db: DB) => {
                 avatar: true,
                 is_active: true,
                 last_login: true,
-                url: true,
               },
             },
           },

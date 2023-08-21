@@ -3,7 +3,7 @@ import { useUserStore } from "~~/stores/user"
 const userStore = useUserStore()
 const { $client } = useNuxtApp()
 
-const data = await $client.user.library.albums.useQuery({ id: userStore.user.id })
+const data = await $client.user.info.query({id: userStore.user.id })
 </script>
 
 <template>

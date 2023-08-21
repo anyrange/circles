@@ -3,6 +3,7 @@ import postgres from "postgres"
 import readline from "readline"
 import {
   users,
+  userSocials,
   albums,
   tracks,
   history,
@@ -42,6 +43,7 @@ terminal.question("Are you sure you want to flush all db? (y/n) ", (ans) => {
     await tx.delete(artists)
     await tx.delete(albums)
     await tx.delete(images)
+    await tx.delete(userSocials)
     await tx.delete(users)
   })
     .then(() => console.log("Successfully flushed"))

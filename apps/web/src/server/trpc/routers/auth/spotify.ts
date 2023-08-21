@@ -30,9 +30,9 @@ export const spotify = publicProcedure
       user.last_login.getTime() === user.registration_date.getTime()
 
     if (isNewUser)
-      await parseUserHistory(user.id, access_token).catch((e) =>
-        error(`Couldn't parse ${user.display_name}:`, e)
-      )
+      parseUserHistory(user.id, access_token)
+        .then()
+        .catch((e) => error(`Couldn't parse ${user.display_name}:`, e))
 
     const authToken = await sign({ id: user.id })
 
@@ -76,7 +76,7 @@ async function parseUserHistory(id: string, token: string) {
 
   await controllers.task.updateDatabase({
     histories: [{ userId: id, history }],
-    features,
+    features: features.filter(Boolean),
     tracks,
     albums,
     artists,

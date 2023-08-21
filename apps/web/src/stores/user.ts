@@ -10,7 +10,6 @@ interface User {
   avatar: string
   country: string
   filter_enabled: boolean
-  url: string
   product: string
   last_login: string
   registration_date: string

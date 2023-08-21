@@ -29,7 +29,6 @@ export const users = pgTable("users", {
   country: text("country").notNull(),
   privacy: privacyEnum("privacy").default("public").notNull(),
   filter_enabled: boolean("filter_enabled").notNull(),
-  url: text("url").notNull(),
   product: text("product").notNull(),
   type: text("type").notNull(),
 
@@ -39,12 +38,6 @@ export const users = pgTable("users", {
   last_login: timestamp("last_login").defaultNow().notNull(),
   registration_date: timestamp("registration_date").defaultNow().notNull(),
 })
-
-export const usersRelations = relations(users, ({ many }) => ({
-  history: many(history),
-  follows: many(follows),
-  followed: many(follows),
-}))
 
 export const follows = pgTable("follows", {
   id: serial("id").primaryKey(),
@@ -63,6 +56,36 @@ export const followsRelations = relations(follows, ({ one }) => ({
   }),
   followee: one(users, {
     fields: [follows.followee_id],
+    references: [users.id],
+  }),
+}))
+
+export const userSocials = pgTable("user_socials", {
+  id: serial("id").primaryKey(),
+  user_id: varchar("user_id", { length: 30 })
+    .references(() => users.id)
+    .notNull(),
+  twitter: text("twitter").default("").notNull(),
+  facebook: text("facebook").default("").notNull(),
+  youtube: text("youtube").default("").notNull(),
+  telegram: text("telegram").default("").notNull(),
+  spotify: text("spotify").default("").notNull(),
+  apple: text("apple").default("").notNull(),
+})
+
+export const usersRelations = relations(users, ({ many, one }) => ({
+  history: many(history),
+  follows: many(follows),
+  followed: many(follows),
+  socials: one(userSocials, {
+    fields: [users.id],
+    references: [userSocials.user_id],
+  }),
+}))
+
+export const userSocialsRelations = relations(userSocials, ({ one }) => ({
+  user: one(users, {
+    fields: [userSocials.user_id],
     references: [users.id],
   }),
 }))
