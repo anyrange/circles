@@ -19,7 +19,7 @@ export interface APIRecentlyPlayedResponse {
 }
 
 export interface APIAudioFeaturesResponse {
-  audio_features: AudioFeature[]
+  audio_features: (AudioFeature | null)[]
 }
 
 export interface APIAlbumsResponse {

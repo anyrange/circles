@@ -1,3 +1,4 @@
+import "@total-typescript/ts-reset"
 import { schedule } from "node-cron"
 import { log } from "@circles/utils"
 import { refreshTokens, parseHistory } from "./tasks"

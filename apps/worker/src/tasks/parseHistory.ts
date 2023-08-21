@@ -39,7 +39,7 @@ export const parseHistory = createTask(async (usersInfo) => {
   const artists: ExtendedArtist[] = []
 
   newInfo.filter(isPromiseFulfilled).forEach(({ value }) => {
-    features.push(...value.features)
+    features.push(...value.features.filter(Boolean))
     tracks.push(...value.tracks)
     albums.push(...value.albums)
     artists.push(...value.artists)
