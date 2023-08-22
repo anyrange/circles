@@ -18,6 +18,7 @@
     "@trpc/server": "^10.9.0",
     "@vueuse/nuxt": "^10.3.0",
     "dotenv": "^16.0.3",
+    "envalid": "^7.3.1",
     "jsonwebtoken": "^9.0.1",
     "pinia": "^2.1.6",
     "trpc-nuxt": "^0.5.0",

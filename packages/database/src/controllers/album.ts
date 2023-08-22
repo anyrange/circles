@@ -12,6 +12,7 @@ export const createAlbumController = (db: DB) => {
         .values(extractImages(data))
         .returning({ images_id: images.id })
         .then((item) => item[0])
+
       return await tx
         .insert(albums)
         .values({ ...formatAlbum(data), images_id })

@@ -12,7 +12,7 @@ const parseCookies = (cookies: string) => {
     if (kv.length != 2) return acc
 
     return Object.assign(fromEntries([[kv[0].trimStart(), kv[1]]]), acc)
-  }, {}) as { [key: string]: string }
+  }, {}) as { [key: string]: string | undefined }
 }
 
 export async function createContext(event: H3Event) {
