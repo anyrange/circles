@@ -1,22 +1,75 @@
 import "@total-typescript/ts-reset"
-import { schedule } from "node-cron"
+import express from "express"
 import { log } from "@circles/utils"
-import { refreshTokens, parseHistory } from "./tasks"
+import { PORT } from "./config"
+import { WorkerManager } from "./core/manager"
+import { activeTasks } from "./tasks"
 
-log("Starting workers")
+const manager = new WorkerManager()
 
-refreshTokens().then((res) =>
-  log(`Initial token refresh: ${res.fulfilled}/${res.overall} in ${res.time}s`)
-)
+for (const task of activeTasks) {
+  manager.registerTask(task)
+}
 
-schedule("*/30 * * * *", async () => {
-  const res = await refreshTokens()
-  log(`Refreshing tokens: ${res.fulfilled}/${res.overall} in ${res.time}s`)
+const app = express()
+
+app.use(express.json())
+
+app.get("/ping", async (_, res) => {
+  res.send("pong\n")
 })
 
-schedule("*/5 * * * *", async () => {
-  const res = await parseHistory()
-  log(`Parsing tracks: ${res.fulfilled}/${res.overall} in ${res.time}s`)
+app.get("/status", async (_, res) => {
+  res.json(manager.status)
 })
 
-export { collectUserHistory } from "./tasks"
+app.get("/tasks", async (_, res) => {
+  res.json([...manager.tasks.keys()])
+})
+
+app.get("/jobs", async (req, res) => {
+  const { taskName } = req.query
+
+  if (
+    !taskName ||
+    typeof taskName != "string" ||
+    !manager.tasks.get(taskName)
+  ) {
+    res.status(404)
+    res.send("Not found")
+    return
+  }
+
+  const handler = manager.tasks.get(taskName)!
+
+  res.json(await handler.create())
+})
+
+app.post("/exec", async (req, res) => {
+  const { taskName } = req.query
+  const { jobId, args } = req.body
+
+  if (
+    !taskName ||
+    typeof taskName != "string" ||
+    !manager.tasks.get(taskName)
+  ) {
+    res.status(404)
+    res.send("Not found")
+    return
+  }
+
+  if (!jobId || !args) {
+    res.status(400)
+    res.send("Job not provided")
+    return
+  }
+
+  manager.enqueueJob(taskName, { jobId, args })
+
+  res.json({ message: "enqueued" })
+})
+
+app.listen(PORT, () => {
+  log(`Server running at http://localhost:${PORT}`)
+})

@@ -1,2 +1,4 @@
-export * from "./parseHistory"
-export * from "./refreshTokens"
+import { SpotifyHistoryParser } from "./spotify/history"
+import { SpotifyTokensParser } from "./spotify/tokens"
+
+export const activeTasks = [SpotifyHistoryParser, SpotifyTokensParser] as const

@@ -20,3 +20,5 @@ if (typeof process.env.DATABASE_URL !== "string") {
 
 export const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, DATABASE_URL } =
   process.env
+
+export const PORT = Number(process.env.PORT) || 7777

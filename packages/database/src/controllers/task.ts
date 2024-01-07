@@ -6,6 +6,7 @@ import { createAlbumController } from "./album"
 import { createArtistController } from "./artist"
 import { createTrackController } from "./track"
 import { createAudioFeaturesController } from "./audioFeatures"
+import { createUserController } from "./user"
 
 export const createTaskController = (db: DB) => {
   const getUsersInfo = async () => {
@@ -33,14 +34,12 @@ export const createTaskController = (db: DB) => {
   }
 
   const updateDatabase = async (data: UpdateInfo) => {
-    const newHistories = data.histories.filter(({ history }) => history.length)
-
     const isEmpty = !(
       data.albums.length ||
       data.artists.length ||
       data.tracks.length ||
       data.features.length ||
-      newHistories.length
+      data.history.length
     )
 
     if (isEmpty) return
@@ -50,17 +49,7 @@ export const createTaskController = (db: DB) => {
       await createArtistController(tx).createMany(data.artists)
       await createTrackController(tx).createMany(data.tracks)
       await createAudioFeaturesController(tx).createMany(data.features)
-
-      const historyRecords = newHistories.flatMap(
-        ({ userId, history: listeningHistory }) =>
-          listeningHistory.map(({ played_at, track_id }) => ({
-            user_id: userId,
-            played_at,
-            track_id,
-          }))
-      )
-
-      await tx.insert(history).values(historyRecords)
+      await createUserController(tx).updateHistory(data.userId, data.history)
     })
   }
 

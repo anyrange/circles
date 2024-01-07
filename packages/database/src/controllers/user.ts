@@ -16,6 +16,12 @@ type UserWithTokens = User & {
   refresh_token: Tokens["refresh_token"]
 }
 
+type TokenUpdate = {
+  id: User["id"]
+  access_token: Tokens["access_token"]
+  is_active: boolean
+}
+
 export const createUserController = (db: DB) => {
   const upsert = async (data: UserWithTokens) => {
     const changingInfo = {
@@ -127,14 +133,14 @@ export const createUserController = (db: DB) => {
     })
   }
 
-  const updateAccessToken = async (
-    id: User["id"],
-    access_token: Tokens["access_token"]
-  ) => {
+  const updateAccessToken = async (update: TokenUpdate) => {
+    const { id, access_token, is_active } = update
+
     return db
       .update(users)
       .set({
         access_token,
+        is_active,
       })
       .where(eq(users.id, id))
       .returning({
@@ -143,17 +149,11 @@ export const createUserController = (db: DB) => {
       })
   }
 
-  const updateAccessTokens = async (
-    usersList: {
-      id: User["id"]
-      access_token: Tokens["access_token"]
-      is_active: boolean
-    }[]
-  ) => {
-    if (!usersList.length) return []
+  const updateManyAccessTokens = async (updateList: TokenUpdate[]) => {
+    if (!updateList.length) return []
 
     return db.transaction(async (tx) => {
-      usersList.forEach(async ({ id, access_token, is_active }) => {
+      updateList.forEach(async ({ id, access_token, is_active }) => {
         await tx
           .update(users)
           .set({
@@ -402,7 +402,7 @@ export const createUserController = (db: DB) => {
     lastListened,
     getUserTokens,
     updateAccessToken,
-    updateAccessTokens,
+    updateManyAccessTokens,
     updateHistory,
     getHistory,
     topTracks,

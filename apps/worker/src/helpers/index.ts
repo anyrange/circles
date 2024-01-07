@@ -1,7 +1,7 @@
 import { controllers } from "../services/database"
 
 import type { Item, HistoryRecord } from "@circles/types"
-import type { EntitiesIds, StorageItem } from "../types"
+import type { EntitiesIds } from "../types"
 
 export function extractEntitiesIds(items: Item[]) {
   const trackIds = items.map(({ track }) => track.id)
@@ -18,60 +18,16 @@ export function createHistoryStorage() {
   const trackIdsAcc = new Set<string>([])
   const albumIdsAcc = new Set<string>([])
   const artistIdsAcc = new Set<string>([])
+  let history: HistoryRecord[] = []
 
-  const storage: {
-    [key: EntitiesIds["userId"]]: StorageItem
-  } = {}
-
-  const initiateUser = (userId: string) => {
-    storage[userId] = {
-      token: "",
-      history: [],
-      trackIds: [],
-      albumIds: [],
-      artistIds: [],
-    }
+  const addEntities = ({ trackIds, albumIds, artistIds }: EntitiesIds) => {
+    trackIds.forEach((id) => trackIdsAcc.add(id))
+    albumIds.forEach((id) => albumIdsAcc.add(id))
+    artistIds.forEach((id) => artistIdsAcc.add(id))
   }
 
-  const addEntities = ({
-    trackIds,
-    albumIds,
-    artistIds,
-    userId,
-  }: EntitiesIds) => {
-    if (!storage[userId]) initiateUser(userId)
-
-    trackIds.forEach((id) => {
-      if (trackIdsAcc.has(id)) return
-
-      trackIdsAcc.add(id)
-      storage[userId].trackIds.push(id)
-    })
-
-    albumIds.forEach((id) => {
-      if (albumIdsAcc.has(id)) return
-
-      albumIdsAcc.add(id)
-      storage[userId].albumIds.push(id)
-    })
-
-    artistIds.forEach((id) => {
-      if (artistIdsAcc.has(id)) return
-
-      artistIdsAcc.add(id)
-      storage[userId].artistIds.push(id)
-    })
-  }
-
-  const addHistory = (
-    userId: string,
-    history: HistoryRecord[],
-    token: string
-  ) => {
-    if (!storage[userId]) initiateUser(userId)
-
-    storage[userId].history.push(...history)
-    storage[userId].token = token
+  const addHistory = (newData: HistoryRecord[]) => {
+    history.push(...newData)
   }
 
   const cleanEntityDuplicates = async () => {
@@ -90,38 +46,34 @@ export function createHistoryStorage() {
 
     albumIds.forEach((id) => albumIdsAcc.add(id))
     artistIds.forEach((id) => artistIdsAcc.add(id))
+    // tracks pre-filtered during history collection
   }
 
-  const getEntitiesUpdates = () => {
-    return Object.values(storage).map((fields) => ({
-      token: fields.token,
-      trackIds: fields.trackIds.filter((id) => trackIdsAcc.has(id)),
-      albumIds: fields.albumIds.filter((id) => albumIdsAcc.has(id)),
-      artistIds: fields.artistIds.filter((id) => artistIdsAcc.has(id)),
-    }))
+  const getEntities = () => {
+    return {
+      trackIds: [...trackIdsAcc],
+      albumIds: [...albumIdsAcc],
+      artistIds: [...artistIdsAcc],
+    }
   }
 
-  const getHistories = () => {
-    return Object.entries(storage).map(([id, fields]) => ({
-      userId: id,
-      history: fields.history,
-    }))
+  const getHistory = () => {
+    return history
   }
 
   const clearStorage = () => {
     trackIdsAcc.clear()
     albumIdsAcc.clear()
     artistIdsAcc.clear()
-
-    for (const userId in storage) initiateUser(userId)
+    history = []
   }
 
   return {
     addEntities,
     addHistory,
     cleanEntityDuplicates,
-    getEntitiesUpdates,
-    getHistories,
+    getEntities,
+    getHistory,
     clearStorage,
   }
 }
