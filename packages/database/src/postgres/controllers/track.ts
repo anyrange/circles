@@ -1,7 +1,6 @@
 import { sql } from "drizzle-orm"
 import type { Track, Item } from "@circles/types"
-import { tracks, images } from "../schema"
-import type { DB } from "../schema"
+import { tracks, images, type DB } from "../schema"
 import { extractImages, formatTrack } from "../helpers"
 import { inArray } from "drizzle-orm"
 

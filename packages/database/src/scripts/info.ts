@@ -1,11 +1,11 @@
-import { createDBClient } from ".."
+import { createPostgresClient } from "../postgres"
 
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL must be defined in env")
+if (!process.env.POSTGRES_URL) {
+  console.error("POSTGRES_URL must be defined in env")
   process.exit(1)
 }
 
-const db = createDBClient(process.env.DATABASE_URL)
+const db = createPostgresClient(process.env.POSTGRES_URL)
 
 const printInfo = async () => {
   const [usersNum, albumsNum, genresNum, artistsNum, tracksNum] =

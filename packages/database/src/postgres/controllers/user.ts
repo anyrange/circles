@@ -8,8 +8,8 @@ import {
   users,
   images,
   userSocials,
+  type DB,
 } from "../schema"
-import type { DB } from "../schema"
 
 type UserWithTokens = User & {
   access_token: Tokens["access_token"]

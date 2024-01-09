@@ -1,7 +1,6 @@
 import { sql } from "drizzle-orm"
 import type { AudioFeature } from "@circles/types"
-import { audioFeatures } from "../schema"
-import type { DB } from "../schema"
+import { audioFeatures, type DB } from "../schema"
 import { formatAudioFeatures } from "../helpers"
 
 export const createAudioFeaturesController = (db: DB) => {

@@ -1,7 +1,7 @@
 import { error } from "@circles/utils"
 import * as dotenv from "dotenv"
 
-dotenv.config()
+dotenv.config({ path: "../../.env" })
 
 if (typeof process.env.SPOTIFY_CLIENT_SECRET !== "string") {
   error("SPOTIFY_CLIENT_SECRET must be defined in env")
@@ -13,12 +13,12 @@ if (typeof process.env.SPOTIFY_CLIENT_ID !== "string") {
   process.exit(1)
 }
 
-if (typeof process.env.DATABASE_URL !== "string") {
-  error("DATABASE_URL must be defined in env")
+if (typeof process.env.POSTGRES_URL !== "string") {
+  error("POSTGRES_URL must be defined in env")
   process.exit(1)
 }
 
-export const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, DATABASE_URL } =
+export const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, POSTGRES_URL } =
   process.env
 
 export const PORT = Number(process.env.PORT) || 7777

@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm"
 import { history, type DB } from "../schema"
-import type { UpdateInfo } from "../types"
+import type { UpdateInfo } from "../../types"
 import { createAlbumController } from "./album"
 import { createArtistController } from "./artist"
 import { createTrackController } from "./track"

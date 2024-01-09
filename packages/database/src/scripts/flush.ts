@@ -13,10 +13,10 @@ import {
   artists,
   genres,
   audioFeatures,
-} from "../schema"
+} from "../postgres/schema"
 
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL must be defined in env")
+if (!process.env.POSTGRES_URL) {
+  console.error("POSTGRES_URL must be defined in env")
   process.exit(1)
 }
 
@@ -25,7 +25,7 @@ const terminal = readline.createInterface({
   output: process.stdout,
 })
 
-const queryClient = postgres(process.env.DATABASE_URL)
+const queryClient = postgres(process.env.POSTGRES_URL)
 const db = drizzle(queryClient)
 
 terminal.question("Are you sure you want to flush all db? (y/n) ", (ans) => {

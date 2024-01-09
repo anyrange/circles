@@ -1,7 +1,6 @@
 import { inArray, sql } from "drizzle-orm"
 import type { ExtendedArtist } from "@circles/types"
-import { artists, images, genres, artistsToGenres } from "../schema"
-import type { DB } from "../schema"
+import { artists, images, genres, artistsToGenres, type DB } from "../schema"
 import { extractImages, formatArtist } from "../helpers"
 
 export const createArtistController = (db: DB) => {
