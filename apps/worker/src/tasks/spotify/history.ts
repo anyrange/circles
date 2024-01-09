@@ -17,7 +17,7 @@ export class SpotifyHistoryParser extends WorkerTask {
   }
 
   async create(): Promise<HistoryParserJob[]> {
-    const users = await controllers.task.getUsersInfo()
+    const users = await controllers.general.getUsersInfo()
 
     return users.map((user) => {
       const { refresh_token, ...jobInfo } = user
@@ -42,7 +42,7 @@ export class SpotifyHistoryParser extends WorkerTask {
 
     const history = tempStorage.getHistory()
 
-    await controllers.task.updateDatabase({
+    await controllers.general.updateDatabase({
       userId: user.id,
       history,
       features: newInfo.features.filter(Boolean),

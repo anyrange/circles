@@ -14,7 +14,7 @@ export class SpotifyTokensParser extends WorkerTask {
   }
 
   async create(): Promise<TokenParserJob[]> {
-    const users = await controllers.task.getUsersInfo()
+    const users = await controllers.general.getUsersInfo()
 
     return users.map((user) => {
       const { lastHistoryRecord, access_token, ...jobInfo } = user

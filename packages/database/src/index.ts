@@ -7,7 +7,7 @@ import { createTrackController } from "./controllers/track"
 import { createAlbumController } from "./controllers/album"
 import { createArtistController } from "./controllers/artist"
 import { createAudioFeaturesController } from "./controllers/audioFeatures"
-import { createTaskController } from "./controllers/task"
+import { createGeneralController } from "./controllers/general"
 import { createGenreController } from "./controllers/genre"
 
 export const createDBClient = (connectionString: string) => {
@@ -20,7 +20,7 @@ export const createDBClient = (connectionString: string) => {
     artist: createArtistController(db),
     track: createTrackController(db),
     audioFeatures: createAudioFeaturesController(db),
-    task: createTaskController(db),
+    general: createGeneralController(db),
     genre: createGenreController(db),
   }
 }

@@ -1,6 +1,5 @@
 import { desc, eq } from "drizzle-orm"
-import { history } from "../schema"
-import type { DB } from "../schema"
+import { history, type DB } from "../schema"
 import type { UpdateInfo } from "../types"
 import { createAlbumController } from "./album"
 import { createArtistController } from "./artist"
@@ -8,7 +7,7 @@ import { createTrackController } from "./track"
 import { createAudioFeaturesController } from "./audioFeatures"
 import { createUserController } from "./user"
 
-export const createTaskController = (db: DB) => {
+export const createGeneralController = (db: DB) => {
   const getUsersInfo = async () => {
     const usersList = await db.query.users.findMany({
       columns: {
