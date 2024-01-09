@@ -10,7 +10,7 @@ import { createAudioFeaturesController } from "./controllers/audioFeatures"
 import { createGeneralController } from "./controllers/general"
 import { createGenreController } from "./controllers/genre"
 
-export const createDBClient = (connectionString: string) => {
+export const createPostgresClient = (connectionString: string) => {
   const queryClient = postgres(connectionString)
   const db = drizzle(queryClient, { schema })
 

@@ -74,8 +74,9 @@ async function parseUserHistory(id: string, token: string) {
     }
   )
 
-  await controllers.task.updateDatabase({
-    histories: [{ userId: id, history }],
+  await controllers.general.updateDatabase({
+    userId: id,
+    history,
     features: features.filter(Boolean),
     tracks,
     albums,

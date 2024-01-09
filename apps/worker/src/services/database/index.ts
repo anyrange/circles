@@ -1,4 +1,4 @@
-import { createDBClient } from "@circles/database"
+import { createPostgresClient } from "@circles/database"
 import { DATABASE_URL } from "../../config"
 
-export const controllers = createDBClient(DATABASE_URL)
+export const controllers = createPostgresClient(DATABASE_URL)
