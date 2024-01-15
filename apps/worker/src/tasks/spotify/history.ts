@@ -1,8 +1,8 @@
-import type { Cursors } from "@circles/types"
+import type { Cursors, Job } from "@circles/types"
 import { controllers } from "../../services/database"
 import { spotifyAPI } from "../../services/spotify-api"
 import { extractEntitiesIds, createHistoryStorage } from "../../helpers"
-import { WorkerTask, type Job } from "../../core/task"
+import { WorkerTask } from "../../core/task"
 import type { UserInfo } from "../../types"
 
 export type HistoryParserJob = Job<{

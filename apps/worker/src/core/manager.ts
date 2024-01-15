@@ -1,54 +1,85 @@
-import { WorkerTask, type WorkerTaskConstructor, type Job } from "./task"
-
-type ManagerStatus = "busy" | "free"
+import { UniqPriorityQueue } from "@circles/utils"
+import { type Job } from "@circles/types"
+import { WorkerTask, type WorkerTaskConstructor } from "./task"
+import { MAX_WORKER_LOAD } from "../config"
 
 export class WorkerManager {
-  tasks = new Map<string, WorkerTask>()
-  jobQueue = new Map<string, Job<any>>()
-  status: ManagerStatus = "free"
+  private load: number
+  private isFree: boolean
+  private tasks: Map<string, WorkerTask>
+  private jobQueue: UniqPriorityQueue<{
+    weight: number
+    taskName: string
+    job: Job<any>
+  }>
 
-  constructor() {}
+  constructor() {
+    this.load = 0
+    this.isFree = true
+    this.tasks = new Map()
+    this.jobQueue = new UniqPriorityQueue()
+  }
 
-  registerTask(task: WorkerTaskConstructor) {
+  status() {
+    return {
+      load: this.load,
+      isFree: this.isFree,
+      jobs: this.jobQueue.size(),
+    }
+  }
+
+  registerTaskHandler(task: WorkerTaskConstructor) {
     const handler = new task()
     this.tasks.set(handler.name, handler)
   }
 
-  runNextJob() {
-    this.status = "busy"
+  getTaskHandler(taskName: string) {
+    return this.tasks.get(taskName)
+  }
 
-    const nextJobKey = this.jobQueue.keys().next().value as string
+  tasksList() {
+    return [...this.tasks.keys()]
+  }
 
-    const [taskName] = nextJobKey.split(":::")
-    const job = this.jobQueue.get(nextJobKey)
+  async runNextJob() {
+    const order = this.jobQueue.dequeue()
 
-    if (!job) {
-      this.runNextJob()
-      return
-    }
+    if (!order) return
 
-    this.jobQueue.delete(nextJobKey)
+    const { job, weight, taskName } = order
 
-    this.tasks.get(taskName)?.run(job)
-
-    if (!this.jobQueue.size) {
-      this.status = "free"
-      return
-    }
+    await this.tasks.get(taskName)!.run(job)
+    this.load -= weight
 
     this.runNextJob()
   }
 
-  enqueueJob(taskName: string, job: Job<any>) {
+  async enqueueJob(
+    taskName: string,
+    weight: number,
+    job: Job<any>,
+    priority = 0
+  ) {
     if (!this.tasks.has(taskName)) {
       throw new Error(`Unknown task - ${taskName}`)
     }
 
-    const { jobId } = job
-    this.jobQueue.set(`${taskName}:::${jobId}`, job)
+    if (this.load + weight > MAX_WORKER_LOAD) {
+      throw new Error(`Exceeded max allowed load`)
+    }
 
-    if (this.status === "free") {
-      this.runNextJob()
+    const { jobId } = job
+    this.jobQueue.enqueue(
+      `${taskName}:::${jobId}`,
+      { job, weight, taskName },
+      priority
+    )
+    this.load += weight
+
+    if (this.isFree) {
+      this.isFree = false
+      await this.runNextJob()
+      this.isFree = true
     }
   }
 

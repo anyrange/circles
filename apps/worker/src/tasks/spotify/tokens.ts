@@ -1,6 +1,7 @@
+import type { Job } from "@circles/types"
 import { controllers } from "../../services/database"
 import { refreshTokens } from "../../services/spotify-api"
-import { WorkerTask, type Job } from "../../core/task"
+import { WorkerTask } from "../../core/task"
 import type { UserInfo } from "../../types"
 
 export type TokenParserJob = Job<{

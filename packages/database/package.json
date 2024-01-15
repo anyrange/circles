@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "generate": "drizzle-kit generate:pg --schema=./src/schema.ts --out=./drizzle",
+    "generate": "drizzle-kit generate:pg --schema=./src/postgres/schema.ts --out=./drizzle",
     "migrate": "dotenv -e ../../.env -- ts-node ./src/scripts/migrate.ts",
     "print-info": "dotenv -e ../../.env -- ts-node ./src/scripts/info.ts",
     "flush": "dotenv -e ../../.env -- ts-node ./src/scripts/flush.ts"

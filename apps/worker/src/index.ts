@@ -8,7 +8,7 @@ import { activeTasks } from "./tasks"
 const manager = new WorkerManager()
 
 for (const task of activeTasks) {
-  manager.registerTask(task)
+  manager.registerTaskHandler(task)
 }
 
 const app = express()
@@ -20,11 +20,11 @@ app.get("/ping", async (_, res) => {
 })
 
 app.get("/status", async (_, res) => {
-  res.json(manager.status)
+  res.json(manager.status())
 })
 
 app.get("/tasks", async (_, res) => {
-  res.json([...manager.tasks.keys()])
+  res.json(manager.tasksList())
 })
 
 app.get("/jobs", async (req, res) => {
@@ -33,39 +33,54 @@ app.get("/jobs", async (req, res) => {
   if (
     !taskName ||
     typeof taskName != "string" ||
-    !manager.tasks.get(taskName)
+    !manager.getTaskHandler(taskName)
   ) {
     res.status(404)
     res.send("Not found")
     return
   }
 
-  const handler = manager.tasks.get(taskName)!
+  const handler = manager.getTaskHandler(taskName)!
 
   res.json(await handler.create())
 })
 
 app.post("/exec", async (req, res) => {
   const { taskName } = req.query
-  const { jobId, args } = req.body
+  const { jobId, weight, args, priority = 0 } = req.body
 
   if (
     !taskName ||
     typeof taskName != "string" ||
-    !manager.tasks.get(taskName)
+    !manager.getTaskHandler(taskName)
   ) {
     res.status(404)
     res.send("Not found")
     return
   }
 
-  if (!jobId || !args) {
+  if (!jobId || !weight || !args) {
     res.status(400)
     res.send("Job not provided")
     return
   }
 
-  manager.enqueueJob(taskName, { jobId, args })
+  if (
+    typeof jobId !== "string" ||
+    typeof weight !== "number" ||
+    typeof priority !== "number"
+  ) {
+    res.status(400)
+    res.send("Invalid job properties")
+    return
+  }
+
+  try {
+    await manager.enqueueJob(taskName, weight, { jobId, args }, priority)
+  } catch (e) {
+    res.status(400).json({ message: (e as Error).message })
+    return
+  }
 
   res.json({ message: "enqueued" })
 })

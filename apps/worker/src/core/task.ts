@@ -1,9 +1,5 @@
 import { getTimeDiffSeconds, log, error } from "@circles/utils"
-
-export type Job<T> = {
-  jobId: string
-  args: T
-}
+import { type Job } from "@circles/types"
 
 type DummyJob = Job<any>
 
