@@ -1,15 +1,15 @@
-export function getTimeStamp() {
+export function datetimeSignature() {
   const time = new Date()
   const timestamp = time.toISOString().split(".")[0]
   return timestamp
 }
 
 export function log(text: string) {
-  console.log(`[${getTimeStamp()}]`, text)
+  console.log(`[${datetimeSignature()}]`, text)
 }
 
 export function error(...errs: unknown[]) {
-  console.error(`[${getTimeStamp()}]`, ...errs)
+  console.error(`[${datetimeSignature()}]`, ...errs)
 }
 
 export function sleep(ms: number) {
