@@ -1,4 +1,5 @@
 export * from "./ds"
+export * from "./constants"
 
 export function datetimeSignature() {
   const time = new Date()
@@ -57,4 +58,8 @@ export function fromEntries<T extends Array<[PropertyKey, unknown]>>(
   entries: T
 ) {
   return Object.fromEntries(entries) as { [K in T[number] as K[0]]: K[1] }
+}
+
+export function isDefined<T>(value: T): value is NonNullable<T> {
+  return value !== undefined && value !== null
 }

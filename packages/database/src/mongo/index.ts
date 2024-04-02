@@ -1,10 +1,11 @@
 import mongoose from "mongoose"
-import { createWorkerModel } from "./models"
+import { createWorkerModel, createTaskModel } from "./models"
 
-export const createMongoClient = (connectionString: string) => {
-  mongoose.connect(connectionString)
-
+export const createMongoClient = async (connectionString: string) => {
+  await mongoose.connect(connectionString)
+  console.log("a")
   return {
     worker: createWorkerModel(),
+    task: createTaskModel(),
   }
 }

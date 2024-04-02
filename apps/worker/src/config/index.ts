@@ -21,6 +21,6 @@ if (typeof process.env.POSTGRES_URL !== "string") {
 export const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, POSTGRES_URL } =
   process.env
 
-export const PORT = Number(process.env.PORT) || 7777
+export const PORT = Number(process.env.WORKER_PORT) || 7777
 
 export const MAX_WORKER_LOAD = 1000

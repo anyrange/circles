@@ -22,7 +22,7 @@ export class UniqPriorityQueue<T> {
       .map((key) => Number(key))
       .sort((a, b) => a - b)
 
-    if (!priorities) return null
+    if (!priorities.length) return null
 
     const highestPriority = priorities[0]
 

@@ -1,14 +1,16 @@
 import { Schema, model } from "mongoose"
 
 type WorkerSchema = {
-  url: string
+  host: string
+  port: number
   active: boolean
   capacity: number
 }
 
 export const createWorkerModel = () => {
   const schema = new Schema<WorkerSchema>({
-    url: { type: String, required: true },
+    host: { type: String, required: true },
+    port: { type: Number, required: true },
     capacity: { type: Number, required: true, default: 100 },
     active: { type: Boolean },
   })
@@ -18,7 +20,7 @@ export const createWorkerModel = () => {
   const list = async (activeOnly = true) => {
     const query = activeOnly ? { active: true } : {}
 
-    return rawModel.find(query).exec()
+    return rawModel.find(query).lean().exec()
   }
 
   return {
