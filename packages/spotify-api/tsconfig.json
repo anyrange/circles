@@ -1,7 +1,0 @@
-{
-  "extends": "@circles/tsconfig/base.json",
-  "compilerOptions": {
-    "noEmit": true
-  },
-  "include": ["**/*.ts"]
-}

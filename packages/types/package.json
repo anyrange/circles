@@ -1,6 +1,0 @@
-{
-  "name": "@circles/types",
-  "version": "0.0.1",
-  "main": "types.d.ts",
-  "types": "types.d.ts"
-}

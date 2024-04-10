@@ -1,8 +1,0 @@
-{
-  "extends": "@circles/tsconfig/base.json",
-  "compilerOptions": {
-    "target": "ES2022",
-    "noEmit": true
-  },
-  "include": ["**/*.ts"]
-}

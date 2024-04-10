@@ -1,1 +1,0 @@
-export { createWorkerModel } from "./worker"

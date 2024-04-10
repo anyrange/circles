@@ -1,7 +1,0 @@
-export { createUserController } from "./user"
-export { createTrackController } from "./track"
-export { createAlbumController } from "./album"
-export { createArtistController } from "./artist"
-export { createAudioFeaturesController } from "./audioFeatures"
-export { createGeneralController } from "./general"
-export { createGenreController } from "./genre"
