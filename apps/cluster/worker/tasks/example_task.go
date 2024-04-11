@@ -1,11 +1,12 @@
 package tasks
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
 type task_args struct {
-	Arg1 int
+	Arg1 int `json:"Args1"`
 }
 
 type Example_task struct {
@@ -23,4 +24,16 @@ func (t Example_task) Execute(job Job) error {
 	_ = args
 	fmt.Printf("Выполняю таску. Id параметров: %s\n", job.Id)
 	return nil
+}
+
+func (task Example_task) Parse_params(bodyBytes []byte) (Job, error) {
+	var m ParseJob[task_args] = ParseJob[task_args]{}
+	err := json.Unmarshal(bodyBytes, &m)
+	if err != nil {
+		return Job{}, fmt.Errorf("не удалось спарсить параметры job")
+	}
+	var res Job
+	res.Id = m.Id
+	res.Args = m.Args
+	return res, nil
 }
