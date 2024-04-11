@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	worker "worker/core"
 	"worker/tasks"
 )
@@ -14,14 +15,20 @@ func default_handler(w http.ResponseWriter, r *http.Request) {
 	_ = r
 }
 
+func get_task(url *url.URL, w *worker.Worker) (tasks.Task, error) {
+	task_name := url.Query().Get("name")
+	var task tasks.Task
+	var err error
+	if task_name == "" {
+		err = fmt.Errorf("плохой запрос: нет имени функции")
+		return task, err
+	}
+	return w.Get_task(task_name)
+}
+
 func execute_handler(w *worker.Worker) func(http.ResponseWriter, *http.Request) {
 	handler := func(ans http.ResponseWriter, req *http.Request) {
-		task_name := req.URL.Query().Get("name")
-		if task_name == "" {
-			fmt.Fprint(ans, "Плохой запрос: нет имени функции")
-			return
-		}
-		task, err := w.Get_task(task_name)
+		task, err := get_task(req.URL, w)
 		if err != nil {
 			fmt.Fprint(ans, err)
 			return
@@ -41,6 +48,26 @@ func execute_handler(w *worker.Worker) func(http.ResponseWriter, *http.Request) 
 	return handler
 }
 
+func status_handler(w *worker.Worker) func(http.ResponseWriter, *http.Request) {
+	handler := func(ans http.ResponseWriter, req *http.Request) {
+		fmt.Fprint(ans, w.Status())
+	}
+	return handler
+}
+
+func jobs_handler(w *worker.Worker) func(http.ResponseWriter, *http.Request) {
+	handler := func(ans http.ResponseWriter, req *http.Request) {
+		task, err := get_task(req.URL, w)
+		if err != nil {
+			fmt.Fprint(ans, err)
+			return
+		}
+		jobs := task.Create()
+		fmt.Fprint(ans, jobs)
+	}
+	return handler
+}
+
 func main() {
 	// Создание обработчика
 	a := worker.Create_worker()
@@ -51,9 +78,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// хендлеры
+	// Хендлеры
 	http.HandleFunc("/", default_handler)
 	http.HandleFunc("/execute", execute_handler(a))
+	http.HandleFunc("/status", status_handler(a))
+	http.HandleFunc("/jobs", jobs_handler(a))
 
 	// Запуск сервера
 	http.ListenAndServe(":80", nil)
