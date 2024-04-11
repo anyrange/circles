@@ -1,4 +1,4 @@
-package worker
+package tasks
 
 import "fmt"
 
@@ -7,7 +7,6 @@ type task_args struct {
 }
 
 type Example_task struct {
-	name string
 }
 
 func (t Example_task) Create() []Job {
@@ -16,9 +15,9 @@ func (t Example_task) Create() []Job {
 
 func (t Example_task) Execute(job Job) {
 	args, rc := job.Args.(task_args)
-	if rc {
+	if !rc {
 		panic("Ебнуло")
 	}
 	_ = args
-	fmt.Printf("Выполняю таску. Ее имя: %s. Id параметров: %s", t.name, job.Id)
+	fmt.Printf("Выполняю таску. Id параметров: %s\n", job.Id)
 }
