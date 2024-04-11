@@ -1,11 +1,11 @@
 package worker
 
-type Args_type struct {
+type Job struct {
 	Id   string
 	Args any
 }
 
 type Task interface {
-	Create() []Args_type
-	Execute(Args_type)
+	Create() []Job
+	Execute(Job)
 }
