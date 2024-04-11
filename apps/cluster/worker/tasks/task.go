@@ -7,5 +7,5 @@ type Job struct {
 
 type Task interface {
 	Create() []Job
-	Execute(Job)
+	Execute(Job) error
 }
