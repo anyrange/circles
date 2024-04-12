@@ -5,7 +5,7 @@ type Job struct {
 	Args any
 }
 
-type ParseJob[T any] struct {
+type Parse_job[T any] struct {
 	Id   string `json:"Id"`
 	Args T      `json:"Args"`
 }

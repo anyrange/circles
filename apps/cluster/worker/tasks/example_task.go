@@ -27,7 +27,7 @@ func (t Example_task) Execute(job Job) error {
 }
 
 func (task Example_task) Parse_params(bodyBytes []byte) (Job, error) {
-	var m ParseJob[task_args] = ParseJob[task_args]{}
+	var m Parse_job[task_args] = Parse_job[task_args]{}
 	err := json.Unmarshal(bodyBytes, &m)
 	if err != nil {
 		return Job{}, fmt.Errorf("не удалось спарсить параметры job")
