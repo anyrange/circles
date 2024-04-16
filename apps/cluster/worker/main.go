@@ -74,7 +74,7 @@ func main() {
 	a := worker.Create_worker()
 
 	// Добавление возможных задач (инициализация обработчика)
-	var err = a.Add_task("task1", tasks.Example_task{})
+	err := a.Add_task("task1", tasks.Example_task{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,5 +86,5 @@ func main() {
 	http.HandleFunc("/jobs", jobs_handler(a))
 
 	// Запуск сервера
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":4000", nil)
 }
