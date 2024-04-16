@@ -3,24 +3,24 @@ package worker
 import (
 	"fmt"
 	"sync"
-	"worker/tasks"
+	"worker/core/task"
 )
 
 type Worker struct {
-	available_tasks  map[string]tasks.Task // handler_name -> source_task
+	available_tasks  map[string]task.Task // handler_name -> source_task
 	task_in_progress *uint
 	mutex            *sync.Mutex
 }
 
 func Create_worker() *Worker {
 	w := new(Worker)
-	w.available_tasks = map[string]tasks.Task{}
+	w.available_tasks = map[string]task.Task{}
 	w.task_in_progress = new(uint)
 	w.mutex = new(sync.Mutex)
 	return w
 }
 
-func (w Worker) Add_task(name string, task tasks.Task) error {
+func (w Worker) Add_task(name string, task task.Task) error {
 	_, rc := w.available_tasks[name]
 	if rc {
 		return fmt.Errorf("таска с таким именем уже существует")
@@ -29,7 +29,7 @@ func (w Worker) Add_task(name string, task tasks.Task) error {
 	return nil
 }
 
-func (w Worker) Get_task(name string) (tasks.Task, error) {
+func (w Worker) Get_task(name string) (task.Task, error) {
 	task, rc := w.available_tasks[name]
 	if !rc {
 		return task, fmt.Errorf("таски с таким именем не существует")
@@ -37,7 +37,7 @@ func (w Worker) Get_task(name string) (tasks.Task, error) {
 	return task, nil
 }
 
-func (w Worker) Execute(task tasks.Task, job tasks.Job) {
+func (w Worker) Execute(task task.Task, job task.Job) {
 	w.mutex.Lock()
 	*w.task_in_progress++
 	w.mutex.Unlock()

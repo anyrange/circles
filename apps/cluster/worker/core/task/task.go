@@ -1,4 +1,4 @@
-package tasks
+package task
 
 type Job struct {
 	Id   string

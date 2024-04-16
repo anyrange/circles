@@ -6,7 +6,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	worker "worker/core"
+	"worker/core/task"
+	"worker/core/worker"
 	"worker/tasks"
 )
 
@@ -15,9 +16,9 @@ func default_handler(w http.ResponseWriter, r *http.Request) {
 	_ = r
 }
 
-func get_task(url *url.URL, w *worker.Worker) (tasks.Task, error) {
+func get_task(url *url.URL, w *worker.Worker) (task.Task, error) {
 	task_name := url.Query().Get("name")
-	var task tasks.Task
+	var task task.Task
 	var err error
 	if task_name == "" {
 		err = fmt.Errorf("плохой запрос: нет имени функции")

@@ -3,6 +3,7 @@ package tasks
 import (
 	"encoding/json"
 	"fmt"
+	"worker/core/task"
 )
 
 type task_args struct {
@@ -12,11 +13,11 @@ type task_args struct {
 type Example_task struct {
 }
 
-func (t Example_task) Create() []Job {
-	return []Job{{Id: "1", Args: task_args{Arg1: 1}}, {Id: "2", Args: task_args{Arg1: 5}}}
+func (t Example_task) Create() []task.Job {
+	return []task.Job{{Id: "1", Args: task_args{Arg1: 1}}, {Id: "2", Args: task_args{Arg1: 5}}}
 }
 
-func (t Example_task) Execute(job Job) error {
+func (t Example_task) Execute(job task.Job) error {
 	args, rc := job.Args.(task_args)
 	if !rc {
 		return fmt.Errorf("ошибка приведения типа аргументов Job")
@@ -26,13 +27,13 @@ func (t Example_task) Execute(job Job) error {
 	return nil
 }
 
-func (task Example_task) Parse_params(bodyBytes []byte) (Job, error) {
-	var m Parse_job[task_args] = Parse_job[task_args]{}
+func (t Example_task) Parse_params(bodyBytes []byte) (task.Job, error) {
+	var m task.Parse_job[task_args] = task.Parse_job[task_args]{}
 	err := json.Unmarshal(bodyBytes, &m)
 	if err != nil {
-		return Job{}, fmt.Errorf("не удалось спарсить параметры job")
+		return task.Job{}, fmt.Errorf("не удалось спарсить параметры job")
 	}
-	var res Job
+	var res task.Job
 	res.Id = m.Id
 	res.Args = m.Args
 	return res, nil
