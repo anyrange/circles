@@ -1,9 +1,8 @@
 package task
 
 type Task struct {
-	Name          string
-	Min_time_work uint
-	Sync_time     uint
-	Max_workload  uint
-	Is_on         bool
+	name          string
+	work_interval uint
+	sync_interval uint
+	// max_workload  uint
 }

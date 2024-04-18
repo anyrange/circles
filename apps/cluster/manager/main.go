@@ -1,14 +1,18 @@
 package main
 
 import (
+	"manager/config"
+	"manager/core/balancer"
 	"manager/core/manager"
 	"time"
 )
 
 func main() {
-	// m := Manager{}
-	b := manager.Create_balancer(1)
+	b := balancer.Create(config.BALANCER_SYNC_INTERVAL)
+	m := manager.Create(b)
+
 	go b.Sync_workers()
-	time.Sleep(5 * time.Second)
-	// _ = m
+
+	time.Sleep(5000)
+	_ = m
 }
