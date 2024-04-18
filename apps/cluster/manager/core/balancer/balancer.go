@@ -20,13 +20,13 @@ func Create(sync_interval time.Duration) *Balancer {
 	return b
 }
 
-func (b Balancer) Sync_workers() {
-	util.Set_Interval(b.sync_workers_handler, b.sync_interval)
+func (b Balancer) Sync_start() {
+	go util.Set_Interval(b.sync_workers, b.sync_interval)
 }
 
 func (b Balancer) Select() *worker.Worker {
 	var min_workload uint = ^uint(0)
-	var res *worker.Worker = nil
+	var available_worker *worker.Worker = nil
 
 	for _, w := range b.workers {
 		current_workload := w.Get_current_workload()
@@ -34,15 +34,15 @@ func (b Balancer) Select() *worker.Worker {
 
 		if min_workload > current_workload && current_workload < max_workload {
 			min_workload = current_workload
-			res = w
+			available_worker = w
 		}
 	}
 
-	return res
+	return available_worker
 }
 
-func (b Balancer) sync_workers_handler() {
-	active_workers := test.Fetch_worker_data()
+func (b Balancer) sync_workers() {
+	active_workers := test.Fetch_workers_data()
 
 	refreshed_workers := map[string]struct{}{}
 
@@ -59,13 +59,11 @@ func (b Balancer) sync_workers_handler() {
 				worker_settings.Max_workload,
 			)
 		} else {
-			w.Set_max_workload(worker_settings.Max_workload)
+			w.Update_settings(worker_settings.Max_workload)
 		}
 	}
 
-	for _, w := range b.workers {
-		worker_hash := fmt.Sprintf("%s:%d", w.Get_address(), w.Get_port())
-
+	for worker_hash := range b.workers {
 		_, ok := refreshed_workers[worker_hash]
 
 		if !ok {

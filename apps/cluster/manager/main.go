@@ -9,9 +9,9 @@ import (
 
 func main() {
 	b := balancer.Create(config.BALANCER_SYNC_INTERVAL)
-	m := manager.Create(b)
+	m := manager.Create(b, config.MANAGER_SYNC_INTERVAL)
 
-	go b.Sync_workers()
+	b.Sync_start()
 
 	time.Sleep(5000)
 	_ = m
