@@ -21,7 +21,8 @@ func Create(sync_interval time.Duration) *Balancer {
 }
 
 func (b Balancer) Sync_start() {
-	go util.Set_interval(b.sync_workers, b.sync_interval)
+	destroyed := make(chan bool)
+	go util.Set_interval(b.sync_workers, b.sync_interval, destroyed)
 }
 
 func (b Balancer) Select() *worker.Worker {
@@ -58,6 +59,7 @@ func (b Balancer) sync_workers() {
 				worker_settings.Port,
 				worker_settings.Max_workload,
 			)
+			b.workers[worker_hash].Sync_start()
 		} else {
 			w.Update_settings(worker_settings.Max_workload)
 		}
@@ -67,6 +69,7 @@ func (b Balancer) sync_workers() {
 		_, ok := refreshed_workers[worker_hash]
 
 		if !ok {
+			b.workers[worker_hash].Destroy()
 			delete(b.workers, worker_hash)
 		}
 	}

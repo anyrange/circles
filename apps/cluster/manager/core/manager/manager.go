@@ -22,7 +22,8 @@ func Create(b *balancer.Balancer, tasks_sync_interval time.Duration) *Manager {
 }
 
 func (m Manager) Sync_start() {
-	go util.Set_interval(m.sync_tasks, m.sync_interval)
+	destroyed := make(chan bool)
+	go util.Set_interval(m.sync_tasks, m.sync_interval, destroyed)
 }
 
 func (m Manager) sync_tasks() {
@@ -52,6 +53,7 @@ func (m Manager) sync_tasks() {
 		_, ok := refreshed_tasks[task_name]
 
 		if !ok {
+			m.tasks[task_name].Destroy()
 			delete(m.tasks, task_name)
 		}
 	}

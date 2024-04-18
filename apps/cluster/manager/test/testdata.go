@@ -31,3 +31,7 @@ func Fetch_tasks_data() []Task_data {
 		},
 	}
 }
+
+func Fetch_worker_state() uint {
+	return 10
+}
