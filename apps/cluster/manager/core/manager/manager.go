@@ -22,7 +22,7 @@ func Create(b *balancer.Balancer, tasks_sync_interval time.Duration) *Manager {
 }
 
 func (m Manager) Sync_start() {
-	go util.Set_Interval(m.sync_tasks, m.sync_interval)
+	go util.Set_interval(m.sync_tasks, m.sync_interval)
 }
 
 func (m Manager) sync_tasks() {

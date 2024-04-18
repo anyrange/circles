@@ -21,7 +21,7 @@ func Create(sync_interval time.Duration) *Balancer {
 }
 
 func (b Balancer) Sync_start() {
-	go util.Set_Interval(b.sync_workers, b.sync_interval)
+	go util.Set_interval(b.sync_workers, b.sync_interval)
 }
 
 func (b Balancer) Select() *worker.Worker {
