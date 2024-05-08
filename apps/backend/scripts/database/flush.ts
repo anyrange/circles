@@ -13,7 +13,7 @@ import {
   artists,
   genres,
   audioFeatures,
-} from "../../services/database/postgres/schema";
+} from "@/services/database/postgres/schema";
 
 if (!process.env.POSTGRES_URL) {
   console.error("POSTGRES_URL must be defined in env");
