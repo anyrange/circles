@@ -1,22 +1,19 @@
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
-import { routes } from "./router";
-import { createErrorResponse } from "./middlewares/serialize";
+import { serializeMiddleware, errorHandler } from "@/middlewares";
+import { auth, user } from "@/router";
+import { env } from "@/config";
 
 const app = new Hono();
 
-routes(app);
-
-app.onError((err, c) => {
-  if (err instanceof HTTPException) {
-    return c.json(err.message, err.status);
-  }
-
-  console.error(err);
-
-  return c.json("Internal error", 500);
-});
-
+app.use(serializeMiddleware);
+app.onError(errorHandler);
 app.notFound((c) => c.json("Unknown route", 404));
 
-export default app;
+const routes = app.route("/auth", auth).route("/user", user);
+
+export default {
+  port: env.PORT,
+  fetch: app.fetch,
+};
+
+export type AppType = typeof routes;

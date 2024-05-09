@@ -4,10 +4,9 @@ import { artists } from "./artists";
 import { albums } from "./albums";
 import { tracks } from "./tracks";
 
-const library = new Hono();
-
-library.route("/artists", artists);
-library.route("/tracks", tracks);
-library.route("/albums", albums);
+const library = new Hono()
+  .route("/artists", artists)
+  .route("/tracks", tracks)
+  .route("/albums", albums);
 
 export { library };

@@ -4,9 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { zValidator } from "@hono/zod-validator";
 import { controllers } from "@/services/database";
 
-const follows = new Hono();
-
-follows.get(
+const follows = new Hono().get(
   "/",
   zValidator(
     "query",

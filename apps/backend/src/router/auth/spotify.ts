@@ -7,9 +7,7 @@ import { spotifyAPI } from "@/services/spotify-api";
 import { getRedirectURI } from "@/helpers";
 import { env } from "@/config";
 
-const spotify = new Hono();
-
-spotify.get(
+const spotify = new Hono().get(
   "/",
   zValidator(
     "query",

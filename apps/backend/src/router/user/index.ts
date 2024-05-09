@@ -5,12 +5,11 @@ import { followers } from "./followers";
 import { follows } from "./follows";
 import { info } from "./info";
 
-const user = new Hono();
-
-user.route("/history", history);
-user.route("/library", library);
-user.route("/followers", followers);
-user.route("/follows", follows);
-user.route("/info", info);
+const user = new Hono()
+  .route("/history", history)
+  .route("/library", library)
+  .route("/followers", followers)
+  .route("/follows", follows)
+  .route("/info", info);
 
 export { user };
