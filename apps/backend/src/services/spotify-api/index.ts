@@ -1,20 +1,20 @@
 import type {
-  CodeOptions,
-  RefreshTokenOptions,
-  EntitiesIds,
-  APIMeResponse,
-  APIRecentlyPlayedResponse,
-  APIAudioFeaturesResponse,
   APIAlbumsResponse,
   APIArtistsResponse,
+  APIAudioFeaturesResponse,
+  APIMeResponse,
+  APIRecentlyPlayedResponse,
   APITracksResponse,
+  CodeOptions,
   Cursors,
+  EntitiesIds,
+  RefreshTokenOptions,
   Tokens,
   TokensError,
 } from "@/types";
 import { call } from "./request";
-import { makeBatchedRequest, createParams, isError } from "./helpers";
-import { env, api } from "@/config";
+import { createParams, isError, makeBatchedRequest } from "./helpers";
+import { api, env } from "@/config";
 
 class SpotifyAPI {
   clientId: string;

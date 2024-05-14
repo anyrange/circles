@@ -10,7 +10,8 @@
     "database:migrate": "dotenv -e .env -- bun run ./scripts/database/migrate.ts",
     "database:print-info": "dotenv -e .env -- bun run ./scripts/database/info.ts",
     "database:flush": "dotenv -e .env -- bun run ./scripts/database/flush.ts",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint": "eslint src",
+    "lint-fix": "eslint src --fix",
     "format-check": "prettier --check .",
     "format": "prettier --write .",
     "postinstall": "stale-dep -u"
@@ -21,6 +22,7 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.10",
     "envalid": "^8.0.0",
+    "globals": "^15.2.0",
     "hono": "^4.3.2",
     "postgres": "^3.4.4",
     "zod": "^3.23.7"

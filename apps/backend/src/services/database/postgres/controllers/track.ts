@@ -1,6 +1,6 @@
-import { sql, inArray } from "drizzle-orm";
-import type { Track, Item } from "@/types";
-import { tracks, images, type DB } from "../schema";
+import { inArray, sql } from "drizzle-orm";
+import type { Item, Track } from "@/types";
+import { type DB, images, tracks } from "../schema";
 import { extractImages, formatTrack } from "../helpers";
 
 export const createTrackController = (db: DB) => {

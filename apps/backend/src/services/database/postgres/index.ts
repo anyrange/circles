@@ -2,13 +2,13 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 import {
-  createUserController,
-  createTrackController,
   createAlbumController,
   createArtistController,
   createAudioFeaturesController,
   createGeneralController,
   createGenreController,
+  createTrackController,
+  createUserController,
 } from "./controllers";
 
 export const createPostgresClient = (connectionString: string) => {

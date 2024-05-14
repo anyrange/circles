@@ -1,11 +1,16 @@
 import { Hono } from "hono";
-import { serializeMiddleware, errorHandler } from "@/middlewares";
+import {
+  authMiddleware,
+  errorHandler,
+  serializeMiddleware,
+} from "@/middlewares";
 import { auth, user } from "@/router";
 import { env } from "@/config";
 
 const app = new Hono();
 
 app.use(serializeMiddleware);
+app.use(authMiddleware);
 app.onError(errorHandler);
 app.notFound((c) => c.json("Unknown route", 404));
 

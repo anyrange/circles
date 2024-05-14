@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { genres, type DB } from "../schema";
+import { type DB, genres } from "../schema";
 
 export const createGenreController = (db: DB) => {
   const count = async () => {

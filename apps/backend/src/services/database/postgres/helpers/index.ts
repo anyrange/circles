@@ -1,9 +1,9 @@
 import type {
+  Album,
+  AudioFeature,
   ExtendedAlbum,
   ExtendedArtist,
-  Album,
   Track,
-  AudioFeature,
 } from "../../../../types";
 
 export function extractImages(entity: Album | ExtendedAlbum | ExtendedArtist) {

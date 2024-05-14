@@ -1,14 +1,14 @@
 import {
-  pgTable,
-  serial,
-  text,
-  varchar,
-  pgEnum,
   boolean,
-  timestamp,
   doublePrecision,
   integer,
+  pgEnum,
+  pgTable,
   primaryKey,
+  serial,
+  text,
+  timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";

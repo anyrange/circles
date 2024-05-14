@@ -1,15 +1,11 @@
-import { Hono } from "hono";
+import { createMiddleware } from "hono/factory";
 import { jwt } from "hono/jwt";
 import { env } from "@/config";
 
-const authMiddleware = new Hono();
-
-authMiddleware.use("/*", (c, next) => {
+export const authMiddleware = createMiddleware((c, next) => {
   const jwtMiddleware = jwt({
     secret: env.JWT_SECRET,
   });
 
   return jwtMiddleware(c, next);
 });
-
-export { authMiddleware };

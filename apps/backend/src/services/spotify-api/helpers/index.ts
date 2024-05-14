@@ -8,6 +8,7 @@ import type {
 import { api } from "@/config";
 
 export async function makeBatchedRequest<
+  // eslint-disable-next-line no-unused-vars
   F extends (ids: string[]) => ReturnType<F>,
 >(fn: F, ids: string[], chunkSize = api.API_DEFAULT_CAPACITY) {
   if (!ids.length) {

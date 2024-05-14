@@ -1,12 +1,12 @@
 import { desc, eq } from "drizzle-orm";
-import { history, type DB } from "../schema";
+import { type DB, history } from "../schema";
 import type {
   AudioFeature,
   ExtendedAlbum,
   ExtendedArtist,
+  HistoryRecord,
   Track,
   User,
-  HistoryRecord,
 } from "@/types";
 
 import { createAlbumController } from "./album";

@@ -1,6 +1,6 @@
 import { inArray, sql } from "drizzle-orm";
 import type { ExtendedAlbum } from "@/types";
-import { albums, images, type DB } from "../schema";
+import { type DB, albums, images } from "../schema";
 import { extractImages, formatAlbum } from "../helpers";
 
 export const createAlbumController = (db: DB) => {

@@ -1,14 +1,14 @@
-import { eq, desc, and, lt, sql, gte, lte } from "drizzle-orm";
-import type { User, Tokens, HistoryRecord } from "@/types";
+import { and, desc, eq, gte, lt, lte, sql } from "drizzle-orm";
+import type { HistoryRecord, Tokens, User } from "@/types";
 import {
+  type DB,
   albums,
   artists,
   history,
-  tracks,
-  users,
   images,
+  tracks,
   userSocials,
-  type DB,
+  users,
 } from "../schema";
 
 type UserWithTokens = User & {
@@ -77,6 +77,10 @@ export const createUserController = (db: DB) => {
 
   const getOne = async (id: User["id"]) => {
     return db.query.users.findFirst({
+      columns: {
+        access_token: false,
+        refresh_token: false,
+      },
       where: eq(users.id, id),
       with: {
         socials: {
