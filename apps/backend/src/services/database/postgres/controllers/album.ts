@@ -1,5 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
-import type { ExtendedAlbum } from "@/types";
+import type { ExtendedAlbum } from "../../../../types";
 import { type DB, albums, images } from "../schema";
 import { extractImages, formatAlbum } from "../helpers";
 

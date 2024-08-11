@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@circles/utils": "file:../../packages/ts/utils",
-    "@hono/zod-validator": "^0.2.1",
+    "@hono/zod-validator": "^0.2.2",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.10",
     "envalid": "^8.0.0",

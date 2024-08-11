@@ -2,18 +2,18 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import readline from "readline";
 import {
-  users,
-  userSocials,
   albums,
-  tracks,
+  artists,
+  artistsToGenres,
+  audioFeatures,
+  follows,
+  genres,
   history,
   images,
-  follows,
-  artistsToGenres,
-  artists,
-  genres,
-  audioFeatures,
-} from "@/services/database/postgres/schema";
+  tracks,
+  userSocials,
+  users,
+} from "../../src/services/database/postgres/schema";
 
 if (!process.env.POSTGRES_URL) {
   console.error("POSTGRES_URL must be defined in env");

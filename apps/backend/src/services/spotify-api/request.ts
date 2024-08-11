@@ -1,5 +1,5 @@
 import { sleep } from "@circles/utils";
-import { api } from "@/config";
+import { api } from "../../config";
 
 interface APIOptions {
   route: string;

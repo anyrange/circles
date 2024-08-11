@@ -7,7 +7,7 @@ import type {
   HistoryRecord,
   Track,
   User,
-} from "@/types";
+} from "../../../../types";
 
 import { createAlbumController } from "./album";
 import { createArtistController } from "./artist";

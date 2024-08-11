@@ -1,5 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
-import type { ExtendedArtist } from "@/types";
+import type { ExtendedArtist } from "../../../../types";
 import { type DB, artists, artistsToGenres, genres, images } from "../schema";
 import { extractImages, formatArtist } from "../helpers";
 

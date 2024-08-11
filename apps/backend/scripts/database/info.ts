@@ -1,4 +1,4 @@
-import { createPostgresClient } from "@/services/database/postgres";
+import { createPostgresClient } from "../../src/services/database/postgres";
 
 if (!process.env.POSTGRES_URL) {
   console.error("POSTGRES_URL must be defined in env");

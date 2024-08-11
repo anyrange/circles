@@ -1,5 +1,5 @@
 import { and, desc, eq, gte, lt, lte, sql } from "drizzle-orm";
-import type { HistoryRecord, Tokens, User } from "@/types";
+import type { HistoryRecord, Tokens, User } from "../../../../types";
 import {
   type DB,
   albums,

@@ -1,30 +1,28 @@
 import { createMiddleware } from "hono/factory";
 
-export const createSuccessResponse = (data: any) => ({
-  success: true,
-  data,
-});
+type Response<T> = [T, null] | [null, any];
 
-export const createErrorResponse = (error: any) => ({
-  success: false,
-  error,
-});
+export const createSuccessResponse = <T>(data: T) =>
+  [data, null] as Response<T>;
+
+export const createErrorResponse = <T>(error: T) =>
+  [null, error] as Response<null>;
 
 export const serializeMiddleware = createMiddleware(async (c, next) => {
   await next();
 
   const response = c.res;
 
+  if (response.ok) {
+    return;
+  }
+
   const body = (await c.res.json()) as any;
 
   const isZodError = body?.error?.name === "ZodError";
 
   c.res = new Response(
-    JSON.stringify(
-      response.ok
-        ? createSuccessResponse(body)
-        : createErrorResponse(isZodError ? body.error : body),
-    ),
+    JSON.stringify(createErrorResponse(isZodError ? body.error : body)),
     { status: c.res.status },
   );
 });

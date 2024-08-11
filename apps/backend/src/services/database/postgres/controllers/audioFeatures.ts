@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import type { AudioFeature } from "@/types";
+import type { AudioFeature } from "../../../../types";
 import { type DB, audioFeatures } from "../schema";
 import { formatAudioFeatures } from "../helpers";
 

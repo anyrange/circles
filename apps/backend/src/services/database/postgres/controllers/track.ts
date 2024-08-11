@@ -1,5 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
-import type { Item, Track } from "@/types";
+import type { Item, Track } from "../../../../types";
 import { type DB, images, tracks } from "../schema";
 import { extractImages, formatTrack } from "../helpers";
 

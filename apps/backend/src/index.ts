@@ -1,16 +1,18 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 // import { swaggerUI } from "@hono/swagger-ui";
 
 import {
   authMiddleware,
   errorHandler,
   serializeMiddleware,
-} from "@/middlewares";
-import { auth, user } from "@/router";
-import { env } from "@/config";
+} from "./middlewares";
+import { auth, user } from "./router";
+import { env } from "./config";
 
 const app = new Hono();
 
+app.use("/*", cors());
 app.use(serializeMiddleware);
 app.use(authMiddleware);
 app.onError(errorHandler);

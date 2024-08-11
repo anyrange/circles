@@ -1,5 +1,5 @@
 import type { Item } from "@circles/types";
-import { api, env } from "@/config";
+import { api, env } from "../config";
 
 export const getRedirectURI = () => {
   return `${env.APP_URL}/callback`;

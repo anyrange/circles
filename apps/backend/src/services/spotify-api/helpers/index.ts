@@ -4,8 +4,8 @@ import type {
   RefreshTokenOptions,
   Tokens,
   TokensError,
-} from "@/types";
-import { api } from "@/config";
+} from "../../../types";
+import { api } from "../../../config";
 
 export async function makeBatchedRequest<
   // eslint-disable-next-line no-unused-vars

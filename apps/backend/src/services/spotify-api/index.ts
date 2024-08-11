@@ -11,10 +11,10 @@ import type {
   RefreshTokenOptions,
   Tokens,
   TokensError,
-} from "@/types";
+} from "../../types";
+import { api, env } from "../../config";
 import { call } from "./request";
 import { createParams, isError, makeBatchedRequest } from "./helpers";
-import { api, env } from "@/config";
 
 class SpotifyAPI {
   clientId: string;

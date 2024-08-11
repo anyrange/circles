@@ -2,10 +2,10 @@ import { z } from "zod";
 import { Hono } from "hono";
 import { sign } from "hono/jwt";
 import { zValidator } from "@hono/zod-validator";
-import { controllers } from "@/services/database";
-import { spotifyAPI } from "@/services/spotify-api";
-import { getRedirectURI } from "@/helpers";
-import { env } from "@/config";
+import { controllers } from "../../services/database";
+import { spotifyAPI } from "../../services/spotify-api";
+import { getRedirectURI } from "../../helpers";
+import { env } from "../../config";
 
 const spotify = new Hono().get(
   "/",
