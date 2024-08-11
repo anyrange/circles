@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
-import { AppType } from "../../backend/src";
+import type { AppType } from "../../backend";
 
 const client = hc<AppType>("http://localhost:8787/");
 
-client.user.info.$get({ query: { id: "7uq098pzvp4db2e2138tmgneb" } });
+await client.user.info.$get({ query: { id: "7uq098pzvp4db2e2138tmgneb" } });

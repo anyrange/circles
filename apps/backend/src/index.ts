@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+// import { swaggerUI } from "@hono/swagger-ui";
+
 import {
   authMiddleware,
   errorHandler,
@@ -15,6 +17,7 @@ app.onError(errorHandler);
 app.notFound((c) => c.json("Unknown route", 404));
 
 const routes = app.route("/auth", auth).route("/user", user);
+// app.get("/ui", swaggerUI({ url: "/doc" }));
 
 export default {
   port: env.PORT,
