@@ -1,0 +1,28 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.2.2",
+    "enzo-core": "^0.0.21",
+    "hono": "^4.5.5",
+    "vue": "^3.4.37",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.6",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vue-tsc": "^2.0.29"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

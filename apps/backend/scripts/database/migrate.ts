@@ -10,7 +10,7 @@ if (!process.env.POSTGRES_URL) {
 const migrationClient = postgres(process.env.POSTGRES_URL, { max: 1 });
 
 migrate(drizzle(migrationClient), {
-  migrationsFolder: "../../services/database/drizzle",
+  migrationsFolder: "./src/services/database/drizzle",
 })
   .then(() => console.log("Successfully migrated"))
   .catch((err) => console.log(err))
