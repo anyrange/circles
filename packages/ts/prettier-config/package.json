@@ -1,7 +1,7 @@
 {
-  "name": "@circles/types",
+  "name": "@circles/prettier-config",
   "version": "0.0.0",
-  "main": "index.d.ts",
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   }

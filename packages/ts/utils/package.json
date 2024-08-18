@@ -1,12 +1,12 @@
 {
-  "dependencies": {},
-  "name": "utils",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
+  "name": "@circles/utils",
+  "version": "0.0.0",
+  "main": "index.ts",
+  "publishConfig": {
+    "access": "public"
   },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+  "devDependencies": {
+    "@circles/tsconfig": "workspace:*",
+    "typescript": "^5.4.5"
   }
 }

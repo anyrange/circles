@@ -1,0 +1,16 @@
+{
+  "name": "circles",
+  "description": "Circles Monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "fix": "turbo fix",
+    "test": "turbo test",
+    "type-check": "turbo type-check"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.6"
+  },
+  "packageManager": "pnpm@8.15.5"
+}

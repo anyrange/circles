@@ -1,25 +1,5 @@
 export * from "./data-structures";
 
-export function datetimeSignature() {
-  const time = new Date();
-  const timestamp = time.toISOString().split(".")[0];
-  return timestamp;
-}
-
-export function log(text: string) {
-  console.log(`[${datetimeSignature()}]`, text);
-}
-
-export function error(...errs: unknown[]) {
-  console.error(`[${datetimeSignature()}]`, ...errs);
-}
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
 export function getTimeDiffSeconds(start: Date, end: Date) {
   const diffMs = end.getTime() - start.getTime();
   const diffSeconds = diffMs / 1000;

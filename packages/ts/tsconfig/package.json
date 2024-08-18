@@ -1,7 +1,6 @@
 {
-  "name": "@circles/types",
+  "name": "@circles/tsconfig",
   "version": "0.0.0",
-  "main": "index.d.ts",
   "publishConfig": {
     "access": "public"
   }

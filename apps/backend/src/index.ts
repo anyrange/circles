@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { serve } from "@hono/node-server";
 // import { swaggerUI } from "@hono/swagger-ui";
 
 import {
@@ -21,9 +22,14 @@ app.notFound((c) => c.json("Unknown route", 404));
 const routes = app.route("/auth", auth).route("/user", user);
 // app.get("/ui", swaggerUI({ url: "/doc" }));
 
-export default {
-  port: env.PORT,
-  fetch: app.fetch,
-};
+serve(
+  {
+    port: env.PORT,
+    fetch: app.fetch,
+  },
+  (info) => {
+    console.log(`Server is running on http://${info.address}:${info.port}`);
+  },
+);
 
 export type AppType = typeof routes;

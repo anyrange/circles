@@ -46,3 +46,9 @@ export function isCodeOptions(
 ): data is CodeOptions {
   return (data as CodeOptions).code !== undefined;
 }
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
