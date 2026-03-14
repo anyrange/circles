@@ -10,6 +10,12 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.wrangler
+.tanstack
+.nitro
+.output
+.vinxi
+.env
 *.local
 
 # Editor directories and files

@@ -1,1 +1,0 @@
-export { AppType } from "./src";

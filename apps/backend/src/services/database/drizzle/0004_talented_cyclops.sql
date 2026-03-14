@@ -1,2 +1,0 @@
-ALTER TABLE "artists_to_genres" DROP CONSTRAINT "artists_to_genres_artist_id_genre_id";--> statement-breakpoint
-ALTER TABLE "artists_to_genres" ADD CONSTRAINT "artists_to_genres_artist_id_genre_id_pk" PRIMARY KEY("artist_id","genre_id");

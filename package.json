@@ -1,16 +1,21 @@
 {
   "name": "circles",
-  "description": "Circles Monorepo",
+  "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "turbo dev",
-    "lint": "turbo lint",
-    "fix": "turbo fix",
-    "test": "turbo test",
-    "type-check": "turbo type-check"
+    "ready": "vp fmt && vp lint && vp run test -r && vp run build -r",
+    "dev": "run-p dev:frontend dev:api dev:worker",
+    "dev:frontend": "vp run @circles/frontend#dev",
+    "dev:api": "vp run @circles/backend#dev:api",
+    "dev:worker": "vp run @circles/backend#dev:worker"
   },
   "devDependencies": {
-    "turbo": "^2.0.6"
+    "npm-run-all2": "catalog:",
+    "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@8.15.5"
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@10.32.1"
 }

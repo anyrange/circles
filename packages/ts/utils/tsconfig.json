@@ -1,6 +1,0 @@
-{
-  "extends": "@circles/tsconfig/base.json",
-  "compilerOptions": {
-    "lib": ["es2021"]
-  }
-}
