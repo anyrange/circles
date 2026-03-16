@@ -1,107 +1,77 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { api } from "@/lib/api";
-import { authClient } from "@/lib/auth";
+import { FeedSection } from "@/components/FeedSection";
+import { ScrobbleTimelineChart } from "@/components/ScrobbleTimelineChart";
+import { StatCard } from "@/components/StatCard";
+import { TimeRangeTabs } from "@/components/TimeRangeTabs";
+import { TopArtistsRow } from "@/components/TopArtistsRow";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Range } from "@/lib/use-stats";
+import { useExtendedStats, useStats } from "@/lib/use-stats";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
 function DashboardPage() {
-  const navigate = useNavigate();
+  const [range, setRange] = useState<Range>("30d");
+  const { data: stats } = useStats(range);
+  const { data: extended } = useExtendedStats(range);
 
-  const { data: me, isLoading } = useQuery({
-    queryKey: ["me"],
-    queryFn: async () => {
-      const res = await api.me.$get();
-      if (!res.ok) throw new Error("Failed to fetch profile");
-      return res.json();
-    },
-  });
-
-  const { data: stats } = useQuery({
-    queryKey: ["me", "stats"],
-    queryFn: async () => {
-      const res = await api.me.stats.$get();
-      if (!res.ok) throw new Error("Failed to fetch stats");
-      return res.json();
-    },
-  });
-
-  async function logout() {
-    await authClient.signOut();
-    await navigate({ to: "/" });
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
+  const hours = extended ? Math.round(extended.totalListeningMs / 3_600_000) : 0;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {me?.avatarUrl && (
-            <img src={me.avatarUrl} alt={me.displayName ?? ""} className="size-10 rounded-full" />
-          )}
-          <div>
-            <p className="font-semibold">{me?.displayName ?? "Unknown"}</p>
-            <p className="text-sm text-muted-foreground">{me?.email}</p>
-          </div>
-        </div>
-        <button
-          onClick={logout}
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Sign out
-        </button>
+    <div className="space-y-8 px-6 py-8">
+      <div>
+        <h1 className="text-2xl font-bold">Home</h1>
+        <p className="text-sm text-muted-foreground">Your listening universe</p>
       </div>
 
-      {stats && (
-        <div className="space-y-8">
-          <section>
-            <h2 className="mb-4 text-sm font-semibold tracking-widest uppercase opacity-50">
-              Top Tracks
-            </h2>
-            <ol className="space-y-2">
-              {stats.topTracks.map((item, i) => (
-                <li key={item.track.id} className="flex items-center gap-3">
-                  <span className="w-5 text-right text-sm text-muted-foreground">{i + 1}</span>
-                  <span className="flex-1 truncate">{item.track.name}</span>
-                  <span className="text-sm text-muted-foreground">{item.playCount} plays</span>
-                </li>
-              ))}
-            </ol>
-          </section>
+      <TimeRangeTabs value={range} onChange={setRange} />
 
-          <section>
-            <h2 className="mb-4 text-sm font-semibold tracking-widest uppercase opacity-50">
-              Top Artists
-            </h2>
-            <ol className="space-y-3">
-              {stats.topArtists.map((item, i) => (
-                <li key={item.artist.id} className="flex items-center gap-3">
-                  <span className="w-5 text-right text-sm text-muted-foreground">{i + 1}</span>
-                  {item.artist.images?.[0] && (
-                    <img
-                      src={item.artist.images[0].url}
-                      alt={item.artist.name}
-                      className="size-8 rounded-full object-cover"
-                    />
-                  )}
-                  <span className="flex-1 truncate">{item.artist.name}</span>
-                  <span className="text-sm text-muted-foreground">{item.playCount} plays</span>
-                </li>
-              ))}
-            </ol>
-          </section>
+      {extended ? (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard label="Scrobbles" value={extended.totalScrobbles.toLocaleString()} />
+          <StatCard label="Listening time" value={`${hours}h`} />
+          <StatCard
+            label="Mainstream score"
+            value={extended.mainstreamScore}
+            sub="avg track popularity"
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 rounded-xl" />
+          ))}
         </div>
       )}
+
+      {stats && stats.topArtists.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-sm font-semibold tracking-widest uppercase opacity-50">
+            Top Artists
+          </h2>
+          <TopArtistsRow artists={stats.topArtists} />
+        </div>
+      )}
+
+      {extended?.scrobblesByDate && extended.scrobblesByDate.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-sm font-semibold tracking-widest uppercase opacity-50">
+            Listening over time
+          </h2>
+          <ScrobbleTimelineChart data={extended.scrobblesByDate} />
+        </div>
+      )}
+
+      <div>
+        <h2 className="mb-3 text-sm font-semibold tracking-widest uppercase opacity-50">
+          Friend Activity
+        </h2>
+        <FeedSection />
+      </div>
     </div>
   );
 }

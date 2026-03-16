@@ -1,6 +1,9 @@
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { eq } from "drizzle-orm";
 
 import { config } from "../config";
+import { db as drizzleDb } from "../db/postgres";
+import { account } from "../db/postgres/schema";
 
 export type { AccessToken } from "@spotify/web-api-ts-sdk";
 
@@ -105,4 +108,33 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
     refreshToken: data.refresh_token ?? refreshToken,
     expiresIn: data.expires_in,
   };
+}
+
+/**
+ * Refreshes the token if expiring within 60s and stores the updated tokens.
+ * Returns the current valid access token.
+ */
+export async function refreshAndStoreToken(
+  accountRow: typeof account.$inferSelect,
+): Promise<string> {
+  if (
+    accountRow.accessTokenExpiresAt &&
+    accountRow.accessTokenExpiresAt.getTime() - Date.now() >= 60_000
+  ) {
+    return accountRow.accessToken!;
+  }
+
+  const refreshed = await refreshAccessToken(accountRow.refreshToken!);
+
+  await drizzleDb
+    .update(account)
+    .set({
+      accessToken: refreshed.accessToken,
+      refreshToken: refreshed.refreshToken,
+      accessTokenExpiresAt: new Date(Date.now() + refreshed.expiresIn * 1000),
+      updatedAt: new Date(),
+    })
+    .where(eq(account.id, accountRow.id));
+
+  return refreshed.accessToken;
 }

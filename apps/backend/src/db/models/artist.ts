@@ -1,7 +1,7 @@
-import { inArray } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, or, sql } from "drizzle-orm";
 
 import { db } from "../postgres";
-import { artists } from "../postgres/schema";
+import { albums, artists, history, trackArtists, tracks } from "../postgres/schema";
 
 export type Artist = typeof artists.$inferSelect;
 export type NewArtist = typeof artists.$inferInsert;
@@ -19,9 +19,9 @@ export class ArtistModel {
         target: artists.spotifyId,
         set: {
           name: artists.name,
-          genres: artists.genres,
-          images: artists.images,
-          popularity: artists.popularity,
+          genres: sql`COALESCE(EXCLUDED.genres, ${artists.genres})`,
+          images: sql`COALESCE(EXCLUDED.images, ${artists.images})`,
+          popularity: sql`COALESCE(EXCLUDED.popularity, ${artists.popularity})`,
         },
       })
       .returning();
@@ -33,5 +33,200 @@ export class ArtistModel {
     }
 
     return db.select().from(artists).where(inArray(artists.spotifyId, spotifyIds));
+  }
+
+  async findDetailForUser(userId: string, artistId: string) {
+    const [artist] = await db
+      .select({
+        id: artists.id,
+        spotifyId: artists.spotifyId,
+        name: artists.name,
+        genres: artists.genres,
+        images: artists.images,
+        popularity: artists.popularity,
+        playCount: count(history.id),
+        trackCount: sql<number>`count(distinct ${tracks.id})`,
+        albumCount: sql<number>`count(distinct ${albums.id})`,
+        lastPlayedAt: sql<Date | null>`max(${history.playedAt})`,
+      })
+      .from(artists)
+      .leftJoin(trackArtists, eq(trackArtists.artistId, artists.id))
+      .leftJoin(tracks, eq(trackArtists.trackId, tracks.id))
+      .leftJoin(albums, eq(tracks.albumId, albums.id))
+      .leftJoin(history, and(eq(history.trackId, tracks.id), eq(history.userId, userId)))
+      .where(eq(artists.id, artistId))
+      .groupBy(
+        artists.id,
+        artists.spotifyId,
+        artists.name,
+        artists.genres,
+        artists.images,
+        artists.popularity,
+      )
+      .limit(1);
+
+    if (!artist) {
+      return null;
+    }
+
+    const [topTracks, albumsByArtist, recentPlays] = await Promise.all([
+      db
+        .select({
+          trackId: tracks.id,
+          trackSpotifyId: tracks.spotifyId,
+          trackName: tracks.name,
+          trackDurationMs: tracks.durationMs,
+          albumId: albums.id,
+          albumName: albums.name,
+          albumImageUrl: sql<string | null>`${albums.images}->0->>'url'`,
+          playCount: count(history.id),
+        })
+        .from(history)
+        .innerJoin(tracks, eq(history.trackId, tracks.id))
+        .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
+        .leftJoin(albums, eq(tracks.albumId, albums.id))
+        .where(and(eq(history.userId, userId), eq(trackArtists.artistId, artistId)))
+        .groupBy(
+          tracks.id,
+          tracks.spotifyId,
+          tracks.name,
+          tracks.durationMs,
+          albums.id,
+          albums.name,
+          albums.images,
+        )
+        .orderBy(desc(count(history.id)), tracks.name)
+        .limit(10)
+        .then((rows) =>
+          rows.map((row) => ({
+            track: {
+              id: row.trackId,
+              spotifyId: row.trackSpotifyId,
+              name: row.trackName,
+              durationMs: row.trackDurationMs,
+              album: row.albumId
+                ? {
+                    id: row.albumId,
+                    name: row.albumName,
+                    imageUrl: row.albumImageUrl,
+                  }
+                : null,
+            },
+            playCount: row.playCount,
+          })),
+        ),
+      db
+        .select({
+          album: {
+            id: albums.id,
+            spotifyId: albums.spotifyId,
+            name: albums.name,
+            albumType: albums.albumType,
+            releaseDate: albums.releaseDate,
+            imageUrl: sql<string | null>`${albums.images}->0->>'url'`,
+          },
+          playCount: count(history.id),
+          trackCount: sql<number>`count(distinct ${tracks.id})`,
+        })
+        .from(history)
+        .innerJoin(tracks, eq(history.trackId, tracks.id))
+        .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
+        .innerJoin(albums, eq(tracks.albumId, albums.id))
+        .where(and(eq(history.userId, userId), eq(trackArtists.artistId, artistId)))
+        .groupBy(
+          albums.id,
+          albums.spotifyId,
+          albums.name,
+          albums.albumType,
+          albums.releaseDate,
+          albums.images,
+        )
+        .orderBy(desc(count(history.id)), albums.releaseDate, albums.name)
+        .limit(12),
+      db
+        .select({
+          playedAt: history.playedAt,
+          track: {
+            id: tracks.id,
+            name: tracks.name,
+            albumImageUrl: sql<string | null>`${albums.images}->0->>'url'`,
+          },
+        })
+        .from(history)
+        .innerJoin(tracks, eq(history.trackId, tracks.id))
+        .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
+        .leftJoin(albums, eq(tracks.albumId, albums.id))
+        .where(and(eq(history.userId, userId), eq(trackArtists.artistId, artistId)))
+        .orderBy(desc(history.playedAt))
+        .limit(12),
+    ]);
+
+    return {
+      artist,
+      topTracks,
+      albums: albumsByArtist,
+      recentPlays,
+    };
+  }
+
+  async getLibraryArtists(
+    userId: string,
+    opts: { since?: Date; limit?: number; cursor?: { playCount: number; id: string } } = {},
+  ) {
+    const { since, limit = 50, cursor } = opts;
+    const conditions = [eq(history.userId, userId)];
+    if (since) conditions.push(gte(history.playedAt, since));
+
+    const baseQuery = db
+      .select({
+        artist: {
+          id: artists.id,
+          spotifyId: artists.spotifyId,
+          name: artists.name,
+          images: artists.images,
+        },
+        playCount: count(history.id),
+        trackCount: sql<number>`count(distinct ${tracks.id})`,
+        albumCount: sql<number>`count(distinct ${albums.id})`,
+        lastPlayedAt: sql<Date | null>`max(${history.playedAt})`,
+      })
+      .from(history)
+      .innerJoin(tracks, eq(history.trackId, tracks.id))
+      .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
+      .innerJoin(artists, eq(trackArtists.artistId, artists.id))
+      .leftJoin(albums, eq(tracks.albumId, albums.id))
+      .where(and(...conditions))
+      .groupBy(artists.id, artists.spotifyId, artists.name, artists.images);
+
+    const filteredQuery = cursor
+      ? baseQuery.having(
+          or(
+            sql`${count(history.id)} < ${cursor.playCount}`,
+            sql`(${count(history.id)} = ${cursor.playCount} AND ${artists.id} > ${cursor.id})`,
+          ),
+        )
+      : baseQuery;
+
+    const rows = await filteredQuery.orderBy(desc(count(history.id)), artists.id).limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = hasMore ? rows.slice(0, limit) : rows;
+    const lastItem = items.at(-1);
+
+    const [{ totalCount }] = await db
+      .select({ totalCount: sql<number>`count(distinct ${artists.id})` })
+      .from(history)
+      .innerJoin(tracks, eq(history.trackId, tracks.id))
+      .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
+      .innerJoin(artists, eq(trackArtists.artistId, artists.id))
+      .where(and(...conditions));
+
+    return {
+      items,
+      totalCount: Number(totalCount ?? 0),
+      hasMore,
+      nextCursor:
+        hasMore && lastItem ? { playCount: lastItem.playCount, id: lastItem.artist.id } : null,
+    };
   }
 }

@@ -12,7 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated.tools'
+import { Route as AuthenticatedTimeMachineRouteImport } from './routes/_authenticated.time-machine'
+import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated.social'
+import { Route as AuthenticatedPlaylistsRouteImport } from './routes/_authenticated.playlists'
+import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
+import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated.import'
+import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated.history'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated.u.$username'
+import { Route as AuthenticatedTracksTrackIdRouteImport } from './routes/_authenticated.tracks.$trackId'
+import { Route as AuthenticatedArtistsArtistIdRouteImport } from './routes/_authenticated.artists.$artistId'
+import { Route as AuthenticatedAlbumsAlbumIdRouteImport } from './routes/_authenticated.albums.$albumId'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -28,40 +39,171 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedToolsRoute = AuthenticatedToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTimeMachineRoute =
+  AuthenticatedTimeMachineRouteImport.update({
+    id: '/time-machine',
+    path: '/time-machine',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedSocialRoute = AuthenticatedSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPlaylistsRoute = AuthenticatedPlaylistsRouteImport.update({
+  id: '/playlists',
+  path: '/playlists',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedImportRoute = AuthenticatedImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTracksTrackIdRoute =
+  AuthenticatedTracksTrackIdRouteImport.update({
+    id: '/tracks/$trackId',
+    path: '/tracks/$trackId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedArtistsArtistIdRoute =
+  AuthenticatedArtistsArtistIdRouteImport.update({
+    id: '/artists/$artistId',
+    path: '/artists/$artistId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAlbumsAlbumIdRoute =
+  AuthenticatedAlbumsAlbumIdRouteImport.update({
+    id: '/albums/$albumId',
+    path: '/albums/$albumId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/import': typeof AuthenticatedImportRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/playlists': typeof AuthenticatedPlaylistsRoute
+  '/social': typeof AuthenticatedSocialRoute
+  '/time-machine': typeof AuthenticatedTimeMachineRoute
+  '/tools': typeof AuthenticatedToolsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRoute
+  '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRoute
+  '/tracks/$trackId': typeof AuthenticatedTracksTrackIdRoute
+  '/u/$username': typeof AuthenticatedUUsernameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/history': typeof AuthenticatedHistoryRoute
+  '/import': typeof AuthenticatedImportRoute
+  '/library': typeof AuthenticatedLibraryRoute
+  '/playlists': typeof AuthenticatedPlaylistsRoute
+  '/social': typeof AuthenticatedSocialRoute
+  '/time-machine': typeof AuthenticatedTimeMachineRoute
+  '/tools': typeof AuthenticatedToolsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRoute
+  '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRoute
+  '/tracks/$trackId': typeof AuthenticatedTracksTrackIdRoute
+  '/u/$username': typeof AuthenticatedUUsernameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/import': typeof AuthenticatedImportRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
+  '/_authenticated/playlists': typeof AuthenticatedPlaylistsRoute
+  '/_authenticated/social': typeof AuthenticatedSocialRoute
+  '/_authenticated/time-machine': typeof AuthenticatedTimeMachineRoute
+  '/_authenticated/tools': typeof AuthenticatedToolsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRoute
+  '/_authenticated/artists/$artistId': typeof AuthenticatedArtistsArtistIdRoute
+  '/_authenticated/tracks/$trackId': typeof AuthenticatedTracksTrackIdRoute
+  '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/auth/callback'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/import'
+    | '/library'
+    | '/playlists'
+    | '/social'
+    | '/time-machine'
+    | '/tools'
+    | '/auth/callback'
+    | '/albums/$albumId'
+    | '/artists/$artistId'
+    | '/tracks/$trackId'
+    | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/auth/callback'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/history'
+    | '/import'
+    | '/library'
+    | '/playlists'
+    | '/social'
+    | '/time-machine'
+    | '/tools'
+    | '/auth/callback'
+    | '/albums/$albumId'
+    | '/artists/$artistId'
+    | '/tracks/$trackId'
+    | '/u/$username'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/_authenticated/dashboard'
+    | '/_authenticated/history'
+    | '/_authenticated/import'
+    | '/_authenticated/library'
+    | '/_authenticated/playlists'
+    | '/_authenticated/social'
+    | '/_authenticated/time-machine'
+    | '/_authenticated/tools'
     | '/auth/callback'
+    | '/_authenticated/albums/$albumId'
+    | '/_authenticated/artists/$artistId'
+    | '/_authenticated/tracks/$trackId'
+    | '/_authenticated/u/$username'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +235,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/tools': {
+      id: '/_authenticated/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof AuthenticatedToolsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/time-machine': {
+      id: '/_authenticated/time-machine'
+      path: '/time-machine'
+      fullPath: '/time-machine'
+      preLoaderRoute: typeof AuthenticatedTimeMachineRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/social': {
+      id: '/_authenticated/social'
+      path: '/social'
+      fullPath: '/social'
+      preLoaderRoute: typeof AuthenticatedSocialRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/playlists': {
+      id: '/_authenticated/playlists'
+      path: '/playlists'
+      fullPath: '/playlists'
+      preLoaderRoute: typeof AuthenticatedPlaylistsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/import': {
+      id: '/_authenticated/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof AuthenticatedImportRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/history': {
+      id: '/_authenticated/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthenticatedHistoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -100,15 +291,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/u/$username': {
+      id: '/_authenticated/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof AuthenticatedUUsernameRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tracks/$trackId': {
+      id: '/_authenticated/tracks/$trackId'
+      path: '/tracks/$trackId'
+      fullPath: '/tracks/$trackId'
+      preLoaderRoute: typeof AuthenticatedTracksTrackIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/artists/$artistId': {
+      id: '/_authenticated/artists/$artistId'
+      path: '/artists/$artistId'
+      fullPath: '/artists/$artistId'
+      preLoaderRoute: typeof AuthenticatedArtistsArtistIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/albums/$albumId': {
+      id: '/_authenticated/albums/$albumId'
+      path: '/albums/$albumId'
+      fullPath: '/albums/$albumId'
+      preLoaderRoute: typeof AuthenticatedAlbumsAlbumIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedImportRoute: typeof AuthenticatedImportRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
+  AuthenticatedPlaylistsRoute: typeof AuthenticatedPlaylistsRoute
+  AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
+  AuthenticatedTimeMachineRoute: typeof AuthenticatedTimeMachineRoute
+  AuthenticatedToolsRoute: typeof AuthenticatedToolsRoute
+  AuthenticatedAlbumsAlbumIdRoute: typeof AuthenticatedAlbumsAlbumIdRoute
+  AuthenticatedArtistsArtistIdRoute: typeof AuthenticatedArtistsArtistIdRoute
+  AuthenticatedTracksTrackIdRoute: typeof AuthenticatedTracksTrackIdRoute
+  AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedImportRoute: AuthenticatedImportRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
+  AuthenticatedPlaylistsRoute: AuthenticatedPlaylistsRoute,
+  AuthenticatedSocialRoute: AuthenticatedSocialRoute,
+  AuthenticatedTimeMachineRoute: AuthenticatedTimeMachineRoute,
+  AuthenticatedToolsRoute: AuthenticatedToolsRoute,
+  AuthenticatedAlbumsAlbumIdRoute: AuthenticatedAlbumsAlbumIdRoute,
+  AuthenticatedArtistsArtistIdRoute: AuthenticatedArtistsArtistIdRoute,
+  AuthenticatedTracksTrackIdRoute: AuthenticatedTracksTrackIdRoute,
+  AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

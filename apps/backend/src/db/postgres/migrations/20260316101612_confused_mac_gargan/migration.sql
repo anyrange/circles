@@ -1,0 +1,1 @@
+ALTER TABLE "ai_cache" ALTER COLUMN "response" SET DATA TYPE jsonb USING "response"::jsonb;

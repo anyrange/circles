@@ -37,6 +37,9 @@
     "pg:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "catalog:",
+    "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/s3-request-presigner": "catalog:",
     "@better-auth/drizzle-adapter": "catalog:",
     "@hatchet-dev/typescript-sdk": "catalog:",
     "@hono/node-server": "^1.19.8",
@@ -46,6 +49,7 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "1.0.0-beta.15-859cf75",
     "envalid": "^8.1.1",
+    "fflate": "catalog:",
     "hono": "^4.11.4",
     "pg": "^8.16.3",
     "pino": "^10.1.1",

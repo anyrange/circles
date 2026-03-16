@@ -10,4 +10,9 @@ export class UserModel {
     const [row] = await db.select().from(user).where(eq(user.id, id)).limit(1);
     return row ?? null;
   }
+
+  async findByUsername(username: string): Promise<User | null> {
+    const [row] = await db.select().from(user).where(eq(user.username, username)).limit(1);
+    return row ?? null;
+  }
 }

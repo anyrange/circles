@@ -3,6 +3,8 @@ import type { QueryClient } from "@tanstack/react-query";
 import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import { Provider as TanStackQueryProvider } from "../integrations/tanstack-query/root-provider";
 
@@ -47,7 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans [overflow-wrap:anywhere] antialiased selection:bg-[rgba(79,184,178,0.24)]">
         <TanStackQueryProvider>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
           <TanStackDevtools
             config={{
               position: "bottom-right",

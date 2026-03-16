@@ -13,6 +13,7 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.tracks.id,
       to: r.audioFeatures.trackId,
     }),
+    playlistTracks: r.many.playlistTracks(),
   },
   albums: {
     tracks: r.many.tracks(),
@@ -48,5 +49,23 @@ export const relations = defineRelations(schema, (r) => ({
   },
   user: {
     history: r.many.history(),
+    playlists: r.many.playlists(),
+  },
+  playlists: {
+    user: r.one.user({
+      from: r.playlists.userId,
+      to: r.user.id,
+    }),
+    playlistTracks: r.many.playlistTracks(),
+  },
+  playlistTracks: {
+    playlist: r.one.playlists({
+      from: r.playlistTracks.playlistId,
+      to: r.playlists.id,
+    }),
+    track: r.one.tracks({
+      from: r.playlistTracks.trackId,
+      to: r.tracks.id,
+    }),
   },
 }));

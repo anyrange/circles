@@ -6,7 +6,13 @@ import { requestId } from "hono/request-id";
 import { config } from "../config";
 import { auth } from "../library/auth";
 import { logger } from "../library/logger";
+import { aiController } from "./controllers/ai";
+import { importController } from "./controllers/import";
+import { leaderboardController } from "./controllers/leaderboard";
+import { libraryController } from "./controllers/library";
 import { meController } from "./controllers/me";
+import { playlistsController } from "./controllers/playlists";
+import { socialController } from "./controllers/social";
 import { usersController } from "./controllers/users";
 import { errorHandler } from "./middleware/error";
 
@@ -24,7 +30,13 @@ const app = new Hono()
   .get("/health", (ctx) => ctx.json({ status: "ok" }))
   .on(["GET", "POST"], "/api/auth/*", (ctx) => auth.handler(ctx.req.raw))
   .route("/me", meController)
-  .route("/users", usersController);
+  .route("/users", usersController)
+  .route("/", socialController)
+  .route("/", playlistsController)
+  .route("/", libraryController)
+  .route("/", aiController)
+  .route("/", importController)
+  .route("/", leaderboardController);
 
 app.onError(errorHandler);
 

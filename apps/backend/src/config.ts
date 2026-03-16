@@ -23,6 +23,14 @@ export const env = cleanEnv(process.env, {
   SPOTIFY_CLIENT_SECRET: str({ default: "" }),
 
   HATCHET_CLIENT_TOKEN: str({ default: "" }),
+
+  ANTHROPIC_API_KEY: str({ default: "" }),
+
+  S3_BUCKET: str({ default: "" }),
+  S3_REGION: str({ default: "us-east-1" }),
+  S3_ACCESS_KEY_ID: str({ default: "" }),
+  S3_SECRET_ACCESS_KEY: str({ default: "" }),
+  S3_ENDPOINT: str({ default: "" }),
 });
 
 export const config = {
@@ -49,5 +57,15 @@ export const config = {
   },
   hatchet: {
     token: env.HATCHET_CLIENT_TOKEN,
+  },
+  anthropic: {
+    apiKey: env.ANTHROPIC_API_KEY,
+  },
+  s3: {
+    bucket: env.S3_BUCKET,
+    region: env.S3_REGION,
+    accessKeyId: env.S3_ACCESS_KEY_ID,
+    secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+    endpoint: env.S3_ENDPOINT || undefined,
   },
 };
