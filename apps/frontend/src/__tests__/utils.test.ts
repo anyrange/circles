@@ -16,8 +16,6 @@ describe("cn", () => {
   });
 
   it("handles conditional objects", () => {
-    expect(cn({ "text-red-500": true, "text-blue-500": false })).toBe(
-      "text-red-500",
-    );
+    expect(cn({ "text-red-500": true, "text-blue-500": false })).toBe("text-red-500");
   });
 });

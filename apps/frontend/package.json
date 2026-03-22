@@ -10,7 +10,8 @@
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "type-check": "tsc --noEmit",
-    "test:unit": "vitest"
+    "test": "vp test --passWithNoTests",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "catalog:",
@@ -44,12 +45,12 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
-    "vitest": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@circles/backend": "workspace:*",
     "@cloudflare/vite-plugin": "catalog:",
+    "@playwright/test": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/devtools-vite": "catalog:",
     "@types/node": "catalog:",
@@ -59,6 +60,7 @@
     "typescript": "~5.9.3",
     "vite": "catalog:",
     "vite-plus": "catalog:",
+    "vitest": "catalog:",
     "wrangler": "catalog:"
   }
 }

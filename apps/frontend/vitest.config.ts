@@ -16,5 +16,6 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     typecheck: { enabled: true },
     watch: false,
+    exclude: ["**/node_modules/**", "**/e2e/**"],
   },
 });
