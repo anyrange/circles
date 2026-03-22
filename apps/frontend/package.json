@@ -9,7 +9,8 @@
     "preview": "vp preview",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:unit": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "catalog:",
@@ -24,10 +25,14 @@
     "@tanstack/react-table": "catalog:",
     "@tanstack/router-plugin": "catalog:",
     "@tanstack/zod-adapter": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
     "better-auth": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "hono": "catalog:",
+    "jsdom": "catalog:",
     "lucide-react": "catalog:",
     "radix-ui": "catalog:",
     "react": "catalog:",
@@ -39,6 +44,7 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
+    "vitest": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
