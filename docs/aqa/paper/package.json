@@ -1,0 +1,12 @@
+{
+  "name": "circles-paper",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "typst watch src/main.typ main.pdf",
+    "build": "typst compile src/main.typ main.pdf",
+    "format": "oxfmt src/"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.43.0"
+  }
+}
