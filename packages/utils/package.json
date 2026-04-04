@@ -25,6 +25,7 @@
     "build": "vp pack",
     "dev": "vp pack --watch",
     "test": "vp test",
+    "test:coverage": "vp test run --coverage",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm run build"
   },

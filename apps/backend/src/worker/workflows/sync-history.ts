@@ -4,9 +4,9 @@ import { and, eq, notExists } from "drizzle-orm";
 import { db } from "../../db";
 import { db as drizzleDb } from "../../db/postgres";
 import { account, audioFeatures, tracks } from "../../db/postgres/schema";
-import { fetchHydratedArtists } from "../../lib/spotify-artists";
 import { logger } from "../../library/logger";
 import { createSpotifyClient, refreshAndStoreToken } from "../../library/spotify";
+import { fetchHydratedArtists } from "../../library/spotify-artists";
 import { hatchet } from "../client";
 
 interface Input extends JsonObject {

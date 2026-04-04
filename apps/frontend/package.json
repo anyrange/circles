@@ -10,7 +10,8 @@
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "type-check": "tsc --noEmit",
-    "test": "vp test --passWithNoTests",
+    "test": "vp test run --passWithNoTests",
+    "test:coverage": "vp test run --config vitest.unit.config.ts --coverage --passWithNoTests",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -45,6 +46,7 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
+    "vitest-browser-react": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
