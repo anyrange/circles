@@ -86,7 +86,7 @@ When a new PDF is added to `sources/`:
 
 ## Authors
 
-1. **Aldiyar Seylkhanov** — Bachelor Degree Student, AITU (_(email)_, ORCID _(fill in)_)
+1. **Aldiyar Seylkhanov** — Bachelor Degree Student, AITU (seylkhanov.aldiyar@gmail.com)
 2. **Alexandr Tyulkov** — Master Degree Student, AITU (widesehl@gmail.com, ORCID 0009-0009-6422-0559)
 
 **Venue:** IEEE SIST 2026 conference, `charged-ieee:0.1.4` template

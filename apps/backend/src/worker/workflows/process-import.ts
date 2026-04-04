@@ -7,8 +7,9 @@ import { config } from "../../config";
 import { db as drizzleDb } from "../../db/postgres";
 import { importJobs } from "../../db/postgres/schema";
 import { logger } from "../../library/logger";
+import { isValidEntry, type SpotifyExportEntry } from "../../library/spotify-export";
+import { isZip } from "../../library/zip";
 import { hatchet } from "../client";
-import type { SpotifyExportEntry } from "./import-batch";
 import { BATCH_SIZE, importBatch } from "./import-batch";
 
 interface Input extends JsonObject {
@@ -64,9 +65,7 @@ processImport.task({
         entries = JSON.parse(new TextDecoder().decode(bodyBytes));
       }
 
-      const valid = entries.filter(
-        (e) => e.spotify_track_uri && e.ms_played >= 30_000 && e.master_metadata_track_name,
-      );
+      const valid = entries.filter(isValidEntry);
 
       logger.worker.info({ userId, total: valid.length }, "parsed import, spawning batches");
 
@@ -118,8 +117,4 @@ async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Uint8Array
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string));
   }
   return Buffer.concat(chunks);
-}
-
-function isZip(bytes: Uint8Array): boolean {
-  return bytes[0] === 0x50 && bytes[1] === 0x4b;
 }

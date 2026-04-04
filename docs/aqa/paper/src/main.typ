@@ -18,7 +18,7 @@
       name: "Aldiyar Seylkhanov",
       department: [Bachelor Degree Student, School of Software Engineering],
       organization: [Astana IT University (AITU)],
-      location: [Astana, Kazakhstan \ _(email)_ \ #link("https://orcid.org/_(orcid)_")[_(orcid)_]],
+      location: [Astana, Kazakhstan \ seylkhanov.aldiyar\@gmail.com],
     ),
     (
       name: "Alexandr Tyulkov",

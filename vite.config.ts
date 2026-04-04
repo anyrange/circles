@@ -5,7 +5,15 @@ export default defineConfig({
     exclude: ["**/node_modules/**", "**/e2e/**", "apps/**"],
   },
   fmt: {
-    ignorePatterns: ["dist/**", "**/migrations/**", "routeTree.gen.ts"],
+    ignorePatterns: [
+      "dist/**",
+      "coverage/**",
+      "**/coverage/**",
+      "**/migrations/**",
+      ".claude/**",
+      ".agents/**",
+      "routeTree.gen.ts",
+    ],
     semi: true,
     sortImports: {},
     sortTailwindcss: {

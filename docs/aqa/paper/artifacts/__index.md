@@ -4,13 +4,13 @@ Quick reference for all source artifacts. Each file contains full notes, key quo
 
 ---
 
-| File                         | BibTeX Key                | What It Is                                                                | Use In Paper               |
-| ---------------------------- | ------------------------- | ------------------------------------------------------------------------- | -------------------------- |
-| `brooks1986silver.md`        | `brooks1986silver`        | Classic software engineering essay on essential vs accidental complexity  | Related Work, Discussion   |
-| `potvin2016monorepo.md`      | `potvin2016monorepo`      | CACM article on Google's monorepo model and supporting infrastructure     | Related Work, Introduction |
-| `bierman2014typescript.md`   | `bierman2014typescript`   | Formal account of TypeScript as a pragmatic typed extension of JavaScript | Related Work               |
-| `tobinhochstadt2008typed.md` | `tobinhochstadt2008typed` | Typed Scheme paper on migrating scripts into maintainable typed programs  | Related Work               |
-| `hilton2016ci.md`            | `hilton2016ci`            | Empirical study of continuous integration adoption and effects            | Related Work, Evaluation   |
+| File                         | BibTeX Key                | What It Is                                                                 | Use In Paper                         |
+| ---------------------------- | ------------------------- | -------------------------------------------------------------------------- | ------------------------------------ |
+| `bogner2022totype.md`        | `bogner2022totype`        | MSR study comparing JavaScript and TypeScript software quality on GitHub   | Related Work, Introduction           |
+| `shah2023designsystemsjs.md` | `shah2023designsystemsjs` | CoNTESA paper on standardizing design-system requirements with a JS API    | Discussion, optional background      |
+| `tang2026toolchains.md`      | `tang2026toolchains`      | MSR study of bug categories in TypeScript projects and toolchain fragility | Introduction, Related Work           |
+| `wang2022testautomation.md`  | `wang2022testautomation`  | JSS study connecting test automation maturity with product quality and CI  | Related Work, Evaluation             |
+| `yu2023nfrci.md`             | `yu2023nfrci`             | EMSE multi-case study of automated NFR testing through CI environments     | Related Work, Evaluation, Discussion |
 
 ---
 
@@ -18,15 +18,15 @@ Quick reference for all source artifacts. Each file contains full notes, key quo
 
 **Introduction**
 
-- `potvin2016monorepo`
+- `bogner2022totype`
+- `tang2026toolchains`
 
 **Related Work**
 
-- `brooks1986silver`
-- `potvin2016monorepo`
-- `bierman2014typescript`
-- `tobinhochstadt2008typed`
-- `hilton2016ci`
+- `bogner2022totype`
+- `tang2026toolchains`
+- `wang2022testautomation`
+- `yu2023nfrci`
 
 **System Description / Methods**
 
@@ -34,11 +34,15 @@ Quick reference for all source artifacts. Each file contains full notes, key quo
 
 **Evaluation**
 
-- `hilton2016ci`
+- `wang2022testautomation`
+- `yu2023nfrci`
 
 **Discussion**
 
-- `brooks1986silver`
+- `shah2023designsystemsjs`
+- `tang2026toolchains`
+- `wang2022testautomation`
+- `yu2023nfrci`
 
 ---
 

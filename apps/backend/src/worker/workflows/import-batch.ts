@@ -6,19 +6,14 @@ import { config } from "../../config";
 import { db } from "../../db";
 import { db as drizzleDb } from "../../db/postgres";
 import { account, importJobs } from "../../db/postgres/schema";
-import { fetchHydratedArtists } from "../../lib/spotify-artists";
 import { logger } from "../../library/logger";
+import { withRetry } from "../../library/retry";
 import { createSpotifyClient, refreshAndStoreToken } from "../../library/spotify";
+import { fetchHydratedArtists } from "../../library/spotify-artists";
+import { type SpotifyExportEntry, trackIdFromUri } from "../../library/spotify-export";
 import { hatchet } from "../client";
 
-export interface SpotifyExportEntry extends JsonObject {
-  ts: string;
-  master_metadata_track_name: string | null;
-  master_metadata_album_artist_name: string | null;
-  master_metadata_album_album_name: string | null;
-  spotify_track_uri: string | null;
-  ms_played: number;
-}
+export type { SpotifyExportEntry };
 
 interface Input extends JsonObject {
   userId: string;
@@ -66,7 +61,7 @@ importBatch.task({
     const spotify = createSpotifyClient(accessToken);
 
     const trackUris = [...new Set(chunk.map((e) => e.spotify_track_uri!))];
-    const trackIds = trackUris.map((uri) => uri.split(":")[2]).filter(Boolean) as string[];
+    const trackIds = trackUris.map(trackIdFromUri).filter(Boolean) as string[];
 
     const trackDetails = await withRetry(() => spotify.tracks.get(trackIds));
     const tracksArray = Array.isArray(trackDetails) ? trackDetails : [trackDetails];
@@ -120,7 +115,7 @@ importBatch.task({
 
     const historyRows = chunk
       .map((entry) => {
-        const spotifyId = entry.spotify_track_uri!.split(":")[2];
+        const spotifyId = trackIdFromUri(entry.spotify_track_uri!);
         const trackId = spotifyId ? trackIdBySpotifyId[spotifyId] : undefined;
         if (!trackId) return null;
         return { userId, trackId, playedAt: new Date(entry.ts) };
@@ -142,21 +137,6 @@ importBatch.task({
     );
   },
 });
-
-async function withRetry<T>(fn: () => Promise<T>, retries = 5): Promise<T> {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      const isRateLimit = err instanceof Error && err.message.toLowerCase().includes("rate limit");
-      if (!isRateLimit || attempt === retries - 1) throw err;
-      const delay = 30_000 + Math.random() * 10_000; // 30-40s with jitter
-      logger.worker.warn({ attempt, delay: Math.round(delay) }, "spotify rate limited, waiting");
-      await new Promise((r) => setTimeout(r, delay));
-    }
-  }
-  throw new Error("unreachable");
-}
 
 async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Uint8Array> {
   const chunks: Buffer[] = [];

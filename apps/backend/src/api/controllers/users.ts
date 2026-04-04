@@ -4,7 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 import { db } from "../../db";
-import { sinceFromRange } from "../../lib/range";
+import { sinceFromRange } from "../../library/range";
 
 export const usersController = new Hono()
   .get("/by-username/:username", async (ctx) => {
