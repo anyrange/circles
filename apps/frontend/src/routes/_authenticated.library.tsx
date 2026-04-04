@@ -1,14 +1,20 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { type UseInfiniteQueryResult } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Disc3, LibraryBig, Music2, Users } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { z } from "zod";
 
 import { TimeRangeTabs } from "@/components/TimeRangeTabs";
 import { TrackRow } from "@/components/TrackRow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/lib/api";
+import {
+  albumsQuery,
+  artistsQuery,
+  scrobblesQuery,
+  tracksQuery,
+  useLibraryOverview,
+} from "@/features/api/library";
 
 const searchSchema = z.object({
   tab: z.enum(["scrobbles", "artists", "albums", "tracks"]).catch("scrobbles"),
@@ -25,111 +31,26 @@ function LibraryPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: overview, isLoading: overviewLoading } = useQuery({
-    queryKey: ["library", "overview", search.range],
-    queryFn: async () => {
-      const res = await api.library.overview.$get({ query: { range: search.range } });
-      if (!res.ok) throw new Error("Failed to fetch library overview");
-      return res.json();
-    },
-  });
+  const { data: overview, isLoading: overviewLoading } = useLibraryOverview(search);
+  const artQ = artistsQuery(search);
+  const albQ = albumsQuery(search);
+  const trackQ = tracksQuery(search);
+  const scrobQ = scrobblesQuery(search);
 
-  const artistsQuery = useInfiniteQuery({
-    queryKey: ["library", "artists", search.range],
-    enabled: search.tab === "artists",
-    initialPageParam: undefined as { playCount: number; id: string } | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.artists.$get({
-        query: {
-          range: search.range,
-          limit: "30",
-          ...(pageParam
-            ? {
-                cursorPlayCount: String(pageParam.playCount),
-                cursorId: pageParam.id,
-              }
-            : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch artists");
-      return res.json();
-    },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
+  const tabBasedQuery: Record<"artists" | "albums" | "tracks", UseInfiniteQueryResult> = useMemo(
+    () => ({
+      artists: artQ,
+      albums: albQ,
+      tracks: trackQ,
+    }),
+    [artQ, albQ, trackQ],
+  );
 
-  const albumsQuery = useInfiniteQuery({
-    queryKey: ["library", "albums", search.range],
-    enabled: search.tab === "albums",
-    initialPageParam: undefined as { playCount: number; id: string } | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.albums.$get({
-        query: {
-          range: search.range,
-          limit: "30",
-          ...(pageParam
-            ? {
-                cursorPlayCount: String(pageParam.playCount),
-                cursorId: pageParam.id,
-              }
-            : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch albums");
-      return res.json();
-    },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
+  const activeQuery = tabBasedQuery[search.tab as keyof typeof tabBasedQuery] || scrobQ;
 
-  const tracksQuery = useInfiniteQuery({
-    queryKey: ["library", "tracks", search.range],
-    enabled: search.tab === "tracks",
-    initialPageParam: undefined as { playCount: number; id: string } | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.tracks.$get({
-        query: {
-          range: search.range,
-          limit: "30",
-          ...(pageParam
-            ? {
-                cursorPlayCount: String(pageParam.playCount),
-                cursorId: pageParam.id,
-              }
-            : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch tracks");
-      return res.json();
-    },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
-
-  const scrobblesQuery = useInfiniteQuery({
-    queryKey: ["library", "scrobbles", search.range],
-    enabled: search.tab === "scrobbles",
-    initialPageParam: undefined as string | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.scrobbles.$get({
-        query: {
-          range: search.range,
-          limit: "40",
-          ...(pageParam ? { cursor: pageParam } : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch scrobbles");
-      return res.json();
-    },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
-
-  const activeQuery =
-    search.tab === "artists"
-      ? artistsQuery
-      : search.tab === "albums"
-        ? albumsQuery
-        : search.tab === "tracks"
-          ? tracksQuery
-          : scrobblesQuery;
-  const hasItems = Boolean(activeQuery.data?.pages[0]?.items?.length);
+  const hasItems = Boolean(
+    (activeQuery.data as { pages: { items: unknown[] }[] })?.pages[0]?.items?.length,
+  );
 
   useEffect(() => {
     const element = loadMoreRef.current;
@@ -147,6 +68,15 @@ function LibraryPage() {
     observer.observe(element);
     return () => observer.disconnect();
   }, [activeQuery]);
+
+  const TabToComponent: Record<string, ReactNode> = {
+    scrobbles: <ScrobblesList pages={scrobQ.data?.pages || []} />,
+    artists: <ArtistsList pages={artQ.data?.pages || []} />,
+    albums: <AlbumsList pages={albQ.data?.pages || []} />,
+    tracks: <TracksList pages={trackQ.data?.pages || []} />,
+  };
+
+  const TabListComponent = TabToComponent[search.tab];
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-6 py-8">
@@ -174,7 +104,11 @@ function LibraryPage() {
             <button
               key={tab.value}
               type="button"
-              onClick={() => void navigate({ search: (prev) => ({ ...prev, tab: tab.value }) })}
+              onClick={() =>
+                void navigate({
+                  search: (prev) => ({ ...prev, tab: tab.value }),
+                })
+              }
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${
                 active
                   ? "border-foreground bg-foreground text-background"
@@ -232,13 +166,7 @@ function LibraryPage() {
       )}
 
       <section className="rounded-[2rem] border border-border/60 bg-card/30 p-4 sm:p-5">
-        {search.tab === "scrobbles" ? (
-          <ScrobblesList pages={scrobblesQuery.data?.pages ?? []} />
-        ) : null}
-        {search.tab === "artists" ? <ArtistsList pages={artistsQuery.data?.pages ?? []} /> : null}
-        {search.tab === "albums" ? <AlbumsList pages={albumsQuery.data?.pages ?? []} /> : null}
-        {search.tab === "tracks" ? <TracksList pages={tracksQuery.data?.pages ?? []} /> : null}
-
+        {TabListComponent}
         {activeQuery.isLoading ? <ListSkeleton /> : null}
 
         {!activeQuery.isLoading && !hasItems ? (
@@ -470,7 +398,11 @@ type AlbumItem = {
 
 type TrackItem = {
   track: { id: string; name: string };
-  album?: { id?: string | null; name?: string | null; imageUrl?: string | null } | null;
+  album?: {
+    id?: string | null;
+    name?: string | null;
+    imageUrl?: string | null;
+  } | null;
   artistNames: string;
   playCount: number;
 };
