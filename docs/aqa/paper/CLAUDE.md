@@ -73,14 +73,14 @@ When a new PDF is added to `sources/`:
 
 ## Paper Structure (IMRAD)
 
-| Section | Purpose |
-|---------|---------|
-| Introduction | Monorepo testing fragmentation problem, research question, contributions |
-| Related Work | Monorepo tooling literature, testing consistency research, Vite/Vitest prior work |
+| Section            | Purpose                                                                           |
+| ------------------ | --------------------------------------------------------------------------------- |
+| Introduction       | Monorepo testing fragmentation problem, research question, contributions          |
+| Related Work       | Monorepo tooling literature, testing consistency research, Vite/Vitest prior work |
 | System Description | Circles architecture (frontend, backend, shared packages), toolchain before/after |
-| Evaluation | Metrics: config surface, test behavior consistency, CI pipeline uniformity |
-| Discussion | Threats to validity, generalizability beyond Circles |
-| Conclusion | Summary of findings, implications for monorepo projects |
+| Evaluation         | Metrics: config surface, test behavior consistency, CI pipeline uniformity        |
+| Discussion         | Threats to validity, generalizability beyond Circles                              |
+| Conclusion         | Summary of findings, implications for monorepo projects                           |
 
 ---
 
@@ -96,12 +96,14 @@ When a new PDF is added to `sources/`:
 ## Case Study: Circles
 
 Circles is a TypeScript full-stack monorepo built with:
+
 - **Frontend:** React (Vite+)
 - **Backend:** Hono + Drizzle ORM
 - **Shared packages:** common types, utilities
 - **Toolchain:** Vite+ (`vp` CLI) — wraps Vite, Rolldown, Vitest, Oxlint, Oxfmt
 
 Key facts useful for the paper:
+
 - All packages share the same test runner (Vitest via `vp test`)
 - All packages share the same linter (Oxlint via `vp lint`) and formatter (Oxfmt via `vp fmt`)
 - No per-package Vitest or Babel config — configuration is centralized
