@@ -12,7 +12,6 @@ catalog:
   "@hatchet-dev/typescript-sdk": ^1.16.0
   "@hookform/resolvers": ^5.2.2
   "@playwright/test": ^1.52.0
-  "@scalar/hono-api-reference": ^0.10.6
   "@tailwindcss/vite": ^4.2.1
   "@tanstack/devtools-vite": ^0.5.5
   "@tanstack/react-devtools": ^0.9.13
