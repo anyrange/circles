@@ -4,3 +4,8 @@ declare module "vite-plus/test" {
   interface Assertion<T = any> extends TestingLibraryMatchers<any, T> {}
   interface AsymmetricMatchersContaining extends TestingLibraryMatchers<any, any> {}
 }
+
+declare module "@voidzero-dev/vite-plus-test" {
+  interface Assertion<T = any> extends TestingLibraryMatchers<any, T> {}
+  interface AsymmetricMatchersContaining extends TestingLibraryMatchers<any, any> {}
+}

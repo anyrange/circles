@@ -1,24 +1,20 @@
-import { defineConfig } from "vite-plus";
+import { defineProject } from "vite-plus";
 
-import tsdownConfig from "./tsdown.config.js";
+import { frontendVitestConfig } from "./vitest.shared";
 
-export default defineConfig({
-  pack: tsdownConfig,
+const unitProject = {
+  ...frontendVitestConfig,
   test: {
+    name: "unit",
     root: import.meta.dirname,
     environment: "node",
+    include: ["src/**/*.unit.spec.{ts,tsx}"],
     typecheck: { enabled: true },
-    watch: false,
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov", "json-summary"],
       reportsDirectory: "./coverage",
-      include: [
-        "src/library/range.ts",
-        "src/library/retry.ts",
-        "src/library/spotify-export.ts",
-        "src/library/zip.ts",
-      ],
+      include: ["src/lib/utils.ts"],
       thresholds: {
         lines: 90,
         functions: 90,
@@ -28,4 +24,6 @@ export default defineConfig({
       },
     },
   },
-});
+};
+
+export default defineProject(unitProject as never);

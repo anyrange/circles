@@ -3,8 +3,8 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../db";
 import { db as drizzleDb } from "../db/postgres";
 import { account } from "../db/postgres/schema";
-import { logger } from "../library/logger";
-import { createSpotifyClient, refreshAndStoreToken } from "../library/spotify";
+import { logger } from "./logger";
+import { createSpotifyClient, refreshAndStoreToken } from "./spotify";
 
 type SpotifyClient = ReturnType<typeof createSpotifyClient>;
 
