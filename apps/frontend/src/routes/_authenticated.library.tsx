@@ -1,7 +1,7 @@
 import { type UseInfiniteQueryResult } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Disc3, LibraryBig, Music2, Users } from "lucide-react";
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useMemo, type ComponentProps, type ReactNode } from "react";
 import { z } from "zod";
 
 import { TimeRangeTabs } from "@/components/TimeRangeTabs";
@@ -15,6 +15,7 @@ import {
   tracksQuery,
   useLibraryOverview,
 } from "@/features/api/library";
+import { useInfinityQuery } from "@/hooks/useInfinityQuery";
 
 const searchSchema = z.object({
   tab: z.enum(["scrobbles", "artists", "albums", "tracks"]).catch("scrobbles"),
@@ -29,15 +30,18 @@ export const Route = createFileRoute("/_authenticated/library")({
 function LibraryPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: overview, isLoading: overviewLoading } = useLibraryOverview(search);
+  const { data: overview, isLoading: overviewLoading } =
+    useLibraryOverview(search);
   const artQ = artistsQuery(search);
   const albQ = albumsQuery(search);
   const trackQ = tracksQuery(search);
   const scrobQ = scrobblesQuery(search);
 
-  const tabBasedQuery: Record<"artists" | "albums" | "tracks", UseInfiniteQueryResult> = useMemo(
+  const tabBasedQuery: Record<
+    "artists" | "albums" | "tracks",
+    UseInfiniteQueryResult
+  > = useMemo(
     () => ({
       artists: artQ,
       albums: albQ,
@@ -46,28 +50,15 @@ function LibraryPage() {
     [artQ, albQ, trackQ],
   );
 
-  const activeQuery = tabBasedQuery[search.tab as keyof typeof tabBasedQuery] || scrobQ;
+  const activeQuery =
+    tabBasedQuery[search.tab as keyof typeof tabBasedQuery] || scrobQ;
 
   const hasItems = Boolean(
-    (activeQuery.data as { pages: { items: unknown[] }[] })?.pages[0]?.items?.length,
+    (activeQuery.data as { pages: { items: unknown[] }[] })?.pages[0]?.items
+      ?.length,
   );
 
-  useEffect(() => {
-    const element = loadMoreRef.current;
-    if (!element || !activeQuery.hasNextPage) {
-      return;
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      if (entry?.isIntersecting && !activeQuery.isFetchingNextPage) {
-        void activeQuery.fetchNextPage();
-      }
-    });
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [activeQuery]);
+  const loadMoreRef = useInfinityQuery(activeQuery);
 
   const TabToComponent: Record<string, ReactNode> = {
     scrobbles: <ScrobblesList pages={scrobQ.data?.pages || []} />,
@@ -75,6 +66,26 @@ function LibraryPage() {
     albums: <AlbumsList pages={albQ.data?.pages || []} />,
     tracks: <TracksList pages={trackQ.data?.pages || []} />,
   };
+
+  const statsCardData = [
+    {
+      label: "Scrobbles",
+      value: overview?.totalScrobbles.toLocaleString(),
+    },
+    {
+      label: "Artists",
+      value: overview?.totalArtists.toLocaleString(),
+    },
+    {
+      label: "Albums",
+      value: overview?.totalAlbums.toLocaleString(),
+    },
+    {
+      label: "Tracks",
+      value: overview?.totalTracks.toLocaleString(),
+      sub: `${overview?.averagePerDay} / day`,
+    },
+  ];
 
   const TabListComponent = TabToComponent[search.tab];
 
@@ -85,14 +96,18 @@ function LibraryPage() {
           <p className="text-xs font-semibold tracking-[0.24em] text-muted-foreground uppercase">
             Archive
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Library</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            Library
+          </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Browse every scrobble, artist, album, and track in one place.
           </p>
         </div>
         <TimeRangeTabs
           value={search.range}
-          onChange={(range) => void navigate({ search: (prev) => ({ ...prev, range }) })}
+          onChange={(range) =>
+            navigate({ search: (prev) => ({ ...prev, range }) })
+          }
         />
       </div>
 
@@ -105,7 +120,7 @@ function LibraryPage() {
               key={tab.value}
               type="button"
               onClick={() =>
-                void navigate({
+                navigate({
                   search: (prev) => ({ ...prev, tab: tab.value }),
                 })
               }
@@ -127,39 +142,39 @@ function LibraryPage() {
       ) : (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="grid grid-cols-2 gap-3">
-            <StatCard label="Scrobbles" value={overview.totalScrobbles.toLocaleString()} />
-            <StatCard label="Artists" value={overview.totalArtists.toLocaleString()} />
-            <StatCard label="Albums" value={overview.totalAlbums.toLocaleString()} />
-            <StatCard
-              label="Tracks"
-              value={overview.totalTracks.toLocaleString()}
-              sub={`${overview.averagePerDay} / day`}
-            />
+            {statsCardData.map((stat) => (
+              <StatCard
+                key={stat.label}
+                {...(stat as ComponentProps<typeof StatCard>)}
+              />
+            ))}
           </div>
           <aside className="rounded-[1.75rem] border border-border/60 bg-card/30 p-5">
             <p className="text-sm font-semibold">Date Range</p>
             <div className="mt-5 space-y-3">
-              {overview.scrobblesByYear.map((item: { year: number; count: number }) => (
-                <div
-                  key={item.year}
-                  className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-3"
-                >
-                  <p className="text-xs text-muted-foreground">{item.year}</p>
-                  <div className="flex items-center gap-3">
-                    <div className="h-6 flex-1 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-rose-200"
-                        style={{
-                          width: `${(item.count / Math.max(...overview.scrobblesByYear.map((row: { count: number }) => row.count), 1)) * 100}%`,
-                        }}
-                      />
+              {overview.scrobblesByYear.map(
+                (item: { year: number; count: number }) => (
+                  <div
+                    key={item.year}
+                    className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-3"
+                  >
+                    <p className="text-xs text-muted-foreground">{item.year}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="h-6 flex-1 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-rose-200"
+                          style={{
+                            width: `${(item.count / Math.max(...overview.scrobblesByYear.map((row: { count: number }) => row.count), 1)) * 100}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="w-12 text-right text-xs text-muted-foreground">
+                        {item.count}
+                      </span>
                     </div>
-                    <span className="w-12 text-right text-xs text-muted-foreground">
-                      {item.count}
-                    </span>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </aside>
         </div>
@@ -170,7 +185,9 @@ function LibraryPage() {
         {activeQuery.isLoading ? <ListSkeleton /> : null}
 
         {!activeQuery.isLoading && !hasItems ? (
-          <p className="py-8 text-sm text-muted-foreground">No library data for this range yet.</p>
+          <p className="py-8 text-sm text-muted-foreground">
+            No library data for this range yet.
+          </p>
         ) : null}
 
         {hasItems ? (
@@ -178,9 +195,13 @@ function LibraryPage() {
             {activeQuery.isFetchingNextPage ? (
               <p className="text-sm text-muted-foreground">Loading more…</p>
             ) : activeQuery.hasNextPage ? (
-              <p className="text-sm text-muted-foreground">Scroll to load more</p>
+              <p className="text-sm text-muted-foreground">
+                Scroll to load more
+              </p>
             ) : (
-              <p className="text-sm text-muted-foreground">You’ve reached the end.</p>
+              <p className="text-sm text-muted-foreground">
+                You’ve reached the end.
+              </p>
             )}
           </div>
         ) : null}
@@ -259,8 +280,9 @@ function ArtistsList({ pages }: { pages: Array<{ items: ArtistItem[] }> }) {
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{item.artist.name}</p>
               <p className="text-sm text-muted-foreground">
-                {item.playCount.toLocaleString()} plays • {item.albumCount.toLocaleString()} albums
-                • {item.trackCount.toLocaleString()} tracks
+                {item.playCount.toLocaleString()} plays •{" "}
+                {item.albumCount.toLocaleString()} albums •{" "}
+                {item.trackCount.toLocaleString()} tracks
               </p>
             </div>
           </Link>
@@ -285,7 +307,11 @@ function AlbumsList({ pages }: { pages: Array<{ items: AlbumItem[] }> }) {
             <div className="w-8 text-sm text-muted-foreground">{index + 1}</div>
             <div className="size-14 overflow-hidden rounded-2xl bg-muted">
               {item.album.images?.[0]?.url ? (
-                <img src={item.album.images[0].url} alt="" className="size-full object-cover" />
+                <img
+                  src={item.album.images[0].url}
+                  alt=""
+                  className="size-full object-cover"
+                />
               ) : null}
             </div>
             <div className="min-w-0 flex-1">
@@ -332,7 +358,15 @@ function TracksList({ pages }: { pages: Array<{ items: TrackItem[] }> }) {
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatCard({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
   return (
     <div className="rounded-[1.75rem] border border-border/60 bg-card/40 p-5">
       <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
