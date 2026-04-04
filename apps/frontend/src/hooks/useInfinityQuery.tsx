@@ -12,7 +12,7 @@ export const useInfinityQuery = (activeQuery: UseInfiniteQueryResult) => {
     const observer = new IntersectionObserver((entries) => {
       const [entry] = entries;
       if (entry?.isIntersecting && !activeQuery.isFetchingNextPage) {
-        activeQuery.fetchNextPage();
+        void activeQuery.fetchNextPage();
       }
     });
 
