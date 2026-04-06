@@ -1,14 +1,21 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { type UseInfiniteQueryResult } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Disc3, LibraryBig, Music2, Users } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useMemo, type ComponentProps, type ReactNode } from "react";
 import { z } from "zod";
 
 import { TimeRangeTabs } from "@/components/TimeRangeTabs";
 import { TrackRow } from "@/components/TrackRow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/lib/api";
+import {
+  albumsQuery,
+  artistsQuery,
+  scrobblesQuery,
+  tracksQuery,
+  useLibraryOverview,
+} from "@/features/api/library";
+import { useInfinityQuery } from "@/hooks/useInfinityQuery";
 
 const searchSchema = z.object({
   tab: z.enum(["scrobbles", "artists", "albums", "tracks"]).catch("scrobbles"),
@@ -23,130 +30,58 @@ export const Route = createFileRoute("/_authenticated/library")({
 function LibraryPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: overview, isLoading: overviewLoading } = useQuery({
-    queryKey: ["library", "overview", search.range],
-    queryFn: async () => {
-      const res = await api.library.overview.$get({ query: { range: search.range } });
-      if (!res.ok) throw new Error("Failed to fetch library overview");
-      return res.json();
+  const { data: overview, isLoading: overviewLoading } = useLibraryOverview(search);
+  const artQ = artistsQuery(search);
+  const albQ = albumsQuery(search);
+  const trackQ = tracksQuery(search);
+  const scrobQ = scrobblesQuery(search);
+
+  const tabBasedQuery: Record<"artists" | "albums" | "tracks", UseInfiniteQueryResult> = useMemo(
+    () => ({
+      artists: artQ,
+      albums: albQ,
+      tracks: trackQ,
+    }),
+    [artQ, albQ, trackQ],
+  );
+
+  const activeQuery = tabBasedQuery[search.tab as keyof typeof tabBasedQuery] || scrobQ;
+
+  const hasItems = Boolean(
+    (activeQuery.data as { pages: { items: unknown[] }[] })?.pages[0]?.items?.length,
+  );
+
+  const loadMoreRef = useInfinityQuery(activeQuery);
+
+  const TabToComponent: Record<string, ReactNode> = {
+    scrobbles: <ScrobblesList pages={scrobQ.data?.pages || []} />,
+    artists: <ArtistsList pages={artQ.data?.pages || []} />,
+    albums: <AlbumsList pages={albQ.data?.pages || []} />,
+    tracks: <TracksList pages={trackQ.data?.pages || []} />,
+  };
+
+  const statsCardData = [
+    {
+      label: "Scrobbles",
+      value: overview?.totalScrobbles.toLocaleString(),
     },
-  });
-
-  const artistsQuery = useInfiniteQuery({
-    queryKey: ["library", "artists", search.range],
-    enabled: search.tab === "artists",
-    initialPageParam: undefined as { playCount: number; id: string } | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.artists.$get({
-        query: {
-          range: search.range,
-          limit: "30",
-          ...(pageParam
-            ? {
-                cursorPlayCount: String(pageParam.playCount),
-                cursorId: pageParam.id,
-              }
-            : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch artists");
-      return res.json();
+    {
+      label: "Artists",
+      value: overview?.totalArtists.toLocaleString(),
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
-
-  const albumsQuery = useInfiniteQuery({
-    queryKey: ["library", "albums", search.range],
-    enabled: search.tab === "albums",
-    initialPageParam: undefined as { playCount: number; id: string } | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.albums.$get({
-        query: {
-          range: search.range,
-          limit: "30",
-          ...(pageParam
-            ? {
-                cursorPlayCount: String(pageParam.playCount),
-                cursorId: pageParam.id,
-              }
-            : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch albums");
-      return res.json();
+    {
+      label: "Albums",
+      value: overview?.totalAlbums.toLocaleString(),
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
-
-  const tracksQuery = useInfiniteQuery({
-    queryKey: ["library", "tracks", search.range],
-    enabled: search.tab === "tracks",
-    initialPageParam: undefined as { playCount: number; id: string } | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.tracks.$get({
-        query: {
-          range: search.range,
-          limit: "30",
-          ...(pageParam
-            ? {
-                cursorPlayCount: String(pageParam.playCount),
-                cursorId: pageParam.id,
-              }
-            : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch tracks");
-      return res.json();
+    {
+      label: "Tracks",
+      value: overview?.totalTracks.toLocaleString(),
+      sub: `${overview?.averagePerDay} / day`,
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
+  ];
 
-  const scrobblesQuery = useInfiniteQuery({
-    queryKey: ["library", "scrobbles", search.range],
-    enabled: search.tab === "scrobbles",
-    initialPageParam: undefined as string | undefined,
-    queryFn: async ({ pageParam }) => {
-      const res = await api.library.scrobbles.$get({
-        query: {
-          range: search.range,
-          limit: "40",
-          ...(pageParam ? { cursor: pageParam } : {}),
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch scrobbles");
-      return res.json();
-    },
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
-
-  const activeQuery =
-    search.tab === "artists"
-      ? artistsQuery
-      : search.tab === "albums"
-        ? albumsQuery
-        : search.tab === "tracks"
-          ? tracksQuery
-          : scrobblesQuery;
-  const hasItems = Boolean(activeQuery.data?.pages[0]?.items?.length);
-
-  useEffect(() => {
-    const element = loadMoreRef.current;
-    if (!element || !activeQuery.hasNextPage) {
-      return;
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      if (entry?.isIntersecting && !activeQuery.isFetchingNextPage) {
-        void activeQuery.fetchNextPage();
-      }
-    });
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [activeQuery]);
+  const TabListComponent = TabToComponent[search.tab];
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-6 py-8">
@@ -162,7 +97,7 @@ function LibraryPage() {
         </div>
         <TimeRangeTabs
           value={search.range}
-          onChange={(range) => void navigate({ search: (prev) => ({ ...prev, range }) })}
+          onChange={(range) => navigate({ search: (prev) => ({ ...prev, range }) })}
         />
       </div>
 
@@ -174,7 +109,11 @@ function LibraryPage() {
             <button
               key={tab.value}
               type="button"
-              onClick={() => void navigate({ search: (prev) => ({ ...prev, tab: tab.value }) })}
+              onClick={() =>
+                navigate({
+                  search: (prev) => ({ ...prev, tab: tab.value }),
+                })
+              }
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${
                 active
                   ? "border-foreground bg-foreground text-background"
@@ -193,14 +132,9 @@ function LibraryPage() {
       ) : (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="grid grid-cols-2 gap-3">
-            <StatCard label="Scrobbles" value={overview.totalScrobbles.toLocaleString()} />
-            <StatCard label="Artists" value={overview.totalArtists.toLocaleString()} />
-            <StatCard label="Albums" value={overview.totalAlbums.toLocaleString()} />
-            <StatCard
-              label="Tracks"
-              value={overview.totalTracks.toLocaleString()}
-              sub={`${overview.averagePerDay} / day`}
-            />
+            {statsCardData.map((stat) => (
+              <StatCard key={stat.label} {...(stat as ComponentProps<typeof StatCard>)} />
+            ))}
           </div>
           <aside className="rounded-[1.75rem] border border-border/60 bg-card/30 p-5">
             <p className="text-sm font-semibold">Date Range</p>
@@ -232,13 +166,7 @@ function LibraryPage() {
       )}
 
       <section className="rounded-[2rem] border border-border/60 bg-card/30 p-4 sm:p-5">
-        {search.tab === "scrobbles" ? (
-          <ScrobblesList pages={scrobblesQuery.data?.pages ?? []} />
-        ) : null}
-        {search.tab === "artists" ? <ArtistsList pages={artistsQuery.data?.pages ?? []} /> : null}
-        {search.tab === "albums" ? <AlbumsList pages={albumsQuery.data?.pages ?? []} /> : null}
-        {search.tab === "tracks" ? <TracksList pages={tracksQuery.data?.pages ?? []} /> : null}
-
+        {TabListComponent}
         {activeQuery.isLoading ? <ListSkeleton /> : null}
 
         {!activeQuery.isLoading && !hasItems ? (
@@ -470,7 +398,11 @@ type AlbumItem = {
 
 type TrackItem = {
   track: { id: string; name: string };
-  album?: { id?: string | null; name?: string | null; imageUrl?: string | null } | null;
+  album?: {
+    id?: string | null;
+    name?: string | null;
+    imageUrl?: string | null;
+  } | null;
   artistNames: string;
   playCount: number;
 };
