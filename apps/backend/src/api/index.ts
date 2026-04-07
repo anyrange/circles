@@ -7,6 +7,7 @@ import { config } from "../config";
 import { auth } from "../library/auth";
 import { logger } from "../library/logger";
 import { aiController } from "./controllers/ai";
+import { createDocsController } from "./controllers/docs";
 import { importController } from "./controllers/import";
 import { leaderboardController } from "./controllers/leaderboard";
 import { libraryController } from "./controllers/library";
@@ -28,6 +29,7 @@ const app = new Hono()
     }),
   )
   .get("/health", (ctx) => ctx.json({ status: "ok" }))
+  .route("/docs", createDocsController())
   .on(["GET", "POST"], "/api/auth/*", (ctx) => auth.handler(ctx.req.raw))
   .route("/me", meController)
   .route("/users", usersController)
