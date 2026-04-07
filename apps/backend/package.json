@@ -46,6 +46,7 @@
     "@hatchet-dev/typescript-sdk": "catalog:",
     "@hono/node-server": "^1.19.8",
     "@hono/zod-validator": "^0.7.6",
+    "@scalar/hono-api-reference": "catalog:",
     "@spotify/web-api-ts-sdk": "^1.2.0",
     "better-auth": "catalog:",
     "dotenv": "^17.2.3",
