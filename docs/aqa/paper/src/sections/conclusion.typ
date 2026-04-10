@@ -1,6 +1,5 @@
 = Conclusion
 
-// TODO: 1–2 paragraphs
-// Summarize: toolchain fragmentation causes test inconsistency; unification resolves it
-// Circles demonstrates this in a real TypeScript full-stack monorepo
-// Future work: measure impact on developer debugging time and CI flakiness rates
+This paper examined testing consistency in the Circles TypeScript monorepo through repository inspection, CI workflow analysis, and direct execution of package test and coverage commands. The current repository demonstrates a clear unification pattern: most testing activity is routed through the `vp` command surface, the CI workflows are compact, and helper-level coverage reports are reproducible across packages. These properties reduce the visible configuration burden of running tests in a multi-package repository.
+
+The empirical results are nonetheless mixed rather than absolute. Backend and shared-package execution were stable, and the targeted helper modules reported full coverage within their configured scope. The frontend package exposed a configuration-level initialization failure during its aggregated test command even though the same unit project passed in isolation. This shows that unified tooling improves consistency conditions, but consistency still has to be verified at the combined execution level. Future work should expand measurement toward route, controller, workflow, and end-to-end layers, and should collect repeated-run data to estimate flakiness and pipeline-level stability over time.

@@ -1,12 +1,19 @@
 = Discussion
 
-// TODO:
-// 5.1 Threats to validity
-//     - single case study (Circles) — limited external validity
-//     - Vite+ is not open source — cannot be replicated by all readers
-//     - no before/after test failure data (Circles started with Vite+)
-// 5.2 Generalizability
-//     - which findings apply to any unified toolchain (not just Vite+)
-//     - the principle: shared resolver + shared transform = consistent environment
-// 5.3 Limitations
-//     - unified toolchains may reduce flexibility for complex per-package needs
+The preliminary results support a narrower claim than simple toolchain advocacy. Circles shows that unification improves reproducibility at the command and workflow level. Most test commands are routed through `vp`, coverage output is structurally similar across packages, and the CI workflows follow a compact execution pattern. At the same time, the frontend failure demonstrates that consistency cannot be inferred from command unification alone. When the frontend unit and browser projects are composed under the aggregate frontend test command, an initialization failure appears that is absent in the isolated unit run. This indicates that environment interaction remains an active risk even inside a unified stack.
+
+This finding is useful for QA analysis because it separates *surface-level unification* from *behavioral uniformity*. Surface-level unification means that packages share one visible command model, similar output conventions, and a common core toolchain. Behavioral uniformity is stronger. It requires that combined execution produce the same result as isolated execution for equivalent tests. The Circles data currently supports the first condition more strongly than the second.
+
+== Implications for Risk and Test Strategy
+
+From a risk perspective, the backend helper layer currently has high detectability and low observed execution risk. It has four stable spec files, 21 passing tests, and 100% coverage within the configured target set. The shared package shows the same pattern on a smaller scale. The frontend should be interpreted differently. The current frontend helper scope is small and well-covered inside its target module, but the aggregate execution anomaly increases the likelihood that configuration interaction faults remain hidden until the full package command is run. In practical QA terms, this means that isolated success is not sufficient evidence for release confidence in the frontend package.
+
+The results also show why narrow coverage percentages can be misleading. All observed coverage values are 100%, but they apply to a very small portion of the system. Controllers, route-level data loading, worker orchestration, and end-to-end user flows are still lightly represented in the measured baseline. The present evidence therefore supports a strategy that expands from helper-level certainty toward integration-level uncertainty, especially in the frontend and backend controller layers.
+
+== Threats to Validity
+
+The study has four main threats to validity. First, it is a single-repository case study, so external validity is limited. Second, the evidence is based on the current repository state rather than on a historical before-and-after migration dataset. This means the paper can evaluate the present unified setup and its remaining inconsistencies, but it cannot quantify the exact delta from a prior fragmented implementation inside the same repository. Third, some coverage results are affected by explicit include lists in package configuration. These measurements are accurate for the configured target scope but not for the system as a whole. Fourth, the observed frontend failure was captured during direct execution on one evaluation date. It should therefore be treated as evidence of a real inconsistency, but not yet as a long-run flakiness estimate.
+
+== Generalizability and Limitations
+
+The case still supports a general principle that is broader than Vite+. When multiple packages share one resolver model, one transformation stack, and one main command interface, the number of environment differences that can invalidate test comparisons is reduced. This principle should apply to other unified toolchains as well. However, the same case also shows a limitation of unification. Package-specific needs, such as browser projects or dedicated end-to-end configuration, reintroduce local variation. A unified toolchain can reduce fragmentation, but it does not eliminate the need to test cross-project composition explicitly.

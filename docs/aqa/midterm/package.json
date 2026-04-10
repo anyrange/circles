@@ -1,0 +1,9 @@
+{
+  "name": "circles-aqa-midterm",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "typst watch report.typ report.pdf",
+    "build": "typst compile report.typ report.pdf"
+  }
+}
