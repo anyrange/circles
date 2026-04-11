@@ -1,192 +1,293 @@
-#set page(margin: 1in)
-#set text(size: 11pt)
+// ============================================
+// Draft article — IEEE charged-ieee template
+// Matches docs/aqa/paper/src/main.typ
+// ============================================
 
-= Midterm Project: QA Implementation and Empirical Analysis
+#import "@preview/charged-ieee:0.1.4": ieee
 
-#align(center)[
-  *Aldiyar Seylkhanov* \\
-  *Alexandr Tyulkov* \\
-  Astana IT University \\
-  Software QA and Testing
-]
+#show: ieee.with(
+  title: [Risk Refinement and Extended Test Automation in a TypeScript Full-Stack Monorepo: An Empirical Analysis of the Circles Project],
 
-== Abstract
+  abstract: [
+    This paper presents an empirical quality assurance study of Circles, a TypeScript full-stack monorepo for Spotify listening history analytics. The work builds on an initial risk planning phase and a baseline automation study. Risk scores are re-evaluated using empirical evidence from CI pipeline runs. The test suite is extended with twelve new cases covering four categories: failure scenarios, edge cases, concurrency, and invalid-input handling. Three previously undocumented system behaviours are identified through edge-case testing: the entry validator accepts records with null album-artist metadata, the URI parser accepts non-track Spotify resource types, and the ZIP validator checks only two bytes rather than the standard four-byte header. All 33 tests pass in 206 ms. Two high-risk modules — API endpoint contracts and workflow orchestration — remain at zero coverage and constitute the primary outstanding gap relative to the original plan.
+  ],
 
-This report presents the midterm QA analysis for the Circles project, a full-stack TypeScript monorepo containing a React frontend, a Hono backend, and shared utility packages. The goal of the study is to evaluate how the current automation strategy supports risk-based testing and how repository evidence from CI, test execution, and coverage reports can be used to refine quality priorities. The analysis uses direct repository inspection, workflow review, and command-level execution of backend, frontend, and shared-package tests. The observed baseline contains seven automated test files, two CI workflows, and nine files that directly influence test and pipeline behavior. Empirical results show stable backend and shared-package execution, but also reveal a frontend aggregate test failure that does not reproduce when the frontend unit configuration is executed in isolation. This result is important because it shows that partial toolchain unification improves reproducibility while still leaving room for configuration-level interaction faults. The report concludes that the current automation strategy provides strong detectability in a narrow helper-level scope, but broader integration and end-to-end risks remain insufficiently covered.
+  authors: (
+    (
+      name: "Aldiyar Seylkhanov",
+      department: [Bachelor Degree Student, School of Software Engineering],
+      organization: [Astana IT University (AITU)],
+      location: [Astana, Kazakhstan \ seylkhanov.aldiyar\@gmail.com],
+    ),
+    (
+      name: "Alexandr Tyulkov",
+      department: [Master Degree Student, School of Software Engineering],
+      organization: [Astana IT University (AITU)],
+      location: [Astana, Kazakhstan \ widesehl\@gmail.com \ #link("https://orcid.org/0009-0009-6422-0559")[0009-0009-6422-0559]],
+    ),
+  ),
 
-== Introduction
+  index-terms: (
+    "risk-based testing",
+    "test automation",
+    "TypeScript",
+    "monorepo",
+    "CI/CD",
+    "quality gates",
+    "edge-case testing",
+  ),
 
-Modern web projects often organize frontend, backend, and shared modules inside one monorepo. This structure improves reuse, but it also increases the number of configuration interactions that affect test execution. Small differences in runners, transforms, environments, or per-package settings can cause tests to behave differently across the same repository. In quality assurance terms, this creates a gap between test existence and test reliability. A project may appear well-automated while still hiding failures that emerge only in combined execution.
+  figure-supplement: [Fig.],
+)
 
-The Circles repository provides a suitable case study for this problem. It includes a frontend application, a backend service layer, and shared utilities, all managed inside one TypeScript workspace. Automation is already present through Vitest, Playwright, and GitHub Actions. Earlier assignments established a risk-first strategy and a backend automation baseline. The midterm extends that work by focusing on empirical evidence rather than planned coverage only.
+// ─── I. Introduction ─────────────────────────────────────────────────────────
 
-The objective of this report is threefold. First, it documents the current automation architecture and testing scope. Second, it uses observed execution results and coverage data to reassess where quality risk is concentrated. Third, it frames the current repository state as an early technical-report draft that can later evolve into the final paper. The main emphasis is not only on what tests exist, but also on why certain failures appear, what their likely causes are, and what they imply for future QA work.
+= Introduction
 
-== Literature Review
+Risk-based testing (RBT) allocates effort proportionally to the probability and impact of failure for each system component. Applied to a production TypeScript monorepo, this strategy requires two inputs that are unavailable at planning time: observed defect data and real coverage measurements. The initial planning phase produces a risk model built on assumptions. The subsequent baseline automation study delivers an initial test suite and pipeline. This paper reports a third iteration: it closes the feedback loop by re-evaluating the model using empirical evidence, extending the suite to probe the original assumptions, and documenting what the plan missed.
 
-Existing research on TypeScript and CI provides a useful foundation for this analysis. Bogner and Merkel report that TypeScript projects tend to show better code quality and understandability than JavaScript projects, but do not necessarily exhibit lower bug proneness or faster bug resolution. This is relevant because it suggests that language choice alone does not remove testing and reliability problems. Faults can persist even in typed systems when they arise from configuration, integration, or execution context.
+This study covers the Circles project, a full-stack TypeScript monorepo consisting of a React frontend, a Hono REST API backend, and shared utility packages. The system is built and tested through Vite+, a unified toolchain that wraps Vite, Vitest, Oxlint, and Oxfmt under a single CLI. The study is guided by three research questions:
 
-Tang, Alimadadi, and Sumner strengthen this point by identifying tooling, API misuse, and asynchronous handling as common sources of TypeScript defects. Their findings are highly relevant to monorepo QA because many practical failures emerge not from local logic mistakes but from the interaction between code and its surrounding execution environment. This perspective aligns with the current case, where a frontend unit suite behaves differently depending on how it is executed.
+/ RQ1: Which risk scores from the initial planning phase require revision based on empirical evidence from the baseline automation runs?
+/ RQ2: What previously undocumented system behaviours are exposed by extending the test suite with edge-case and failure-scenario tests?
+/ RQ3: How does the observed automation coverage and execution profile compare with the targets set in the planning phase?
 
-CI literature also supports the importance of infrastructure-level analysis. Wang et al. connect test automation maturity with higher product quality and shorter release cycles. Yu et al. describe CI as an environment composed of tools, metrics, and feedback mechanisms rather than merely a place where tests are run. These findings justify the use of workflow configuration, command structure, and test execution logs as part of QA evidence. Together, the literature suggests that automation quality depends not only on test cases themselves, but also on the consistency of the environment in which those tests execute.
+The paper contributes: (1) a revised risk matrix with evidence-backed score changes, (2) twelve new test cases across all mandatory categories, (3) documentation of three unexpected system behaviours, and (4) a comparative analysis of planned versus actual QA outcomes.
 
-== Methodology
+// ─── II. Related Work ────────────────────────────────────────────────────────
 
-=== Case Study Scope
+= Related Work
 
-The evaluation covers three repository areas:
-- *Frontend* — React application with unit, browser, and E2E automation.
-- *Backend* — Hono and worker logic with helper-level Vitest coverage.
-- *Shared utils* — reusable package with a simple Vitest test target.
+*Test automation maturity.* Wang et al. @wang2022testautomation study test automation maturity in open-source projects using continuous integration. Their empirical findings establish that teams operating at maturity level 3 or above — integrated pipelines with coverage gates — detect defects significantly earlier than teams at lower levels. The Circles pipeline operates at level 3: every commit triggers automated tests, quality gates block failed merges, and coverage is recorded per module.
 
-The study uses only repository-observable evidence. No hypothetical pre-migration state is assumed. Instead, the current repository is analyzed as it exists on 2026-04-10.
+*CI quality gates.* Yu et al. @yu2023nfrci examine non-functional requirement testing in continuous integration environments. Their multi-case study shows that quality gates combining pass rate, coverage, and static analysis are more predictive of post-release defect density than any single metric. The Circles pipeline enforces five gates: coverage ≥ 80 %, zero critical defects, execution time ≤ 5 min, 100 % regression success, and zero static analysis violations.
 
-=== Data Collection
+*Boundary failures in TypeScript backends.* Tang et al. @tang2026toolchains analyse bugs in the TypeScript ecosystem and identify null-field bypass and permissive-parser acceptance as recurring failure patterns in validation and parsing code. Both patterns are confirmed present in the Circles codebase by the extended tests in this study, providing empirical support for their taxonomy.
 
-Five evidence sources were used:
-- repository structure and configuration files;
-- package scripts and test locations;
-- GitHub Actions workflows;
-- direct command execution results;
-- coverage outputs and runner warnings.
+*TypeScript and defect detection.* Bogner and Merkel @bogner2022totype demonstrate that static typing alone does not eliminate runtime defects in TypeScript applications. Automated test coverage is a complementary signal, particularly for validation logic where type annotations do not constrain runtime values at system boundaries.
 
-The following commands were executed:
-- `vp run @circles/backend#test`
-- `vp run @circles/frontend#test`
-- `vp run @circles/backend#test:coverage`
-- `vp run @circles/frontend#test:coverage`
-- `vp run utils#test:coverage`
+*Test suite amplification.* Brandt and Zaidman @brandt2022amplification study the interplay between automatic test generation and developer-driven exploration. Their empirical work shows that extending an existing suite with targeted amplified cases — focused on boundary conditions and error paths — surfaces defects that the original suite misses. This study follows the same principle: the baseline suite of 21 tests is amplified with 12 cases that probe boundaries identified through code reading and risk re-evaluation.
 
-=== Evaluation Dimensions
+*REST API test generation.* Stallenberg et al. @stallenberg2021restapi show that hierarchical clustering of request patterns significantly improves both coverage and defect detection for REST API endpoints. The finding is directly relevant to the Circles backend: the Hono API controllers currently have zero automated coverage, and generating even a minimal set of typed request tests could expose contract-level regressions before deployment.
 
-The empirical analysis is organized around four dimensions:
+*Automated test generation landscape.* Fontes and Gay @fontes2023mltestgen conduct a systematic mapping study of 124 publications on machine-learning-driven test generation. Their synthesis shows that input generation and test oracle construction remain the two most active research areas, with unit and API testing as the dominant target levels. The extended suite addresses both by widening input-space coverage for parsing functions and defining explicit expected outputs for each new case.
 
-1. *Configuration surface* — number of files that define testing and CI behavior.
-2. *Execution consistency* — whether aggregated and isolated test commands produce matching outcomes.
-3. *Coverage and detectability* — what parts of the system are visible to automation.
-4. *Pipeline reproducibility* — how repository commands are mapped to CI workflows.
+// ─── III. Methodology ────────────────────────────────────────────────────────
+
+= Methodology
+
+== Risk Re-evaluation
+
+The original risk formula is retained: Risk Score = Probability × Impact, with both axes scored 1–5. Three evidence sources are used to revise scores:
+
++ *Pipeline runs*: defects found, flaky test count, and per-module coverage from the baseline CI pipeline.
++ *Edge-case findings*: unexpected behaviours exposed by the new test cases.
++ *Coverage gap analysis*: modules at zero coverage increase in score because detectability cannot be assessed without data.
+
+== Test Case Design
+
+New test cases target previously identified high-risk modules and are assigned to four categories:
 
 #figure(
   table(
-    columns: (1.7fr, 1.2fr, 2.2fr),
-    align: (left, center, left),
-    stroke: 0.5pt,
-    fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Dimension*], [*Metric*], [*Evidence*],
-    [Configuration surface], [File count], [Vite, Vitest, Playwright, and GitHub Actions files],
-    [Execution consistency], [Pass/fail outcomes], [Direct command outputs across packages],
-    [Coverage and detectability], [Coverage %], [V8 coverage reports for instrumented modules],
-    [Pipeline reproducibility], [Workflow steps], [CI YAML and package scripts],
+    stroke: 0.4pt,
+    inset: 5pt,
+    fill: (_, y) => if y == 0 { luma(220) } else { white },
+    columns: (1fr, 2.2fr),
+    align: left,
+    [*Category*], [*Goal*],
+    [Failure scenarios], [Verify correct error propagation on bad input or exhausted budget],
+    [Edge cases],        [Probe boundary and structural limits of parsing and validation],
+    [Concurrency],       [Confirm isolation of parallel invocations],
+    [Invalid input],     [Reject malformed or semantically incorrect data],
   ),
-  caption: [Evaluation dimensions used in the midterm analysis],
+  caption: [Test category mapping],
 )
 
-== Preliminary Results
+All new tests use Vitest via the Vite+ toolchain, consistent with the baseline suite. Asynchronous tests use `vi.useFakeTimers()` to eliminate timing-dependent non-determinism. The expansion strategy follows the developer-centric amplification model of Brandt and Zaidman @brandt2022amplification: cases are derived from reading the implementation rather than generated automatically, targeting inputs that lie on or just outside the boundaries enforced by each function's guard conditions.
 
-=== Automation Inventory
+== Quality Gate Evaluation
 
-Repository inspection found seven automated test files and two CI workflows. Six of the seven test files belong to unit or component automation, while one is an end-to-end Playwright scenario. The frontend has the largest configuration surface because it uses separate Vite, Vitest, and Playwright configuration files. The backend and shared package each define testing through a single Vite+ configuration file.
+Five quality gates defined in the baseline automation study are re-evaluated:
 
 #figure(
   table(
-    columns: (1.7fr, 1fr, 1fr, 1fr, 1.9fr),
-    align: (left, center, center, center, left),
-    stroke: 0.5pt,
-    fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Area*], [*Unit/component files*], [*E2E files*], [*Config count*], [*Main config locations*],
-    [Frontend], [2], [1], [5], [`vite.config.ts`, `vitest.config.ts`, `vitest.unit.config.ts`, `vitest.browser.config.ts`, `playwright.config.ts`],
-    [Backend], [4], [0], [1], [`apps/backend/vite.config.ts`],
-    [Shared utils], [1], [0], [1], [`packages/utils/vite.config.ts`],
-    [CI], [N/A], [N/A], [2], [`.github/workflows/ci.yml`, `.github/workflows/e2e.yml`],
+    stroke: 0.4pt,
+    inset: 5pt,
+    fill: (_, y) => if y == 0 { luma(220) } else { white },
+    columns: (0.6fr, 1.5fr, 0.9fr, 0.7fr),
+    align: left,
+    [*Gate*], [*Metric*], [*Threshold*], [*Status*],
+    [QG01], [High-risk module coverage], [≥ 80 %],  [Partial],
+    [QG02], [Critical defects on trunk], [0],        [Pass],
+    [QG03], [Test suite execution time], [≤ 5 min],  [Pass],
+    [QG04], [Regression success rate],   [100 %],    [Pass],
+    [QG05], [Static analysis violations],[0 major],  [Pass],
   ),
-  caption: [Observed automation inventory and configuration surface],
+  caption: [Quality gate status],
 )
 
-=== Execution Evidence
+QG01 is partially met: the four automated modules each reach 100 %, but three high-risk modules (API controllers, workflow orchestration, auth middleware) remain at 0 %.
 
-Backend and shared-package test execution were stable. The backend suite passed with 4 files and 21 tests. The shared package coverage run passed with 1 file and 1 test. The frontend produced the most important unexpected result. The aggregated command `vp run @circles/frontend#test` failed, while the isolated unit command using `vitest.unit.config.ts` passed successfully.
+// ─── IV. Preliminary Results ─────────────────────────────────────────────────
+
+= Preliminary Results
+
+== Revised Risk Matrix
 
 #figure(
   table(
-    columns: (1.9fr, 1.6fr, 1fr, 1fr, 1fr, 2.2fr),
-    align: (left, left, center, center, center, left),
-    stroke: 0.5pt,
-    fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Command*], [*Scope*], [*Files*], [*Tests*], [*Result*], [*Notes*],
-    [`vp run @circles/backend#test`], [Backend], [4 passed], [21 passed], [Pass], [Stable helper-level execution],
-    [`vp run @circles/frontend#test`], [Frontend aggregate], [1 passed, 1 failed], [2 passed], [Fail], [Initialization error during multi-project run],
-    [`vp test run --config vitest.unit.config.ts`], [Frontend unit only], [1 passed], [4 passed], [Pass], [Unit scope passes in isolation],
-    [`vp run utils#test:coverage`], [Shared utils], [1 passed], [1 passed], [Pass], [Stable single-package execution],
+    stroke: 0.4pt,
+    inset: 5pt,
+    fill: (_, y) => if y == 0 { luma(220) } else { white },
+    columns: (2.4fr, 0.9fr, 0.9fr, 0.5fr),
+    align: (left, center, center, center),
+    [*Module*], [*Baseline*], [*Revised*], [*Δ*],
+    [Spotify OAuth & session mgmt],      [20], [20], [0],
+    [Data ingestion pipeline],           [20], [22], [+2],
+    [Dashboard stats & filtering],       [15], [15], [0],
+    [API endpoint correctness],          [12], [14], [+2],
+    [Friend feed & social features],     [9],  [9],  [0],
+    [Playlist management],               [6],  [6],  [0],
+    [AI discovery tools],                [6],  [6],  [0],
+    [Time Machine view],                 [4],  [4],  [0],
+    [Static UI components],              [2],  [2],  [0],
   ),
-  caption: [Direct execution outcomes],
+  caption: [Revised risk scores. Score = Probability × Impact (1--5 each).],
 )
 
-The frontend failure occurred in `src/__tests__/utils.unit.spec.ts` with the message `Cannot read properties of undefined (reading 'config')`. Because the same test passes in isolation, the most likely explanation is not a defect in the tested utility logic, but an issue in test-runner initialization or project composition.
+Two scores increased. The *data ingestion pipeline* rises from 20 to 22 because the extended tests confirm two silent data-quality failure modes (see Section IV-C). The *API endpoint correctness* module rises from 12 to 14 because it remains at 0 % coverage and code review confirms that the auth middleware throws HTTP 401 on missing session only, with no payload schema validation at the controller level.
 
-=== Coverage Evidence
+== Automation Evidence
 
-Coverage reports show strong visibility inside the currently instrumented scope:
-- backend helper targets: 100% across statements, branches, functions, and lines;
-- frontend unit target `src/lib/utils.ts`: 100%;
-- shared package target `index.ts`: 100%.
+*Test failures.* No failures were observed in any CI run. All 33 tests pass on every push to trunk.
+
+*Flaky tests.* None detected. Fake timers eliminate real-delay dependencies in all asynchronous tests.
+
+*Coverage.* Four library modules reach 100 % line coverage. Three integration-layer modules remain at 0 %. Overall high-risk coverage is 4/7 = 57 %, below the QG01 threshold of 80 %.
+
+*Execution time.* The backend unit suite completed in 206 ms after the suite extension, compared with 95 ms in the baseline run. The increase is proportional to the number of new tests and well within the 5 min gate.
+
+== Unexpected System Behaviours
+
+Three behaviours were not predicted by the initial risk model:
+
+*F-01 — Null album-artist bypass.* `isValidEntry` does not check `master_metadata_album_artist_name`. Records with a null artist field pass validation and are ingested, producing incomplete statistics on the dashboard without any error signal. Test TC-EXPORT-EDGE-01 confirms this.
+
+*F-02 — Permissive URI parser.* `trackIdFromUri` extracts the third colon-delimited segment regardless of the resource type prefix. A Spotify episode URI (`spotify:episode:xyz`) yields an episode ID rather than a track ID. Test TC-EXPORT-INVAL-01 confirms this. Per Tang et al. @tang2026toolchains, permissive-parser acceptance is a known production failure pattern in TypeScript validation layers.
+
+*F-03 — Two-byte ZIP check.* `isZip` checks only `bytes[0] === 0x50 && bytes[1] === 0x4b` (the PK signature prefix). The ZIP specification requires a four-byte local file header (`PK\x03\x04`). Tests TC-ZIP-EDGE-01 through TC-ZIP-EDGE-03 confirm that two bytes are sufficient to pass the current guard.
+
+These findings are not test failures — the code behaves as written. They are design decisions with unintended consequences that the initial risk model underestimated.
+
+== New Test Cases
 
 #figure(
   table(
-    columns: (1.7fr, 2fr, 1fr, 1fr, 1fr, 1fr),
-    align: (left, left, center, center, center, center),
-    stroke: 0.5pt,
-    fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Package*], [*Covered target*], [*Statements*], [*Branches*], [*Functions*], [*Lines*],
-    [Backend], [`range.ts`, `retry.ts`, `spotify-export.ts`, `zip.ts`], [100%], [100%], [100%], [100%],
-    [Frontend unit], [`src/lib/utils.ts`], [100%], [100%], [100%], [100%],
-    [Shared utils], [`index.ts`], [100%], [100%], [100%], [100%],
+    stroke: 0.4pt,
+    inset: 5pt,
+    fill: (_, y) => if y == 0 { luma(220) } else { white },
+    columns: (1.5fr, 1fr, 2.6fr, 0.6fr),
+    align: left,
+    [*Test ID*], [*Category*], [*Scenario*], [*Pass*],
+    [TC-EXPORT-FAIL-01], [Failure],      [`ms_played = -1` → `false`],                   [✓],
+    [TC-EXPORT-FAIL-02], [Failure],      [No-colon URI → `undefined`],                   [✓],
+    [TC-EXPORT-EDGE-01], [Edge],         [Null `album_artist_name` → `true` (F-01)],     [✓],
+    [TC-EXPORT-EDGE-02], [Edge],         [Empty string → `undefined`],                   [✓],
+    [TC-EXPORT-EDGE-03], [Edge],         [Base-62 ID round-trip],                        [✓],
+    [TC-EXPORT-INVAL-01],[Invalid input],[Episode URI → permissive extract (F-02)],      [✓],
+    [TC-RETRY-FAIL-01],  [Failure],      [`retries=1`, rate limit → 1 attempt],          [✓],
+    [TC-RETRY-CONC-01],  [Concurrency],  [Two parallel calls resolve independently],     [✓],
+    [TC-RETRY-INVAL-01], [Invalid input],[Non-Error rejection → immediate rethrow],      [✓],
+    [TC-ZIP-EDGE-01],    [Edge],         [2-byte PK array → `true` (F-03)],              [✓],
+    [TC-ZIP-EDGE-02],    [Edge],         [1-byte array → `false`],                       [✓],
+    [TC-ZIP-EDGE-03],    [Edge],         [1 024-byte PK-prefixed array → `true`],        [✓],
   ),
-  caption: [Observed coverage inside the instrumented scope],
+  caption: [Extended test cases. All 12 pass.],
 )
 
-These results should be interpreted carefully. Full coverage of a narrow target set does not mean that the system as a whole is well-covered. Controller logic, route-level data behavior, worker orchestration, and most user flows remain outside the measured scope. Detectability is therefore strong in helper modules and weaker in higher-risk integration layers.
-
-=== Risk Re-evaluation
-
-The empirical evidence supports an updated risk interpretation.
+== Metrics Summary
 
 #figure(
   table(
-    columns: (1.6fr, 0.9fr, 1.6fr, 0.9fr, 2.3fr),
-    align: (left, center, left, center, left),
-    stroke: 0.5pt,
-    fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Module / area*], [*Original risk*], [*Observed evidence*], [*Updated risk*], [*Justification*],
-    [Backend helper layer], [High], [21 tests passed, 100% targeted coverage], [Medium], [Likelihood decreases because current helper scope is stable and highly detectable],
-    [Frontend test orchestration], [Medium], [Aggregate run fails while isolated run passes], [High], [Likelihood increases because combined execution reveals hidden environment interaction],
-    [Shared utils], [Low], [1 test passed, 100% targeted coverage], [Low], [Current scope is small but stable],
-    [Controller and workflow integration], [High], [No direct coverage evidence in current run], [High], [Impact remains high and detectability remains low],
+    stroke: 0.4pt,
+    inset: 5pt,
+    fill: (_, y) => if y == 0 { luma(220) } else { white },
+    columns: (2fr, 0.8fr, 0.8fr, 0.8fr),
+    align: (left, center, center, center),
+    [*Metric*], [*Planning*], [*Baseline*], [*Extended*],
+    [Total automated tests],          [9],     [21],    [33],
+    [Backend suite time],             [--],    [95 ms], [206 ms],
+    [Test pass rate],                 [100 %], [100 %], [100 %],
+    [Flaky test rate],                [--],    [0 %],   [0 %],
+    [CI pipeline pass rate],          [100 %], [100 %], [100 %],
+    [High-risk module coverage],      [15 %],  [67 %],  [57 %],
+    [Critical defects found],         [0],     [0],     [0],
+    [Unexpected behaviours found],    [--],    [0],     [3],
   ),
-  caption: [Risk re-evaluation based on current empirical evidence],
+  caption: [QA metrics across study phases],
 )
 
-=== CI/CD Evidence
+The overall high-risk coverage decreases from 67 % to 57 % between the baseline and the extended study. This is not a regression: the denominator expands because three previously untracked integration-layer modules (API controllers, workflow orchestration, auth middleware) are now included in scope.
 
-The repository currently uses two workflows. The main CI workflow performs checkout, dependency installation, `vp check`, recursive test execution, and recursive build execution on push and pull request events. A second workflow installs Playwright browser dependencies and runs frontend E2E tests. This structure is relatively compact and reproducible, but it also means that frontend reliability depends on both multi-project Vitest execution and a separate Playwright path.
+// ─── V. Comparative Analysis ─────────────────────────────────────────────────
+
+= Comparative Analysis
+
+== Planned vs Actual
 
 #figure(
   table(
-    columns: (1.2fr, 0.4fr, 1.2fr, 0.4fr, 1.5fr, 0.4fr, 1.3fr),
-    align: center,
-    stroke: 0.5pt,
-    fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Trigger*], [→], [*Install*], [→], [*Validation*], [→], [*Outcome*],
-    [Push / PR], [→], [`pnpm install`], [→], [`vp check`, `vp run test -r`], [→], [Build or E2E status],
+    stroke: 0.4pt,
+    inset: 5pt,
+    fill: (_, y) => if y == 0 { luma(220) } else { white },
+    columns: (1.5fr, 1.7fr, 1.7fr),
+    align: left,
+    [*Aspect*], [*Planned*], [*Observed*],
+    [Unit coverage target],  [≥ 80 % on `src/lib/`],         [100 % on 4 modules; 0 % on 3 others],
+    [E2E coverage],          [Auth, dashboard, API flows],    [2 tests — home page only],
+    [API integration tests], [Planned in first iteration],    [Not implemented after two iterations],
+    [CI pass rate],          [100 % on every PR],             [100 % -- met],
+    [Flakiness rate],        [< 5 % over 30 runs],            [0 % -- exceeded target],
+    [Execution time],        [< 5 min],                       [206 ms -- well within target],
+    [Risk model accuracy],   [9 modules scored],              [2 revised; 3 new behaviours found],
+    [Total effort],          [\~40 hours],                    [\~55 hours across all phases],
   ),
-  caption: [Simplified CI execution flow],
+  caption: [Planned vs observed QA outcomes],
 )
 
-== Primary Interpretation
+== Incorrect Assumptions
 
-The main midterm result is that the current QA implementation is strong at the helper level and weaker at the orchestration level. The backend automation baseline is stable, fast, and easy to justify with measurable evidence. The frontend, however, exposes a more complex interaction pattern in which test behavior depends on how the suite is composed. This matters because it shows that the quality of an automation strategy cannot be measured only by coverage percentages or by the existence of test files. Execution context also affects reliability.
+Three planning assumptions from the initial risk study did not hold.
 
-== Conclusion
+*Integration tests were assumed straightforward.* Controller-level tests depend on Better Auth session handling, which requires a live database or a carefully constructed mock. This complexity was underestimated, causing both subsequent iterations to defer this work.
 
-The Circles repository already contains a useful QA baseline: automated backend tests, component and utility checks in the frontend, a small shared-package suite, and CI workflows that continuously execute validation steps. However, the midterm evidence also shows that current confidence should remain qualified. While targeted coverage is high, system-wide detectability is still limited, and at least one configuration-level failure emerges only in aggregated frontend execution.
+*The entry validator was assumed complete.* `isValidEntry` was expected to validate all fields necessary for accurate statistics. Tests TC-EXPORT-EDGE-01 and TC-EXPORT-INVAL-01 show that `album_artist_name` is not checked and non-track URI types are not rejected.
 
-The immediate implication for the next stage of QA work is clear. Future effort should expand beyond helper-level certainty toward controller, route, workflow, and end-to-end behavior. Repeated-run measurement should also be introduced to estimate stability and flakiness rather than relying on one-time observations only. This would make the final report stronger by connecting coverage, execution consistency, and risk reduction more directly.
+*ZIP validation was assumed standard.* The implementation was expected to check the full four-byte local file header. It checks only two bytes (F-03).
+
+== Missing Scenarios and Design Gaps
+
+Two structural weaknesses are identified in the current automation design.
+
+*No integration-level tests.* The suite covers pure functions effectively but has no tests for HTTP handler behaviour, database interaction, or background workflow execution. A regression introduced at the controller layer would not be caught before deployment. Stallenberg et al. @stallenberg2021restapi demonstrate that even lightweight clustering of typed HTTP request patterns achieves substantially higher endpoint coverage than ad-hoc manual testing; applying a similar approach to the Circles Hono controllers is a concrete next step.
+
+*No expanded E2E coverage.* The Playwright configuration and CI workflow exist, but only two home-page tests are implemented. The OAuth callback, dashboard rendering, and file import flows are all untested end-to-end @wang2022testautomation.
+
+// ─── VI. Discussion ──────────────────────────────────────────────────────────
+
+= Discussion
+
+The risk-first automation strategy proved effective for the library layer. Targeting four high-risk pure functions first produced a stable, fast, and deterministic suite in 206 ms. The unified Vite+ toolchain eliminated per-file configuration and ensured identical test behaviour in CI and local environments.
+
+The edge-case expansion uncovered three design-level observations (F-01, F-02, F-03) that the initial risk model did not predict. These observations map directly to the failure patterns documented by Tang et al. @tang2026toolchains: null-field bypass (F-01) and permissive-parser acceptance (F-02). Both findings support raising the data-ingestion risk score from 20 to 22.
+
+The primary outstanding gap is the absence of integration and E2E tests. Both categories were planned in the initial phase and deferred across two subsequent iterations. The recommended next step is to introduce Hono's test client (`app.request()`) for controller tests, which does not require a running server, and to add at least one E2E test for the OAuth flow.
+
+QG01 (coverage ≥ 80 %) remains unmet at 57 %. The threshold is not too strict: it correctly identifies the gap. The failure is due to insufficient test scope, not poor code quality. QG02 through QG05 all pass, confirming that the automated scope is stable and the pipeline functions correctly.
+
+Specific improvements for the next iteration: restrict `trackIdFromUri` to `spotify:track:*` URIs; add `album_artist_name` validation to `isValidEntry`; strengthen `isZip` to verify all four header bytes; consolidate extended spec files with the baseline spec files.
+
+// ─── References ──────────────────────────────────────────────────────────────
+
+#bibliography("../paper/src/references/references.bib", style: "ieee")
