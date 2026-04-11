@@ -5,6 +5,11 @@
       "source": "antfu/skills",
       "sourceType": "github",
       "computedHash": "669c7275f7e1379b06b2bcfa593603aead4c983b951c7e8edbc09640aa38d0a1"
+    },
+    "wrangler": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "32d0a62081ce8743cf51b2a5bae364a56fae09b99af86986b3e7de068ecd4d8f"
     }
   }
 }
