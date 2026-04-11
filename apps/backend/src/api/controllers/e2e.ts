@@ -1,16 +1,14 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { setSignedCookie } from "hono/cookie";
+import { setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 
 import { config } from "../../config";
 import { db as drizzleDb } from "../../db/postgres";
 import * as schema from "../../db/postgres/schema";
-
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
-const SESSION_COOKIE_NAME = "better-auth.session_token";
+import { auth } from "../../library/auth";
 
 const E2E_USER = {
   email: "e2e@circles.local",
@@ -55,29 +53,20 @@ export const e2eController = new Hono().post("/test/e2e/login", async (ctx) => {
       .returning();
   }
 
-  await drizzleDb.delete(schema.session).where(eq(schema.session.userId, user.id));
+  const authContext = await auth.$context;
 
-  const token = randomBytes(32).toString("hex");
-  const expiresAt = new Date(now.getTime() + SESSION_TTL_SECONDS * 1000);
+  await authContext.internalAdapter.deleteSessions(user.id);
 
-  await drizzleDb.insert(schema.session).values({
-    id: randomUUID(),
-    userId: user.id,
-    token,
-    expiresAt,
-    ipAddress: ctx.req.header("x-forwarded-for") ?? null,
-    userAgent: ctx.req.header("user-agent") ?? null,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  await setSignedCookie(ctx, SESSION_COOKIE_NAME, token, config.auth.secret, {
-    httpOnly: true,
-    sameSite: "Lax",
-    path: "/",
-    secure: false,
-    maxAge: SESSION_TTL_SECONDS,
-  });
+  const cookies = await authContext.test.getCookies({ userId: user.id });
+  for (const cookie of cookies) {
+    setCookie(ctx, cookie.name, cookie.value, {
+      expires: cookie.expires ? new Date(cookie.expires * 1000) : undefined,
+      httpOnly: cookie.httpOnly,
+      path: cookie.path,
+      sameSite: cookie.sameSite,
+      secure: cookie.secure,
+    });
+  }
 
   return ctx.json({
     ok: true,

@@ -8,6 +8,7 @@
     "coverage": "run-p coverage:backend coverage:frontend",
     "coverage:backend": "vp run @circles/backend#test:coverage",
     "coverage:frontend": "vp run @circles/frontend#test:coverage",
+    "e2e": "vp run @circles/frontend#test:e2e",
     "dev": "run-p dev:frontend dev:api dev:worker",
     "dev:frontend": "vp run @circles/frontend#dev",
     "dev:api": "vp run @circles/backend#dev:api",

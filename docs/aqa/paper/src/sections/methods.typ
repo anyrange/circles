@@ -2,9 +2,9 @@
 
 == Case Study Context
 
-Circles is a full-stack TypeScript monorepo with three active package areas relevant to testing. The frontend package uses React and contains both browser-level component tests and Playwright end-to-end tests. The backend package exposes API and worker code and uses Vitest for logic-level tests. The shared `packages/utils` package contains reusable helpers and its own test file. Across the repository, the dominant command surface is Vite+, exposed through the `vp` CLI.
+Circles is a full-stack TypeScript monorepo. It has three active package areas relevant to testing. The frontend uses React and contains browser component tests and end-to-end tests. The backend exposes API and worker code and uses unit tests for logic-level checks. The shared utilities package contains reusable helpers with its own test file. All packages use Vite+ as the main toolchain, accessed through a single CLI.
 
-The current repository state provides a suitable midterm case because it combines a unified command interface with package-level specialization. The backend and shared package each define testing inside `vite.config.ts`. The frontend keeps one base Vite config plus dedicated Vitest project files for unit and browser execution and a separate Playwright config for end-to-end tests. This structure permits direct observation of where unification succeeds and where configuration divergence remains.
+The repository provides a useful case because it combines a unified command interface with some package-level specialization. The backend and shared package each define testing inside their main Vite config file. The frontend keeps a base config plus dedicated files for unit testing, browser testing, and end-to-end testing. This structure allows direct observation of where unification works and where configuration differences remain.
 
 #figure(
   table(
@@ -12,30 +12,30 @@ The current repository state provides a suitable midterm case because it combine
     align: (left, left, left, center),
     stroke: 0.5pt,
     fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Package / Area*], [*Primary role*], [*Observed test stack*], [*Observed test files*],
-    [Frontend], [UI and route rendering], [Vitest unit project, Vitest browser project, Playwright], [3],
-    [Backend], [API, workers, helper logic], [Vitest through `apps/backend/vite.config.ts`], [4],
-    [Shared utils], [Reusable helper package], [Vitest through `packages/utils/vite.config.ts`], [1],
+    [*Package*], [*Primary role*], [*Test stack*], [*Test files*],
+    [Frontend], [UI and route rendering], [Vitest unit, Vitest browser, Playwright], [3],
+    [Backend], [API, workers, helper logic], [Vitest through shared Vite config], [4],
+    [Shared utils], [Reusable helper package], [Vitest through shared Vite config], [1],
   ),
-  caption: [Observed package structure and testing stack in Circles],
+  caption: [Package structure and testing stack in Circles],
 )
 
-== Data Collection Procedure
+== Data Collection
 
-The evaluation used only repository-observable evidence. Five classes of data were collected.
+The evaluation used only repository-observable evidence. Five types of data were collected.
 
-First, the repository structure was inspected to identify configuration files, package scripts, and test locations. Second, the CI workflows in `.github/workflows/ci.yml` and `.github/workflows/e2e.yml` were reviewed to document the execution model used on push and pull request events. Third, direct test execution was performed with the same package commands defined in the repository: backend tests, frontend tests, frontend unit coverage, backend coverage, and shared-package coverage. Fourth, execution logs were examined for failures, warnings, and timing information. Fifth, coverage reports were used to identify the current automated scope and any detectability gaps.
+First, the repository structure was inspected to find configuration files, package scripts, and test file locations. Second, the CI workflows were reviewed to document the execution model used on push and pull request events. Third, direct test execution was performed using the commands defined in the repository for each package. Fourth, execution logs were examined for failures, warnings, and output patterns. Fifth, coverage reports were used to identify the current automated scope.
 
-The concrete commands executed during the evaluation were `vp run @circles/backend#test`, `vp run @circles/frontend#test`, `vp run @circles/backend#test:coverage`, `vp run @circles/frontend#test:coverage`, and `vp run utils#test:coverage`. All commands were run against the repository state observed on 2026-04-10.
+All observations were made against the repository state on 2026-04-10.
 
 == Evaluation Dimensions
 
-The analysis used four dimensions that match the midterm requirement to connect engineering choices with measurable evidence.
+The analysis used four dimensions.
 
-1. *Configuration surface size.* This dimension counts the number of files that directly define test or CI behavior.
-2. *Execution consistency.* This dimension checks whether equivalent test commands behave uniformly across packages and across isolated versus aggregated runs.
-3. *Coverage and detectability.* This dimension evaluates which modules have automated evidence and whether coverage reports indicate strong or weak visibility into failures.
-4. *Pipeline reproducibility.* This dimension documents how repository commands are mapped into CI workflows.
+1. *Configuration surface size.* The number of files that directly define test or CI behavior.
+2. *Execution consistency.* Whether equivalent test commands produce the same outcome across packages and across isolated versus aggregated runs.
+3. *Coverage and detectability.* Which modules have automated test coverage and how much of the system is visible to the test suite.
+4. *Pipeline reproducibility.* How repository test commands map into CI workflows.
 
 #figure(
   table(
@@ -43,18 +43,18 @@ The analysis used four dimensions that match the midterm requirement to connect 
     align: (left, center, left),
     stroke: 0.5pt,
     fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Dimension*], [*Metric*], [*Repository evidence*],
+    [*Dimension*], [*Metric*], [*Evidence source*],
     [Configuration surface], [Count of config files], [Vite, Vitest, Playwright, and GitHub Actions files],
-    [Execution consistency], [Pass or fail outcome], [Direct command outputs from backend, frontend, and shared package],
-    [Coverage and detectability], [Coverage percentage], [V8 coverage reports emitted by package coverage commands],
-    [Pipeline reproducibility], [Step mapping], [Workflow YAML files and package scripts],
+    [Execution consistency], [Pass or fail outcome], [Direct test runs across backend, frontend, and shared package],
+    [Coverage and detectability], [Coverage percentage], [V8 coverage reports from package coverage commands],
+    [Pipeline reproducibility], [Step mapping], [CI workflow YAML files and package scripts],
   ),
   caption: [Evaluation dimensions and evidence sources],
 )
 
 == Configuration and Pipeline Model
 
-Nine files were identified as direct parts of the testing and CI configuration surface: two GitHub Actions workflows, three `vite.config.ts` files, three frontend Vitest configuration files, and one Playwright configuration file. This count is small for a multi-package repository, but it is not zero. The result matters because it shows that unification in Circles is operational rather than absolute.
+Nine files form the testing and CI configuration surface. Two are GitHub Actions workflows. Three are Vite config files, one per package. Three are frontend-specific Vitest config files. One is the Playwright config for end-to-end tests. This count is small for a multi-package repository but it is not zero. Unification in Circles is real but not absolute.
 
 #figure(
   table(
@@ -63,9 +63,9 @@ Nine files were identified as direct parts of the testing and CI configuration s
     stroke: 0.5pt,
     fill: (_, row) => if row == 0 { luma(220) } else { white },
     [*Push / PR*], [→], [*Install*], [→], [*Check and test*], [→], [*Build or E2E*],
-    [GitHub event], [→], [`pnpm install`], [→], [`pnpm vp check`, `pnpm vp run test -r`], [→], [`pnpm vp run build -r` or Playwright workflow],
+    [GitHub event], [→], [Install dependencies], [→], [Static checks and recursive test run], [→], [Recursive build or Playwright E2E],
   ),
-  caption: [Observed CI pipeline structure across the two workflows],
+  caption: [CI pipeline structure across the two workflows],
 )
 
-The main CI workflow performs checkout, dependency installation, static checks, recursive test execution, and recursive build execution. A second workflow installs Playwright browsers and runs frontend end-to-end tests. These workflows show that the repository uses one dominant command surface even though the frontend still needs a dedicated E2E path.
+The main CI workflow performs checkout, dependency installation, static analysis, recursive test execution, and recursive build. A second workflow handles end-to-end tests using a browser runner. Both workflows use the same unified command interface. The frontend still requires a separate E2E workflow, which shows that some package-specific steps remain even under a unified toolchain.

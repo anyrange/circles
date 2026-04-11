@@ -9,7 +9,7 @@ export default defineConfig({
   globalSetup: "./e2e/global.setup.ts",
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://127.0.0.1:3000",
     trace: "on-first-retry",
   },
   projects: [
@@ -21,13 +21,17 @@ export default defineConfig({
   webServer: [
     {
       command: "vp run @circles/backend#dev:api",
-      env: { ...process.env, ENABLE_E2E_AUTH: "true" },
+      env: {
+        ...process.env,
+        ENABLE_E2E_AUTH: "true",
+        FRONTEND_URL: "http://127.0.0.1:3000",
+      },
       url: "http://127.0.0.1:8000/health",
       reuseExistingServer: !process.env.CI,
     },
     {
       command: "vp dev --port 3000",
-      url: "http://localhost:3000",
+      url: "http://127.0.0.1:3000",
       reuseExistingServer: !process.env.CI,
     },
   ],
