@@ -23,8 +23,4 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm vp check
-
-      - run: pnpm vp run test -r
-
-      - run: pnpm vp run build -r
+      - run: pnpm vp run ready
