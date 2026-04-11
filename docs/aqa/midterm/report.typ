@@ -6,10 +6,10 @@
 #import "@preview/charged-ieee:0.1.4": ieee
 
 #show: ieee.with(
-  title: [Risk Refinement and Extended Test Automation in a TypeScript Full-Stack Monorepo: An Empirical Analysis of the Circles Project],
+  title: [How a Unified Development Toolchain Supports Automated Testing Consistency in a TypeScript Full-Stack Monorepo: A Case Study of Circles],
 
   abstract: [
-    This paper presents an empirical quality assurance study of Circles, a TypeScript full-stack monorepo for Spotify listening history analytics. The work builds on an initial risk planning phase and a baseline automation study. Risk scores are re-evaluated using empirical evidence from CI pipeline runs. The test suite is extended with twelve new cases covering four categories: failure scenarios, edge cases, concurrency, and invalid-input handling. Three previously undocumented system behaviours are identified through edge-case testing: the entry validator accepts records with null album-artist metadata, the URI parser accepts non-track Spotify resource types, and the ZIP validator checks only two bytes rather than the standard four-byte header. All 33 tests pass in 206 ms. Two high-risk modules — API endpoint contracts and workflow orchestration — remain at zero coverage and constitute the primary outstanding gap relative to the original plan.
+    TypeScript monorepos often combine frontend, backend, and shared packages under one repository, but test execution is still shaped by package-local configuration. This paper studies how a unified toolchain affects testing consistency in such a setting. The Circles repository is used as a case study because it runs backend, frontend, and shared-package tests through the Vite+ command interface while still keeping a small number of package-specific overrides. The evaluation uses repository inspection, CI workflow analysis, and direct execution of test and coverage commands. The observed configuration surface consists of nine testing and CI configuration files, seven automated test files, and two GitHub Actions workflows. Empirical results show stable execution in the backend and shared package, with 21 backend tests and one shared-package test passing, while the aggregated frontend run exposes a configuration-level failure that does not appear when the frontend unit project is executed in isolation. This result is important because it shows that a unified command surface improves consistency, but multi-project composition can still preserve hidden environment differences. The paper therefore argues that unified toolchains reduce configuration fragmentation and improve reproducibility, yet consistency must still be evaluated at the combined pipeline level rather than only at the per-project level.
   ],
 
   authors: (
@@ -290,4 +290,4 @@ Specific improvements for the next iteration: restrict `trackIdFromUri` to `spot
 
 // ─── References ──────────────────────────────────────────────────────────────
 
-#bibliography("../paper/src/references/references.bib", style: "ieee")
+#bibliography("./references.bib", style: "ieee")
