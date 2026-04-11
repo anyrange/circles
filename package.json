@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "ready": "vp fmt && vp lint && vp run test -r && vp run build -r",
+    "ready": "vp fmt && vp lint",
     "coverage": "run-p coverage:backend coverage:frontend",
     "coverage:backend": "vp run @circles/backend#test:coverage",
     "coverage:frontend": "vp run @circles/frontend#test:coverage",

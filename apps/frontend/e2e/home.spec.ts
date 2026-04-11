@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe("Home page", () => {
   test("shows branding and Spotify sign-in button", async ({ page }) => {
     await page.goto("/");

@@ -1,14 +1,8 @@
 import { describe, expect, test } from "vite-plus/test";
 
-import {
-  isValidEntry,
-  trackIdFromUri,
-  type SpotifyExportEntry,
-} from "./spotify-export";
+import { isValidEntry, trackIdFromUri, type SpotifyExportEntry } from "./spotify-export";
 
-function entry(
-  overrides: Partial<SpotifyExportEntry> = {},
-): SpotifyExportEntry {
+function entry(overrides: Partial<SpotifyExportEntry> = {}): SpotifyExportEntry {
   return {
     ts: "2024-01-01T00:00:00Z",
     master_metadata_track_name: "Track Name",
@@ -34,9 +28,7 @@ describe("TC-EXPORT-FAIL-02 — trackIdFromUri rejects URI with no colon segment
 
 describe("TC-EXPORT-EDGE-01 — isValidEntry accepts null album_artist_name", () => {
   test("passes validation despite null album_artist_name (field is not required)", () => {
-    expect(
-      isValidEntry(entry({ master_metadata_album_artist_name: null })),
-    ).toBe(true);
+    expect(isValidEntry(entry({ master_metadata_album_artist_name: null }))).toBe(true);
   });
 });
 
@@ -48,9 +40,7 @@ describe("TC-EXPORT-EDGE-02 — trackIdFromUri with empty string", () => {
 
 describe("TC-EXPORT-EDGE-03 — trackIdFromUri with special characters in track ID", () => {
   test("handles realistic Base-62 Spotify track ID with mixed case and digits", () => {
-    expect(trackIdFromUri("spotify:track:4iV5W9uYEdYUVa79Axb7Rh")).toBe(
-      "4iV5W9uYEdYUVa79Axb7Rh",
-    );
+    expect(trackIdFromUri("spotify:track:4iV5W9uYEdYUVa79Axb7Rh")).toBe("4iV5W9uYEdYUVa79Axb7Rh");
   });
 });
 
