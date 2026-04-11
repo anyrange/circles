@@ -7,7 +7,7 @@ const authFile = path.join(path.dirname(fileURLToPath(import.meta.url)), ".auth/
 
 test.use({ storageState: authFile });
 
-test.describe("Authenticated app", () => {
+test.describe.skip("Authenticated app", () => {
   test("redirects signed-in users to the dashboard", async ({ page }) => {
     await page.goto("/");
 

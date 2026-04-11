@@ -42,9 +42,7 @@ describe("MusicMatchCard", () => {
   });
 
   it("displays different shared counts correctly", async () => {
-    const screen = await render(
-      <MusicMatchCard match={{ ...baseMatch, sharedCount: 0 }} />,
-    );
+    const screen = await render(<MusicMatchCard match={{ ...baseMatch, sharedCount: 0 }} />);
 
     expect(screen.container).toHaveTextContent("0");
     expect(screen.container).toHaveTextContent("shared artists");

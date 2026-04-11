@@ -5,9 +5,7 @@ import { TimeRangeTabs } from "@/components/TimeRangeTabs";
 
 describe("TimeRangeTabs", () => {
   it("renders all time range options", async () => {
-    const screen = await render(
-      <TimeRangeTabs value="7d" />,
-    );
+    const screen = await render(<TimeRangeTabs value="7d" />);
 
     expect(screen.container).toHaveTextContent("7 days");
     expect(screen.container).toHaveTextContent("30 days");
@@ -20,9 +18,7 @@ describe("TimeRangeTabs", () => {
     const screen = await render(<TimeRangeTabs value="30d" />);
 
     const tabs = screen.container.querySelectorAll("[role='tab']");
-    const active = Array.from(tabs).find(
-      (tab) => tab.getAttribute("aria-selected") === "true",
-    );
+    const active = Array.from(tabs).find((tab) => tab.getAttribute("aria-selected") === "true");
 
     expect(active).not.toBeNull();
     expect(active?.textContent).toBe("30 days");
@@ -42,9 +38,7 @@ describe("TimeRangeTabs", () => {
 
   it("calls onChange with the selected range when a tab is clicked", async () => {
     const onChange = vi.fn();
-    const screen = await render(
-      <TimeRangeTabs value="7d" onChange={onChange} />,
-    );
+    const screen = await render(<TimeRangeTabs value="7d" onChange={onChange} />);
 
     // Use the Playwright locator API so click events propagate through React's
     // synthetic event system correctly

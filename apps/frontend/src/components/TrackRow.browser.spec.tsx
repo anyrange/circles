@@ -5,9 +5,7 @@ import { TrackRow } from "@/components/TrackRow";
 
 describe("TrackRow", () => {
   it("renders title and subtitle", async () => {
-    const screen = await render(
-      <TrackRow title="Bohemian Rhapsody" subtitle="Queen" />,
-    );
+    const screen = await render(<TrackRow title="Bohemian Rhapsody" subtitle="Queen" />);
 
     expect(screen.container).toHaveTextContent("Bohemian Rhapsody");
     expect(screen.container).toHaveTextContent("Queen");
@@ -21,18 +19,14 @@ describe("TrackRow", () => {
   });
 
   it("renders leading rank number", async () => {
-    const screen = await render(
-      <TrackRow title="Hotel California" leading={3} />,
-    );
+    const screen = await render(<TrackRow title="Hotel California" leading={3} />);
 
     expect(screen.container).toHaveTextContent("Hotel California");
     expect(screen.container).toHaveTextContent("3");
   });
 
   it("renders trailing play count", async () => {
-    const screen = await render(
-      <TrackRow title="Comfortably Numb" trailing="142 plays" />,
-    );
+    const screen = await render(<TrackRow title="Comfortably Numb" trailing="142 plays" />);
 
     expect(screen.container).toHaveTextContent("Comfortably Numb");
     expect(screen.container).toHaveTextContent("142 plays");
@@ -40,12 +34,7 @@ describe("TrackRow", () => {
 
   it("renders all props together", async () => {
     const screen = await render(
-      <TrackRow
-        title="Money"
-        subtitle="Pink Floyd"
-        leading={1}
-        trailing="98 plays"
-      />,
+      <TrackRow title="Money" subtitle="Pink Floyd" leading={1} trailing="98 plays" />,
     );
 
     expect(screen.container).toHaveTextContent("Money");

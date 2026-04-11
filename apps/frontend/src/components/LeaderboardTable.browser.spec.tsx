@@ -58,9 +58,7 @@ describe("LeaderboardTable", () => {
   });
 
   it("shows avatar fallback initials", async () => {
-    const screen = await render(
-      <LeaderboardTable entries={[entries[0]!]} />,
-    );
+    const screen = await render(<LeaderboardTable entries={[entries[0]!]} />);
 
     // Avatar fallback is the first letter of the name
     expect(screen.container).toHaveTextContent("A");

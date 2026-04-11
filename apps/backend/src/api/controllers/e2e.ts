@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 
 import { config } from "../../config";
@@ -59,13 +58,17 @@ export const e2eController = new Hono().post("/test/e2e/login", async (ctx) => {
 
   const cookies = await authContext.test.getCookies({ userId: user.id });
   for (const cookie of cookies) {
-    setCookie(ctx, cookie.name, cookie.value, {
-      expires: cookie.expires ? new Date(cookie.expires * 1000) : undefined,
-      httpOnly: cookie.httpOnly,
-      path: cookie.path,
-      sameSite: cookie.sameSite,
-      secure: cookie.secure,
-    });
+    // Set the header directly — hono's setCookie calls encodeURIComponent on the
+    // value, which corrupts the Base64 signature that better-auth reads back raw.
+    const parts = [
+      `${cookie.name}=${cookie.value}`,
+      `Path=${cookie.path ?? "/"}`,
+      cookie.httpOnly ? "HttpOnly" : "",
+      `SameSite=${cookie.sameSite ?? "Lax"}`,
+      cookie.secure ? "Secure" : "",
+      cookie.expires ? `Expires=${new Date(cookie.expires * 1000).toUTCString()}` : "",
+    ].filter(Boolean);
+    ctx.header("Set-Cookie", parts.join("; "), { append: true });
   }
 
   return ctx.json({
