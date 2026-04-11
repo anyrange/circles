@@ -30,6 +30,7 @@
     "pack": "vp pack",
     "test": "vp test",
     "test:coverage": "vp test run --coverage",
+    "dev": "run-p dev:api dev:worker",
     "dev:api": "tsx watch src/api/index.ts | pino-pretty",
     "dev:worker": "tsx src/worker/index.ts",
     "start:api": "node dist/api/index.mjs",

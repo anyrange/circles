@@ -11,7 +11,7 @@
     id: 0,
   ),
   subject: (
-    name: "AQA",
+    name: "",
     code: "AQA",
   ),
 )
