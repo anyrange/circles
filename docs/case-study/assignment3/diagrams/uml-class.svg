@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1050" viewBox="0 0 1500 1050">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #0f172a; }
+      .name { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 14px 'Courier New', monospace; fill: #1e293b; }
+      .small { font: 14px Arial, sans-serif; fill: #1e293b; }
+      .cls { fill: #ffffff; stroke: #334155; stroke-width: 2; }
+      .line { stroke: #334155; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <text x="750" y="42" text-anchor="middle" class="title">UML Class Diagram</text>
+
+  <g transform="translate(80,100)">
+    <rect width="260" height="220" class="cls"/>
+    <line x1="0" y1="44" x2="260" y2="44" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="134" x2="260" y2="134" stroke="#334155" stroke-width="2"/>
+    <text x="130" y="28" text-anchor="middle" class="name">User</text>
+    <text x="12" y="70" class="body">+ id: string</text>
+    <text x="12" y="92" class="body">+ username: string?</text>
+    <text x="12" y="114" class="body">+ isPublic: boolean</text>
+    <text x="12" y="158" class="body">+ findById(id): User?</text>
+    <text x="12" y="180" class="body">+ findByUsername(name): User?</text>
+    <text x="12" y="202" class="body">+ getProfile(): ProfileDto</text>
+  </g>
+
+  <g transform="translate(420,100)">
+    <rect width="280" height="240" class="cls"/>
+    <line x1="0" y1="44" x2="280" y2="44" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="154" x2="280" y2="154" stroke="#334155" stroke-width="2"/>
+    <text x="140" y="28" text-anchor="middle" class="name">AuthService</text>
+    <text x="12" y="70" class="body">- secret: string</text>
+    <text x="12" y="92" class="body">- spotifyClientId: string</text>
+    <text x="12" y="114" class="body">- redirectUri: string</text>
+    <text x="12" y="136" class="body">- trustedOrigins: string[]</text>
+    <text x="12" y="178" class="body">+ startOAuth(): Redirect</text>
+    <text x="12" y="200" class="body">+ createSession(userId): Session</text>
+    <text x="12" y="222" class="body">+ syncOnLogin(userId): void</text>
+  </g>
+
+  <g transform="translate(790,100)">
+    <rect width="280" height="240" class="cls"/>
+    <line x1="0" y1="44" x2="280" y2="44" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="154" x2="280" y2="154" stroke="#334155" stroke-width="2"/>
+    <text x="140" y="28" text-anchor="middle" class="name">HistoryEntry</text>
+    <text x="12" y="70" class="body">+ id: bigint</text>
+    <text x="12" y="92" class="body">+ userId: string</text>
+    <text x="12" y="114" class="body">+ trackId: bigint</text>
+    <text x="12" y="136" class="body">+ playedAt: datetime</text>
+    <text x="12" y="178" class="body">+ insertMany(data): void</text>
+    <text x="12" y="200" class="body">+ findByUser(userId): Page</text>
+    <text x="12" y="222" class="body">+ getTopTracks(userId): TrackStat[]</text>
+  </g>
+
+  <g transform="translate(1160,100)">
+    <rect width="250" height="220" class="cls"/>
+    <line x1="0" y1="44" x2="250" y2="44" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="134" x2="250" y2="134" stroke="#334155" stroke-width="2"/>
+    <text x="125" y="28" text-anchor="middle" class="name">Track</text>
+    <text x="12" y="70" class="body">+ id: bigint</text>
+    <text x="12" y="92" class="body">+ spotifyId: string</text>
+    <text x="12" y="114" class="body">+ name: string</text>
+    <text x="12" y="158" class="body">+ upsertMany(data): Track[]</text>
+    <text x="12" y="180" class="body">+ findDetailForUser(): TrackDto</text>
+    <text x="12" y="202" class="body">+ upsertAudioFeatures(): void</text>
+  </g>
+
+  <g transform="translate(220,470)">
+    <rect width="260" height="220" class="cls"/>
+    <line x1="0" y1="44" x2="260" y2="44" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="134" x2="260" y2="134" stroke="#334155" stroke-width="2"/>
+    <text x="130" y="28" text-anchor="middle" class="name">Artist</text>
+    <text x="12" y="70" class="body">+ id: bigint</text>
+    <text x="12" y="92" class="body">+ spotifyId: string</text>
+    <text x="12" y="114" class="body">+ genres: string[]</text>
+    <text x="12" y="158" class="body">+ upsertMany(data): Artist[]</text>
+    <text x="12" y="180" class="body">+ getLibraryArtists(): Page</text>
+    <text x="12" y="202" class="body">+ findDetailForUser(): ArtistDto</text>
+  </g>
+
+  <g transform="translate(620,470)">
+    <rect width="280" height="240" class="cls"/>
+    <line x1="0" y1="44" x2="280" y2="44" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="154" x2="280" y2="154" stroke="#334155" stroke-width="2"/>
+    <text x="140" y="28" text-anchor="middle" class="name">Playlist</text>
+    <text x="12" y="70" class="body">+ id: bigint</text>
+    <text x="12" y="92" class="body">+ userId: string</text>
+    <text x="12" y="114" class="body">+ name: string</text>
+    <text x="12" y="136" class="body">+ isAuto: boolean</text>
+    <text x="12" y="178" class="body">+ create(data): Playlist</text>
+    <text x="12" y="200" class="body">+ addTrack(id, trackId): void</text>
+    <text x="12" y="222" class="body">+ upsertAutoPlaylist(...): void</text>
+  </g>
+
+  <g transform="translate(1040,470)">
+    <rect width="300" height="240" class="cls"/>
+    <line x1="0" y1="44" x2="300" y2="44" stroke="#334155" stroke-width="2"/>
+    <line x1="0" y1="154" x2="300" y2="154" stroke="#334155" stroke-width="2"/>
+    <text x="150" y="28" text-anchor="middle" class="name">ImportJob</text>
+    <text x="12" y="70" class="body">+ id: bigint</text>
+    <text x="12" y="92" class="body">+ userId: string</text>
+    <text x="12" y="114" class="body">+ status: string</text>
+    <text x="12" y="136" class="body">+ s3Key: string</text>
+    <text x="12" y="178" class="body">+ createPending(userId, key): ImportJob</text>
+    <text x="12" y="200" class="body">+ markProcessing(): void</text>
+    <text x="12" y="222" class="body">+ markCompletedOrFailed(): void</text>
+  </g>
+
+  <line x1="340" y1="210" x2="420" y2="210" class="line"/>
+  <text x="380" y="198" text-anchor="middle" class="small">1 uses 1</text>
+
+  <line x1="1040" y1="220" x2="1160" y2="220" class="line"/>
+  <text x="1100" y="208" text-anchor="middle" class="small">1..* plays *</text>
+
+  <line x1="210" y1="320" x2="210" y2="470" class="line"/>
+  <text x="225" y="400" class="small">* follows *</text>
+
+  <line x1="760" y1="340" x2="760" y2="470" class="line"/>
+  <text x="780" y="410" class="small">1 owns 0..*</text>
+
+  <line x1="900" y1="580" x2="1040" y2="580" class="line"/>
+  <text x="970" y="565" text-anchor="middle" class="small">1 starts 0..*</text>
+
+  <line x1="900" y1="615" x2="1160" y2="320" class="line"/>
+  <text x="1010" y="452" text-anchor="middle" class="small">0..* contains 1..*</text>
+
+  <line x1="480" y1="580" x2="620" y2="580" class="line"/>
+  <text x="550" y="565" text-anchor="middle" class="small">* creates *</text>
+</svg>

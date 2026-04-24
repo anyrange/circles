@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="840" viewBox="0 0 1400 840">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 30px Arial, sans-serif; fill: #0f172a; }
+      .label { font: 700 19px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 15px Arial, sans-serif; fill: #334155; }
+      .edge { font: 15px Arial, sans-serif; fill: #1e293b; }
+      .user { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; }
+      .system { fill: #dcfce7; stroke: #16a34a; stroke-width: 2.5; }
+      .external { fill: #e5e7eb; stroke: #6b7280; stroke-width: 2; }
+      .line { stroke: #334155; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <text x="700" y="48" text-anchor="middle" class="title">C4 Level 1 — System Context</text>
+
+  <rect x="515" y="250" rx="18" ry="18" width="370" height="230" class="system"/>
+  <text x="700" y="300" text-anchor="middle" class="label">Circles</text>
+  <text x="700" y="334" text-anchor="middle" class="small">Music statistics and social platform</text>
+  <text x="700" y="360" text-anchor="middle" class="small">Stores listening history, social graph, playlists,</text>
+  <text x="700" y="384" text-anchor="middle" class="small">AI summaries, and import jobs</text>
+
+  <rect x="80" y="285" rx="18" ry="18" width="280" height="160" class="user"/>
+  <text x="220" y="335" text-anchor="middle" class="label">Spotify User</text>
+  <text x="220" y="366" text-anchor="middle" class="small">Uses dashboard, library, social,</text>
+  <text x="220" y="390" text-anchor="middle" class="small">playlists, import, and AI tools</text>
+
+  <rect x="1010" y="110" rx="18" ry="18" width="280" height="150" class="external"/>
+  <text x="1150" y="158" text-anchor="middle" class="label">Spotify Platform</text>
+  <text x="1150" y="188" text-anchor="middle" class="small">OAuth provider and listening-history API</text>
+
+  <rect x="1010" y="325" rx="18" ry="18" width="280" height="150" class="external"/>
+  <text x="1150" y="373" text-anchor="middle" class="label">Anthropic API</text>
+  <text x="1150" y="403" text-anchor="middle" class="small">Generates Taste DNA, roast, and scene report</text>
+
+  <rect x="1010" y="540" rx="18" ry="18" width="280" height="150" class="external"/>
+  <text x="1150" y="588" text-anchor="middle" class="label">S3-Compatible Storage</text>
+  <text x="1150" y="618" text-anchor="middle" class="small">Stages ZIP/JSON imports for background processing</text>
+
+  <line x1="360" y1="365" x2="515" y2="365" class="line"/>
+  <text x="438" y="345" text-anchor="middle" class="edge">Uses via browser over HTTPS</text>
+
+  <line x1="885" y1="285" x2="1010" y2="185" class="line"/>
+  <text x="958" y="220" text-anchor="middle" class="edge">OAuth, recent plays, artist metadata</text>
+
+  <line x1="885" y1="365" x2="1010" y2="400" class="line"/>
+  <text x="955" y="355" text-anchor="middle" class="edge">Prompt and JSON tool output</text>
+
+  <line x1="885" y1="440" x2="1010" y2="615" class="line"/>
+  <text x="955" y="535" text-anchor="middle" class="edge">Presigned upload + import object access</text>
+</svg>

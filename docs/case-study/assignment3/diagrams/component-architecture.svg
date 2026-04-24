@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="930" viewBox="0 0 1500 930">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #0f172a; }
+      .head { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 15px Arial, sans-serif; fill: #334155; }
+      .edge { font: 15px Arial, sans-serif; fill: #1e293b; }
+      .front { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; }
+      .api { fill: #dcfce7; stroke: #16a34a; stroke-width: 2; }
+      .data { fill: #fed7aa; stroke: #ea580c; stroke-width: 2; }
+      .ext { fill: #e5e7eb; stroke: #6b7280; stroke-width: 2; }
+      .line { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <text x="750" y="42" text-anchor="middle" class="title">Component Interaction View</text>
+
+  <rect x="70" y="380" width="220" height="120" rx="16" ry="16" class="front"/>
+  <text x="180" y="422" text-anchor="middle" class="head">Web Frontend</text>
+  <text x="180" y="448" text-anchor="middle" class="small">Routes + TanStack Query</text>
+  <text x="180" y="470" text-anchor="middle" class="small">Charts, forms, upload UI</text>
+
+  <rect x="410" y="120" width="280" height="130" rx="16" ry="16" class="api"/>
+  <text x="550" y="164" text-anchor="middle" class="head">Auth &amp; Profile Module</text>
+  <text x="550" y="190" text-anchor="middle" class="small">Better Auth, `/api/auth/*`, `/me`</text>
+  <text x="550" y="212" text-anchor="middle" class="small">Owns session and identity flows</text>
+
+  <rect x="410" y="300" width="280" height="130" rx="16" ry="16" class="api"/>
+  <text x="550" y="344" text-anchor="middle" class="head">Analytics &amp; Library Module</text>
+  <text x="550" y="370" text-anchor="middle" class="small">`/me/stats`, `/library/*`, `/leaderboard`</text>
+  <text x="550" y="392" text-anchor="middle" class="small">Aggregation-heavy read paths</text>
+
+  <rect x="410" y="480" width="280" height="130" rx="16" ry="16" class="api"/>
+  <text x="550" y="524" text-anchor="middle" class="head">Social &amp; Playlist Module</text>
+  <text x="550" y="550" text-anchor="middle" class="small">Follows, activity feed, playlist CRUD</text>
+  <text x="550" y="572" text-anchor="middle" class="small">Strongly consistent user writes</text>
+
+  <rect x="410" y="660" width="280" height="130" rx="16" ry="16" class="api"/>
+  <text x="550" y="704" text-anchor="middle" class="head">AI &amp; Import Module</text>
+  <text x="550" y="730" text-anchor="middle" class="small">Taste DNA, roast, ZIP upload/process</text>
+  <text x="550" y="752" text-anchor="middle" class="small">Presigned storage + workflow launch</text>
+
+  <rect x="840" y="180" width="270" height="130" rx="16" ry="16" class="api"/>
+  <text x="975" y="224" text-anchor="middle" class="head">Workflow Worker</text>
+  <text x="975" y="250" text-anchor="middle" class="small">sync-history, refresh-tokens, imports,</text>
+  <text x="975" y="272" text-anchor="middle" class="small">hydrate-artist, weekly playlists</text>
+
+  <rect x="840" y="430" width="270" height="130" rx="16" ry="16" class="data"/>
+  <text x="975" y="474" text-anchor="middle" class="head">PostgreSQL</text>
+  <text x="975" y="500" text-anchor="middle" class="small">User, history, social graph, playlists,</text>
+  <text x="975" y="522" text-anchor="middle" class="small">AI cache, import jobs</text>
+
+  <rect x="840" y="680" width="270" height="130" rx="16" ry="16" class="api"/>
+  <text x="975" y="724" text-anchor="middle" class="head">Hatchet Lite</text>
+  <text x="975" y="750" text-anchor="middle" class="small">Queue + orchestration boundary</text>
+
+  <rect x="1240" y="130" width="210" height="110" rx="16" ry="16" class="ext"/>
+  <text x="1345" y="172" text-anchor="middle" class="head">Spotify</text>
+  <text x="1345" y="196" text-anchor="middle" class="small">OAuth and data source</text>
+
+  <rect x="1240" y="330" width="210" height="110" rx="16" ry="16" class="ext"/>
+  <text x="1345" y="372" text-anchor="middle" class="head">Anthropic</text>
+  <text x="1345" y="396" text-anchor="middle" class="small">AI generation</text>
+
+  <rect x="1240" y="530" width="210" height="110" rx="16" ry="16" class="ext"/>
+  <text x="1345" y="572" text-anchor="middle" class="head">S3 Storage</text>
+  <text x="1345" y="596" text-anchor="middle" class="small">Import staging</text>
+
+  <line x1="290" y1="440" x2="410" y2="185" class="line"/>
+  <line x1="290" y1="440" x2="410" y2="365" class="line"/>
+  <line x1="290" y1="440" x2="410" y2="545" class="line"/>
+  <line x1="290" y1="440" x2="410" y2="725" class="line"/>
+  <text x="350" y="425" text-anchor="middle" class="edge">HTTPS / JSON</text>
+
+  <line x1="690" y1="185" x2="840" y2="235" class="line"/>
+  <text x="765" y="194" text-anchor="middle" class="edge">enqueue initial sync</text>
+
+  <line x1="690" y1="365" x2="840" y2="495" class="line"/>
+  <text x="760" y="420" text-anchor="middle" class="edge">SQL aggregates</text>
+
+  <line x1="690" y1="545" x2="840" y2="495" class="line"/>
+  <text x="765" y="535" text-anchor="middle" class="edge">transactions</text>
+
+  <line x1="690" y1="725" x2="840" y2="745" class="line"/>
+  <text x="765" y="712" text-anchor="middle" class="edge">workflow dispatch</text>
+
+  <line x1="975" y1="310" x2="975" y2="430" class="line"/>
+  <text x="998" y="376" class="edge">SQL write-back</text>
+
+  <line x1="975" y1="680" x2="975" y2="560" class="line"/>
+  <text x="997" y="626" class="edge">worker jobs</text>
+
+  <line x1="1110" y1="235" x2="1240" y2="185" class="line"/>
+  <line x1="1110" y1="235" x2="1240" y2="585" class="line"/>
+  <text x="1180" y="220" text-anchor="middle" class="edge">sync / metadata</text>
+  <text x="1170" y="420" text-anchor="middle" class="edge">object read/write</text>
+
+  <line x1="690" y1="725" x2="1240" y2="385" class="line"/>
+  <text x="990" y="530" text-anchor="middle" class="edge">AI prompt / tool result</text>
+
+  <line x1="690" y1="725" x2="1240" y2="585" class="line"/>
+  <text x="980" y="670" text-anchor="middle" class="edge">presigned upload</text>
+</svg>

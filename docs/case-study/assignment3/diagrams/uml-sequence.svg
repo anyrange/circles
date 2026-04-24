@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1300" viewBox="0 0 1600 1300">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #0f172a; }
+      .head { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 14px Arial, sans-serif; fill: #334155; }
+      .line { stroke: #334155; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .life { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 7 6; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <text x="800" y="40" text-anchor="middle" class="title">UML Sequence Diagrams</text>
+
+  <rect x="40" y="70" width="1520" height="360" rx="18" ry="18" class="panel"/>
+  <text x="70" y="102" class="head">A. User login and initial sync</text>
+  <text x="120" y="140" text-anchor="middle" class="head">User</text>
+  <text x="360" y="140" text-anchor="middle" class="head">Frontend</text>
+  <text x="650" y="140" text-anchor="middle" class="head">API/Auth</text>
+  <text x="940" y="140" text-anchor="middle" class="head">Spotify</text>
+  <text x="1210" y="140" text-anchor="middle" class="head">PostgreSQL</text>
+  <text x="1440" y="140" text-anchor="middle" class="head">Worker</text>
+  <line x1="120" y1="155" x2="120" y2="395" class="life"/>
+  <line x1="360" y1="155" x2="360" y2="395" class="life"/>
+  <line x1="650" y1="155" x2="650" y2="395" class="life"/>
+  <line x1="940" y1="155" x2="940" y2="395" class="life"/>
+  <line x1="1210" y1="155" x2="1210" y2="395" class="life"/>
+  <line x1="1440" y1="155" x2="1440" y2="395" class="life"/>
+  <line x1="120" y1="190" x2="360" y2="190" class="line"/><text x="240" y="180" text-anchor="middle" class="small">1: click login()</text>
+  <line x1="360" y1="220" x2="650" y2="220" class="line"/><text x="505" y="210" text-anchor="middle" class="small">2: GET /api/auth/spotify</text>
+  <line x1="650" y1="250" x2="940" y2="250" class="line"/><text x="795" y="240" text-anchor="middle" class="small">3: OAuth redirect</text>
+  <line x1="940" y1="285" x2="650" y2="285" class="line"/><text x="795" y="275" text-anchor="middle" class="small">4: callback(code)</text>
+  <line x1="650" y1="315" x2="1210" y2="315" class="line"/><text x="930" y="305" text-anchor="middle" class="small">5: insert user/session/account -> 200</text>
+  <line x1="650" y1="345" x2="1440" y2="345" class="line"/><text x="1045" y="335" text-anchor="middle" class="small">6: runNoWait(sync-history)</text>
+  <line x1="650" y1="375" x2="360" y2="375" class="line"/><text x="505" y="365" text-anchor="middle" class="small">7: 302 authenticated session</text>
+
+  <rect x="40" y="460" width="1520" height="360" rx="18" ry="18" class="panel"/>
+  <text x="70" y="492" class="head">B. ZIP import submission</text>
+  <text x="120" y="530" text-anchor="middle" class="head">User</text>
+  <text x="360" y="530" text-anchor="middle" class="head">Frontend</text>
+  <text x="650" y="530" text-anchor="middle" class="head">API</text>
+  <text x="930" y="530" text-anchor="middle" class="head">S3 Storage</text>
+  <text x="1210" y="530" text-anchor="middle" class="head">PostgreSQL</text>
+  <text x="1440" y="530" text-anchor="middle" class="head">Worker</text>
+  <line x1="120" y1="545" x2="120" y2="785" class="life"/>
+  <line x1="360" y1="545" x2="360" y2="785" class="life"/>
+  <line x1="650" y1="545" x2="650" y2="785" class="life"/>
+  <line x1="930" y1="545" x2="930" y2="785" class="life"/>
+  <line x1="1210" y1="545" x2="1210" y2="785" class="life"/>
+  <line x1="1440" y1="545" x2="1440" y2="785" class="life"/>
+  <line x1="120" y1="580" x2="360" y2="580" class="line"/><text x="240" y="570" text-anchor="middle" class="small">1: choose ZIP file</text>
+  <line x1="360" y1="610" x2="650" y2="610" class="line"/><text x="505" y="600" text-anchor="middle" class="small">2: POST /me/import/upload</text>
+  <line x1="650" y1="640" x2="930" y2="640" class="line"/><text x="790" y="630" text-anchor="middle" class="small">3: create presigned URL</text>
+  <line x1="650" y1="670" x2="360" y2="670" class="line"/><text x="505" y="660" text-anchor="middle" class="small">4: 200 {uploadUrl, s3Key}</text>
+  <line x1="360" y1="700" x2="930" y2="700" class="line"/><text x="645" y="690" text-anchor="middle" class="small">5: PUT binary -> 200</text>
+  <line x1="360" y1="730" x2="650" y2="730" class="line"/><text x="505" y="720" text-anchor="middle" class="small">6: POST /me/import/process</text>
+  <line x1="650" y1="760" x2="1210" y2="760" class="line"/><text x="930" y="750" text-anchor="middle" class="small">7: insert import_job(status=pending)</text>
+  <line x1="650" y1="790" x2="1440" y2="790" class="line"/><text x="1045" y="780" text-anchor="middle" class="small">8: runNoWait(process-import) -> 201</text>
+
+  <rect x="40" y="850" width="1520" height="360" rx="18" ry="18" class="panel"/>
+  <text x="70" y="882" class="head">C. Dashboard stats retrieval</text>
+  <text x="160" y="920" text-anchor="middle" class="head">User</text>
+  <text x="480" y="920" text-anchor="middle" class="head">Frontend</text>
+  <text x="830" y="920" text-anchor="middle" class="head">API</text>
+  <text x="1180" y="920" text-anchor="middle" class="head">PostgreSQL</text>
+  <line x1="160" y1="935" x2="160" y2="1175" class="life"/>
+  <line x1="480" y1="935" x2="480" y2="1175" class="life"/>
+  <line x1="830" y1="935" x2="830" y2="1175" class="life"/>
+  <line x1="1180" y1="935" x2="1180" y2="1175" class="life"/>
+  <line x1="160" y1="970" x2="480" y2="970" class="line"/><text x="320" y="960" text-anchor="middle" class="small">1: open dashboard(range=30d)</text>
+  <line x1="480" y1="1000" x2="830" y2="1000" class="line"/><text x="655" y="990" text-anchor="middle" class="small">2: GET /me/stats?range=30d</text>
+  <line x1="480" y1="1030" x2="830" y2="1030" class="line"/><text x="655" y="1020" text-anchor="middle" class="small">3: GET /me/stats/extended?range=30d</text>
+  <line x1="830" y1="1060" x2="1180" y2="1060" class="line"/><text x="1005" y="1050" text-anchor="middle" class="small">4: aggregate history, tracks, artists</text>
+  <line x1="1180" y1="1090" x2="830" y2="1090" class="line"/><text x="1005" y="1080" text-anchor="middle" class="small">5: result rows</text>
+  <line x1="830" y1="1120" x2="480" y2="1120" class="line"/><text x="655" y="1110" text-anchor="middle" class="small">6: 200 JSON stats payloads</text>
+  <line x1="480" y1="1150" x2="160" y2="1150" class="line"/><text x="320" y="1140" text-anchor="middle" class="small">7: render cards and charts</text>
+</svg>

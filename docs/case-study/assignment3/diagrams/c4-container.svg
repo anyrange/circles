@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 30px Arial, sans-serif; fill: #0f172a; }
+      .box-title { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .small { font: 15px Arial, sans-serif; fill: #334155; }
+      .edge { font: 15px Arial, sans-serif; fill: #1e293b; }
+      .frontend { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; }
+      .backend { fill: #dcfce7; stroke: #16a34a; stroke-width: 2; }
+      .database { fill: #fed7aa; stroke: #ea580c; stroke-width: 2; }
+      .external { fill: #e5e7eb; stroke: #6b7280; stroke-width: 2; }
+      .line { stroke: #334155; stroke-width: 2.3; fill: none; marker-end: url(#arrow); }
+      .boundary { fill: none; stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+
+  <text x="750" y="44" text-anchor="middle" class="title">C4 Level 2 — Container Diagram</text>
+  <rect x="220" y="80" width="930" height="790" rx="18" ry="18" class="boundary"/>
+  <text x="248" y="112" class="small">Circles system boundary</text>
+
+  <rect x="40" y="370" width="140" height="90" rx="14" ry="14" class="external"/>
+  <text x="110" y="408" text-anchor="middle" class="box-title">User</text>
+  <text x="110" y="432" text-anchor="middle" class="small">Browser</text>
+
+  <rect x="280" y="170" width="250" height="130" rx="16" ry="16" class="frontend"/>
+  <text x="405" y="214" text-anchor="middle" class="box-title">Web Frontend</text>
+  <text x="405" y="240" text-anchor="middle" class="small">TanStack React Start</text>
+  <text x="405" y="262" text-anchor="middle" class="small">Dashboard, library, social UI</text>
+
+  <rect x="620" y="170" width="260" height="150" rx="16" ry="16" class="backend"/>
+  <text x="750" y="214" text-anchor="middle" class="box-title">API Server</text>
+  <text x="750" y="240" text-anchor="middle" class="small">Hono + Node.js</text>
+  <text x="750" y="262" text-anchor="middle" class="small">Auth, stats, social, playlists, AI, import</text>
+  <text x="750" y="284" text-anchor="middle" class="small">REST/JSON over HTTPS</text>
+
+  <rect x="620" y="430" width="260" height="150" rx="16" ry="16" class="backend"/>
+  <text x="750" y="474" text-anchor="middle" class="box-title">Workflow Worker</text>
+  <text x="750" y="500" text-anchor="middle" class="small">TypeScript + Hatchet SDK</text>
+  <text x="750" y="522" text-anchor="middle" class="small">Sync, import, token refresh, playlists</text>
+
+  <rect x="620" y="690" width="260" height="120" rx="16" ry="16" class="database"/>
+  <text x="750" y="734" text-anchor="middle" class="box-title">PostgreSQL</text>
+  <text x="750" y="760" text-anchor="middle" class="small">Canonical relational data store</text>
+
+  <rect x="280" y="470" width="240" height="110" rx="16" ry="16" class="backend"/>
+  <text x="400" y="512" text-anchor="middle" class="box-title">Hatchet Lite</text>
+  <text x="400" y="536" text-anchor="middle" class="small">Workflow orchestration / queue</text>
+
+  <rect x="1200" y="120" width="240" height="110" rx="16" ry="16" class="external"/>
+  <text x="1320" y="162" text-anchor="middle" class="box-title">Spotify</text>
+  <text x="1320" y="186" text-anchor="middle" class="small">OAuth + Web API</text>
+
+  <rect x="1200" y="330" width="240" height="110" rx="16" ry="16" class="external"/>
+  <text x="1320" y="372" text-anchor="middle" class="box-title">Anthropic</text>
+  <text x="1320" y="396" text-anchor="middle" class="small">LLM report generation</text>
+
+  <rect x="1200" y="540" width="240" height="110" rx="16" ry="16" class="external"/>
+  <text x="1320" y="582" text-anchor="middle" class="box-title">S3 Storage</text>
+  <text x="1320" y="606" text-anchor="middle" class="small">Import file staging</text>
+
+  <line x1="180" y1="415" x2="280" y2="235" class="line"/>
+  <text x="230" y="305" text-anchor="middle" class="edge">HTTPS</text>
+
+  <line x1="530" y1="235" x2="620" y2="235" class="line"/>
+  <text x="575" y="215" text-anchor="middle" class="edge">HTTPS / JSON</text>
+
+  <line x1="750" y1="320" x2="750" y2="430" class="line"/>
+  <text x="772" y="380" class="edge">Hatchet workflow calls</text>
+
+  <line x1="520" y1="525" x2="620" y2="505" class="line"/>
+  <text x="570" y="495" text-anchor="middle" class="edge">gRPC / workflow RPC</text>
+
+  <line x1="750" y1="580" x2="750" y2="690" class="line"/>
+  <text x="770" y="642" class="edge">SQL</text>
+
+  <line x1="690" y1="320" x2="780" y2="690" class="line"/>
+  <text x="660" y="505" text-anchor="middle" class="edge">SQL</text>
+
+  <line x1="880" y1="210" x2="1200" y2="175" class="line"/>
+  <text x="1040" y="165" text-anchor="middle" class="edge">HTTPS OAuth + API</text>
+
+  <line x1="880" y1="250" x2="1200" y2="385" class="line"/>
+  <text x="1030" y="295" text-anchor="middle" class="edge">HTTPS JSON</text>
+
+  <line x1="880" y1="500" x2="1200" y2="175" class="line"/>
+  <text x="1038" y="335" text-anchor="middle" class="edge">HTTPS sync / metadata</text>
+
+  <line x1="880" y1="525" x2="1200" y2="595" class="line"/>
+  <text x="1040" y="548" text-anchor="middle" class="edge">S3 SDK / HTTPS</text>
+
+  <line x1="880" y1="250" x2="1200" y2="595" class="line"/>
+  <text x="1000" y="430" text-anchor="middle" class="edge">Presigned upload URL</text>
+</svg>

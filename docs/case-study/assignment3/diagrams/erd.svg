@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1280" viewBox="0 0 1700 1280">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#334155"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #0f172a; }
+      .head { font: 700 17px Arial, sans-serif; fill: #0f172a; }
+      .body { font: 13px 'Courier New', monospace; fill: #1e293b; }
+      .line { stroke: #334155; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .ent { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; }
+      .note { font: 14px Arial, sans-serif; fill: #334155; }
+    </style>
+  </defs>
+  <text x="850" y="38" text-anchor="middle" class="title">Entity-Relationship Diagram</text>
+
+  <g transform="translate(70,90)">
+    <rect width="250" height="170" class="ent"/>
+    <text x="125" y="28" text-anchor="middle" class="head">user</text>
+    <text x="10" y="56" class="body">PK id: text</text>
+    <text x="10" y="78" class="body">email: text UNIQUE</text>
+    <text x="10" y="100" class="body">spotify_id: varchar UNIQUE</text>
+    <text x="10" y="122" class="body">username: varchar UNIQUE</text>
+    <text x="10" y="144" class="body">is_public: boolean</text>
+  </g>
+
+  <g transform="translate(390,90)">
+    <rect width="250" height="170" class="ent"/>
+    <text x="125" y="28" text-anchor="middle" class="head">session</text>
+    <text x="10" y="56" class="body">PK id: text</text>
+    <text x="10" y="78" class="body">FK user_id -> user.id</text>
+    <text x="10" y="100" class="body">token: text UNIQUE</text>
+    <text x="10" y="122" class="body">expires_at: timestamp</text>
+  </g>
+
+  <g transform="translate(710,90)">
+    <rect width="280" height="190" class="ent"/>
+    <text x="140" y="28" text-anchor="middle" class="head">account</text>
+    <text x="10" y="56" class="body">PK id: text</text>
+    <text x="10" y="78" class="body">FK user_id -> user.id</text>
+    <text x="10" y="100" class="body">provider_id: text</text>
+    <text x="10" y="122" class="body">access_token: text</text>
+    <text x="10" y="144" class="body">refresh_token: text</text>
+    <text x="10" y="166" class="body">access_token_expires_at: ts</text>
+  </g>
+
+  <g transform="translate(1060,90)">
+    <rect width="260" height="170" class="ent"/>
+    <text x="130" y="28" text-anchor="middle" class="head">follows</text>
+    <text x="10" y="56" class="body">PK (follower_id, following_id)</text>
+    <text x="10" y="78" class="body">FK follower_id -> user.id</text>
+    <text x="10" y="100" class="body">FK following_id -> user.id</text>
+    <text x="10" y="122" class="body">created_at: timestamp</text>
+  </g>
+
+  <g transform="translate(70,380)">
+    <rect width="240" height="150" class="ent"/>
+    <text x="120" y="28" text-anchor="middle" class="head">artists</text>
+    <text x="10" y="56" class="body">PK id: bigint</text>
+    <text x="10" y="78" class="body">spotify_id: varchar UNIQUE</text>
+    <text x="10" y="100" class="body">genres: jsonb</text>
+    <text x="10" y="122" class="body">images: jsonb</text>
+  </g>
+
+  <g transform="translate(390,380)">
+    <rect width="240" height="150" class="ent"/>
+    <text x="120" y="28" text-anchor="middle" class="head">albums</text>
+    <text x="10" y="56" class="body">PK id: bigint</text>
+    <text x="10" y="78" class="body">spotify_id: varchar UNIQUE</text>
+    <text x="10" y="100" class="body">name: varchar</text>
+    <text x="10" y="122" class="body">images: jsonb</text>
+  </g>
+
+  <g transform="translate(710,360)">
+    <rect width="260" height="170" class="ent"/>
+    <text x="130" y="28" text-anchor="middle" class="head">tracks</text>
+    <text x="10" y="56" class="body">PK id: bigint</text>
+    <text x="10" y="78" class="body">spotify_id: varchar UNIQUE</text>
+    <text x="10" y="100" class="body">FK album_id -> albums.id</text>
+    <text x="10" y="122" class="body">duration_ms: integer</text>
+    <text x="10" y="144" class="body">popularity: integer</text>
+  </g>
+
+  <g transform="translate(1040,360)">
+    <rect width="280" height="170" class="ent"/>
+    <text x="140" y="28" text-anchor="middle" class="head">track_artists</text>
+    <text x="10" y="56" class="body">PK (track_id, artist_id)</text>
+    <text x="10" y="78" class="body">FK track_id -> tracks.id</text>
+    <text x="10" y="100" class="body">FK artist_id -> artists.id</text>
+    <text x="10" y="122" class="body">resolves N:M Track-Artist</text>
+  </g>
+
+  <g transform="translate(1370,360)">
+    <rect width="250" height="170" class="ent"/>
+    <text x="125" y="28" text-anchor="middle" class="head">audio_features</text>
+    <text x="10" y="56" class="body">PK/FK track_id -> tracks.id</text>
+    <text x="10" y="78" class="body">energy: double</text>
+    <text x="10" y="100" class="body">valence: double</text>
+    <text x="10" y="122" class="body">danceability: double</text>
+  </g>
+
+  <g transform="translate(260,650)">
+    <rect width="280" height="170" class="ent"/>
+    <text x="140" y="28" text-anchor="middle" class="head">history</text>
+    <text x="10" y="56" class="body">PK id: bigint</text>
+    <text x="10" y="78" class="body">FK user_id -> user.id</text>
+    <text x="10" y="100" class="body">FK track_id -> tracks.id</text>
+    <text x="10" y="122" class="body">played_at: timestamp</text>
+    <text x="10" y="144" class="body">UNIQUE(user_id, played_at)</text>
+  </g>
+
+  <g transform="translate(680,650)">
+    <rect width="260" height="170" class="ent"/>
+    <text x="130" y="28" text-anchor="middle" class="head">playlists</text>
+    <text x="10" y="56" class="body">PK id: bigint</text>
+    <text x="10" y="78" class="body">FK user_id -> user.id</text>
+    <text x="10" y="100" class="body">name: varchar</text>
+    <text x="10" y="122" class="body">is_auto: boolean</text>
+    <text x="10" y="144" class="body">spotify_id: varchar</text>
+  </g>
+
+  <g transform="translate(1040,650)">
+    <rect width="290" height="170" class="ent"/>
+    <text x="145" y="28" text-anchor="middle" class="head">playlist_tracks</text>
+    <text x="10" y="56" class="body">PK (playlist_id, track_id)</text>
+    <text x="10" y="78" class="body">FK playlist_id -> playlists.id</text>
+    <text x="10" y="100" class="body">FK track_id -> tracks.id</text>
+    <text x="10" y="122" class="body">position: integer</text>
+  </g>
+
+  <g transform="translate(180,960)">
+    <rect width="260" height="150" class="ent"/>
+    <text x="130" y="28" text-anchor="middle" class="head">ai_cache</text>
+    <text x="10" y="56" class="body">PK id: bigint</text>
+    <text x="10" y="78" class="body">FK user_id -> user.id</text>
+    <text x="10" y="100" class="body">type: varchar</text>
+    <text x="10" y="122" class="body">bucket: varchar UNIQUE per user/type</text>
+  </g>
+
+  <g transform="translate(580,960)">
+    <rect width="290" height="170" class="ent"/>
+    <text x="145" y="28" text-anchor="middle" class="head">import_jobs</text>
+    <text x="10" y="56" class="body">PK id: bigint</text>
+    <text x="10" y="78" class="body">FK user_id -> user.id</text>
+    <text x="10" y="100" class="body">status: varchar</text>
+    <text x="10" y="122" class="body">s3_key: varchar</text>
+    <text x="10" y="144" class="body">total_tracks/imported_tracks: int</text>
+  </g>
+
+  <line x1="320" y1="175" x2="390" y2="175" class="line"/>
+  <text x="355" y="160" text-anchor="middle" class="note">1:N</text>
+
+  <line x1="640" y1="175" x2="710" y2="175" class="line"/>
+  <text x="675" y="160" text-anchor="middle" class="note">1:N</text>
+
+  <line x1="990" y1="175" x2="1060" y2="175" class="line"/>
+  <text x="1025" y="160" text-anchor="middle" class="note">1:N self edge</text>
+
+  <line x1="870" y1="530" x2="870" y2="650" class="line"/>
+  <text x="885" y="602" class="note">1:N</text>
+
+  <line x1="970" y1="445" x2="1040" y2="445" class="line"/>
+  <text x="1005" y="430" text-anchor="middle" class="note">1:N</text>
+
+  <line x1="1320" y1="445" x2="1370" y2="445" class="line"/>
+  <text x="1345" y="430" text-anchor="middle" class="note">1:1</text>
+
+  <line x1="310" y1="455" x2="1040" y2="445" class="line"/>
+  <text x="675" y="428" text-anchor="middle" class="note">N:M via track_artists</text>
+
+  <line x1="540" y1="735" x2="710" y2="735" class="line"/>
+  <text x="625" y="720" text-anchor="middle" class="note">N:1</text>
+
+  <line x1="940" y1="735" x2="1040" y2="735" class="line"/>
+  <text x="990" y="720" text-anchor="middle" class="note">1:N</text>
+
+  <line x1="540" y1="790" x2="710" y2="445" class="line"/>
+  <text x="610" y="610" text-anchor="middle" class="note">N:1</text>
+
+  <line x1="830" y1="820" x2="180" y2="960" class="line"/>
+  <text x="505" y="905" text-anchor="middle" class="note">user 1:N ai_cache</text>
+
+  <line x1="770" y1="820" x2="725" y2="960" class="line"/>
+  <text x="732" y="900" class="note">user 1:N import_jobs</text>
+</svg>
