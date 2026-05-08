@@ -88,6 +88,7 @@ When a new PDF is added to `sources/`:
 
 1. **Aldiyar Seylkhanov** — Bachelor Degree Student, AITU (seylkhanov.aldiyar@gmail.com)
 2. **Alexandr Tyulkov** — Master Degree Student, AITU (widesehl@gmail.com, ORCID 0009-0009-6422-0559)
+3. **Malika Ishakhanova** — Master Degree Student, AITU (malikaishakhanova@gmail.com)
 
 **Venue:** IEEE SIST 2026 conference, `charged-ieee:0.1.4` template
 

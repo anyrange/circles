@@ -1,25 +1,33 @@
 = Discussion
 
-The results support a limited but clear claim. Circles shows that toolchain unification improves reproducibility at the command and CI level. Most test commands go through one interface. Coverage output looks similar across packages. The CI workflows are compact and follow a shared structure. These are real benefits.
+The results show that the risk-based strategy worked best where risks were mapped to small, deterministic units. The Spotify export parser, range helper, retry helper, and ZIP guard all became measurable through automated tests. These modules produced fast execution, selected-scope coverage, and mutation evidence. This pattern supports the value of starting with high-risk helper functions when a system does not yet have broad integration coverage.
 
-But the frontend failure shows that unification at the command level does not guarantee uniform behavior at the execution level. When the frontend unit and browser projects run together under one aggregated command, a runner initialization error appears. The same unit project passes when run in isolation. This means the environment is sensitive to project composition, even inside a unified stack.
+The results also show that high local coverage can be misleading. Four helper modules reached full selected-scope coverage, but global backend coverage stayed below 7%. The cause is scope mismatch. The test suite covers helper logic more strongly than controllers, middleware, workflow orchestration, and database-backed behavior. Therefore, the coverage gate did not fail because individual helper tests were weak. It failed because the automated scope was too narrow.
 
-This distinction matters for quality assurance. There are two different things that can be called consistency. The first is command-level consistency: all packages use the same tool and the same interface. The second is execution-level consistency: combined runs produce the same result as isolated runs. Circles currently has the first. The frontend failure shows that the second is not yet guaranteed.
+Automation improved feedback speed. Backend test execution took milliseconds, while manual checking of the same boundaries would require repeated setup and manual input construction. Mutation testing gave a deeper signal than coverage for the selected helpers. The 87.93% score indicates that most injected changes were detected, but the surviving mutants in `retry.ts` and `zip.ts` show that some boundary behavior remains under-specified.
 
-== Implications for Risk and Test Strategy
+The performance results were strong under local conditions. The authenticated library overview endpoint stayed near 13 ms average latency and below 25 ms P99. This happened because the experiment used a small synthetic dataset and a local database. The result is useful as a baseline, but it does not prove production behavior under remote network latency, larger datasets, or concurrent real users.
 
-The backend helper layer has high detectability and stable execution. Four spec files pass reliably and coverage is complete within the configured scope. The shared package shows the same pattern on a smaller scale.
+The chaos experiment exposed the clearest user-visible failure. When PostgreSQL stopped, the authenticated endpoint failed during session lookup and returned HTTP 500. The service recovered after the database restarted without restarting the API. This is a mixed result. Process-level recovery worked, but user-visible availability did not. The failure point also means that every authenticated route depends on database availability, not only the tested library route.
 
-The frontend should be assessed differently. Its unit scope is small and well-covered. But the aggregated execution failure raises a real risk. A test can pass in isolation and still fail when run as part of a larger pipeline. Isolated success is not enough evidence for release confidence in the frontend package.
+== Trade-Offs
 
-The coverage results also need careful interpretation. All observed coverage values are 100%, but they cover only a small part of the system. Controller logic, route-level code, worker orchestration, and end-to-end flows are not covered. Full coverage of a small target scope does not mean the system is well-tested.
+The main trade-off is speed versus coverage. The current suite is fast because it focuses on helper modules. The cost is limited representativeness. Adding controller, workflow, and database integration tests will improve confidence but increase setup complexity and execution time.
 
-== Threats to Validity
+The second trade-off is automation versus flexibility. Vite+ provides one command interface and reduces configuration differences, but browser tests, end-to-end tests, and mutation tests still need specialized configuration. A unified toolchain reduces fragmentation. It does not remove all package-specific testing requirements.
 
-Four threats apply to this study. First, it is a single-repository case study. The findings cannot be generalized without further evidence. Second, there is no before-and-after migration data from the same repository. The paper evaluates the current unified setup and its remaining inconsistencies, but it cannot measure the exact improvement from a previous fragmented state. Third, coverage results reflect the configured target scope, not the full system. Fourth, the frontend failure was observed once during direct execution. It is real evidence of inconsistency, but it is not a flakiness estimate from repeated runs.
+The third trade-off is accuracy versus cost. Mutation testing and chaos testing provide stronger evidence than ordinary unit tests, but they are slower and require more controlled environments. For that reason, they are better suited to scheduled or release-level checks than to every commit.
 
-== Generalizability
+== Limitations
 
-The case supports a general principle that goes beyond this specific toolchain. When packages share one resolver, one transform pipeline, and one command interface, the number of environment differences that can cause test disagreements is reduced. This principle applies to other unified toolchains as well.
+This study has four limitations. First, it is a single-repository case study, so results cannot be generalized without more projects. Second, the performance dataset is synthetic and small. Third, mutation testing covers only four helper modules. Fourth, controller-level and workflow-level integration tests remain incomplete.
 
-But the Circles case also shows a limit of unification. Browser testing and end-to-end testing have different requirements than unit testing. These differences reintroduce local configuration even inside a unified setup. A unified toolchain reduces fragmentation. It does not remove the need to test cross-project composition explicitly.
+Several unexpected results were useful. The leaderboard route required authentication during real execution even though it was selected as a public aggregate benchmark. The frontend aggregate test command behaved differently from isolated frontend unit execution in the earlier paper inspection. These findings show that composition-level tests are necessary because implementation behavior can differ from local assumptions.
+
+The main lesson is that a QA strategy should not stop at adding tests. Tests must be tied to risks, gates, and measured outcomes. For Circles, the next improvement should focus on backend integration tests for authenticated routes, stronger validation in the import pipeline, and repeated performance and chaos runs on a larger dataset.
+
+== Lessons Learned
+
+Three lessons follow from the study. First, risk-based testing is useful only when it changes test selection. The highest-value evidence came from components that were explicitly identified as high risk before testing began. Second, quality gates need scope labels. A coverage value is meaningful only when the covered files are known. Third, experimental tests reveal different information than unit tests. Performance testing exposed route behavior and latency. Mutation testing exposed weak assertions. Chaos testing exposed dependency recovery behavior.
+
+The next iteration should therefore expand breadth before adding more specialized tools. The backend needs integration tests for authenticated controllers, route middleware, and database-backed queries. The frontend needs repeated aggregate test execution to confirm whether the observed composition failure is stable or intermittent. The import pipeline needs stricter tests for Spotify URI types and required metadata fields. After those changes, mutation and performance experiments should be repeated so that the results represent more of the system.

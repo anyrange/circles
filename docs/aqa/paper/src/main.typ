@@ -10,7 +10,7 @@
   title: [How a Unified Development Toolchain Supports Automated Testing Consistency in a TypeScript Full-Stack Monorepo: A Case Study of Circles],
 
   abstract: [
-    TypeScript monorepos often combine frontend, backend, and shared packages under one repository, but test execution is still shaped by package-local configuration. This paper studies how a unified toolchain affects testing consistency in such a setting. The Circles repository is used as a case study because it runs backend, frontend, and shared-package tests through the Vite+ command interface while still keeping a small number of package-specific overrides. The evaluation uses repository inspection, CI workflow analysis, and direct execution of test and coverage commands. The observed configuration surface consists of nine testing and CI configuration files, seven automated test files, and two GitHub Actions workflows. Empirical results show stable execution in the backend and shared package, with 21 backend tests and one shared-package test passing, while the aggregated frontend run exposes a configuration-level failure that does not appear when the frontend unit project is executed in isolation. This result is important because it shows that a unified command surface improves consistency, but multi-project composition can still preserve hidden environment differences. The paper therefore argues that unified toolchains reduce configuration fragmentation and improve reproducibility, yet consistency must still be evaluated at the combined pipeline level rather than only at the per-project level.
+    Quality assurance in full-stack TypeScript monorepos is difficult because frontend, backend, shared packages, and continuous integration pipelines can fail at different technical boundaries. This paper studies the Circles repository as a case study and addresses a specific gap: risk-based test planning, automated execution, quality gates, and experimental evidence are often documented separately rather than as one reproducible QA argument. The study proposes a risk-based automated testing strategy for Circles. The strategy maps system risks to unit, integration, end-to-end, performance, mutation, and chaos tests, then evaluates the resulting pipeline through repository inspection and direct execution. The observed automation baseline includes 33 passing backend tests, 7 backend test files, 2 GitHub Actions workflows, and a selected-helper mutation score of 87.93%. Local performance testing reached 1,523.90 requests per second for the authenticated library overview endpoint with 12.62 ms average latency. Chaos testing showed that a PostgreSQL outage produced a user-visible HTTP 500 response, but the service recovered after the database restarted. These findings show that risk-based automation improves traceability and exposes concrete gaps, but current evidence remains limited by low whole-backend coverage and a local synthetic dataset.
   ],
 
   authors: (
@@ -25,6 +25,12 @@
       department: [Master Degree Student, School of Software Engineering],
       organization: [Astana IT University (AITU)],
       location: [Astana, Kazakhstan \ widesehl\@gmail.com \ #link("https://orcid.org/0009-0009-6422-0559")[0009-0009-6422-0559]],
+    ),
+    (
+      name: "Malika Ishakhanova",
+      department: [Master Degree Student, School of Software Engineering],
+      organization: [Astana IT University (AITU)],
+      location: [Astana, Kazakhstan \ malikaishakhanova\@gmail.com],
     ),
   ),
 

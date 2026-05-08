@@ -1,3 +1,3 @@
 = Acknowledgment
 
-// TODO: fill in if needed (supervisor, institution, etc.)
+No external funding was used for this coursework paper.

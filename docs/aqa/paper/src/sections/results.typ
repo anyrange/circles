@@ -1,81 +1,192 @@
-= Preliminary Results
+= Results
 
-== Configuration Surface and Test Inventory
+This section reports observed data only. Interpretation is reserved for the discussion.
 
-Repository inspection found seven automated test files and two CI workflows. Of the seven test files, six belong to unit or component-style automation and one belongs to end-to-end testing. The backend contributes four spec files, the frontend contributes one unit file, one browser component file, and one Playwright file, and the shared package contributes one test file. This distribution shows that the current automated baseline is concentrated on helper logic and lightweight UI checks rather than on cross-package interaction paths.
-
-#figure(
-  table(
-    columns: (1.8fr, 1fr, 1fr, 1.4fr, 1.6fr),
-    align: (left, center, center, center, left),
-    stroke: 0.5pt,
-    fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Area*], [*Unit / component*], [*E2E*], [*Config files*], [*Main config locations*],
-    [Frontend], [2], [1], [5], [Vite config, three Vitest configs (aggregated, unit, browser), Playwright config],
-    [Backend], [4], [0], [1], [Vite config],
-    [Shared utils], [1], [0], [1], [Vite config],
-    [CI workflows], [N/A], [N/A], [2], [Unit CI workflow, E2E CI workflow],
-  ),
-  caption: [Observed testing inventory and configuration surface],
-)
-
-The frontend has the richest test-stack composition and the largest local configuration surface. The backend and shared package each depend on a single Vite+ configuration file. This asymmetry is relevant to the later failure analysis because the only observed inconsistency during direct execution appears in the frontend package.
-
-== Direct Execution Outcomes
-
-Direct test execution produced stable results in the backend and shared package. The backend test suite completed successfully with 4 passing files and 21 passing tests. The shared utilities suite completed successfully with 1 passing file and 1 passing test. The frontend produced mixed results. The aggregated frontend test command reported one passing file, one failed suite, and a runner initialization failure in the unit test suite. However, running the unit suite in isolation through its dedicated configuration passed with 1 passing file and 4 passing tests.
+== Test Coverage Versus Risk Priority
 
 #figure(
   table(
-    columns: (1.8fr, 1.8fr, 1.1fr, 1.1fr, 1.2fr, 2.2fr),
-    align: (left, left, center, center, center, left),
+    columns: (0.8fr, 1.1fr, 1.2fr, 2fr),
+    align: (left, center, center, left),
     stroke: 0.5pt,
     fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Run scope*], [*Package*], [*Files*], [*Tests*], [*Result*], [*Notes*],
-    [Backend test suite], [Backend], [4 passed], [21 passed], [Pass], [Stable package-level execution],
-    [Frontend aggregated], [Frontend], [1 passed, 1 failed], [2 passed], [Fail], [Initialization error in unit suite during multi-project run],
-    [Frontend unit (isolated)], [Frontend unit only], [1 passed], [4 passed], [Pass], [Unit project succeeds in isolation],
-    [Shared utils suite], [Shared utils], [1 passed], [1 passed], [Pass], [Stable single-package execution],
+    [*Risk*], [*Priority*], [*Coverage*], [*Test types applied*],
+    [R1], [High], [Partial], [E2E login support, authenticated route checks, chaos dependency test],
+    [R2], [High], [100% selected scope], [Unit, edge-case, invalid-input, mutation],
+    [R3], [High], [100% selected scope], [Unit range tests, performance test],
+    [R4], [High], [0% direct scope], [Controller tests planned, routing behavior observed during performance setup],
+    [R5], [High], [Partial], [Frontend aggregated and isolated execution comparison],
+    [R6], [High], [Scenario covered], [PostgreSQL stop and restart chaos test],
   ),
-  caption: [Observed execution outcomes on 2026-04-10],
+  caption: [Coverage alignment by risk priority],
 )
 
-The failing frontend run is important because it changes the interpretation of consistency. A shared CLI entry point is present, but consistent outcomes are not guaranteed when multiple frontend test projects are composed under one aggregate command. The initialization error appears before unit assertions execute, indicating an environment or runner composition problem rather than a fault in the tested utility function itself.
-
-== Coverage and Detectability
-
-Coverage commands show strong detectability for the currently targeted helper modules and very limited breadth beyond that scope. Backend coverage reached 100% statement, branch, function, and line coverage across four helper modules. Frontend unit coverage reached 100% for the UI utility module. Shared-package coverage reached 100% for the package entry point. These results confirm that the automated baseline is precise but narrow.
+The backend coverage command executed 33 tests successfully. The global backend coverage remained below configured thresholds: 5.88% statements, 6.83% branches, 5.45% functions, and 5.17% lines. The selected helper modules reached full local coverage in the earlier targeted reports.
 
 #figure(
   table(
-    columns: (1.8fr, 1.3fr, 1fr, 1fr, 1fr, 1fr),
-    align: (left, left, center, center, center, center),
+    columns: (1.4fr, 1.1fr, 1.1fr, 1.1fr, 1.1fr, 1.4fr),
+    align: (left, center, center, center, center, left),
     stroke: 0.5pt,
     fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Package*], [*Covered target*], [*Statements*], [*Branches*], [*Functions*], [*Lines*],
-    [Backend], [Four helper utility modules], [100%], [100%], [100%], [100%],
-    [Frontend unit], [UI utility module], [100%], [100%], [100%], [100%],
-    [Shared utils], [Package entry point], [100%], [100%], [100%], [100%],
+    [*Scope*], [*Stmt.*], [*Branch*], [*Func.*], [*Lines*], [*Gate status*],
+    [Selected helper scope], [100%], [100%], [100%], [100%], [Pass in targeted reports],
+    [Whole backend], [5.88%], [6.83%], [5.45%], [5.17%], [Fail global threshold],
   ),
-  caption: [Observed coverage for the currently instrumented scope],
+  caption: [Coverage by measurement scope],
 )
 
-The coverage data should not be interpreted as system-wide completeness. In the frontend, coverage is restricted to one utility module. In the backend, controller and workflow layers remain outside the reported coverage target set even though they are likely to carry higher integration risk. Therefore, detectability is high inside the instrumented helper scope and lower outside it.
-
-== Failure Pattern Analysis
-
-Only one concrete failure was observed during direct execution, but it is analytically useful because it was not predicted by simple per-file unit reasoning. The failure affected the frontend unit suite during the aggregated frontend command and did not reproduce in the isolated unit-project run. This creates a difference between local project success and combined pipeline behavior.
+== Defect Detection: Manual Versus Automated
 
 #figure(
   table(
-    columns: (1.5fr, 1.4fr, 1.6fr, 1fr, 2.2fr),
-    align: (left, left, left, center, left),
+    columns: (1.3fr, 1.2fr, 1.1fr, 1.7fr),
+    align: left,
     stroke: 0.5pt,
     fill: (_, row) => if row == 0 { luma(220) } else { white },
-    [*Failure ID*], [*Affected module*], [*Failure type*], [*Frequency*], [*Interpretation*],
-    [F01], [Frontend unit test suite], [Runner initialization error during aggregated run], [1 observed aggregated run], [The command surface is unified, but the composed frontend test environment is still sensitive to project interaction],
+    [*Method*], [*Total findings*], [*Critical findings*], [*Detection stage*],
+    [Manual architecture review], [2], [0], [Assignment 1 risk planning],
+    [Automated unit tests], [3 design behaviors], [0], [Midterm edge-case execution],
+    [Coverage analysis], [1 gate failure], [0], [Assignment 3 baseline validation],
+    [Performance setup], [1 route behavior], [0], [Assignment 3 load-test preparation],
+    [Chaos experiment], [1 outage behavior], [1], [Assignment 3 failure injection],
   ),
-  caption: [Observed failure evidence],
+  caption: [Observed findings by detection method],
 )
 
-This result increases the apparent risk of frontend test orchestration and lowers confidence in detectability at the package boundary. The backend and shared package currently show no analogous evidence of instability. At this stage, the strongest preliminary finding is therefore mixed: unification simplifies the command surface and supports reproducible coverage reporting, but consistency claims remain weaker in the most configuration-heavy package.
+#figure(
+  table(
+    columns: (1.4fr, 1fr, 1fr, 1.4fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*Test type*], [*Findings*], [*Severity*], [*Example*],
+    [Unit and edge tests], [3], [Medium], [Permissive URI parsing and weak ZIP signature acceptance],
+    [Coverage command], [1], [High], [Global backend coverage below configured gate],
+    [Performance test setup], [1], [Medium], [`/leaderboard` required authentication during execution],
+    [Chaos test], [1], [High], [Authenticated route returned HTTP 500 during database outage],
+  ),
+  caption: [Automated and experimental findings],
+)
+
+== Execution Time Analysis
+
+#figure(
+  table(
+    columns: (1.7fr, 1.4fr, 1.4fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*Test stage*], [*Manual estimate*], [*Automated time*],
+    [Backend baseline suite], [10-15 min], [95 ms],
+    [Backend extended suite], [20-30 min], [206 ms],
+    [Coverage command], [Not practical manually], [Tests pass, threshold fails],
+    [Mutation testing], [Not practical manually], [29 s],
+    [Performance test], [Not practical manually], [10 s per endpoint],
+  ),
+  caption: [Manual versus automated execution time],
+)
+
+Direct package execution also produced the following observed outcomes: backend unit tests passed with 7 files and 33 tests during Assignment 3, while the earlier paper inspection recorded stable backend and shared-package execution and a frontend aggregated-run failure.
+
+#figure(
+  table(
+    columns: (1.6fr, 1.1fr, 1.1fr, 1.1fr, 2fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*Run scope*], [*Files*], [*Tests*], [*Result*], [*Notes*],
+    [Backend baseline], [4], [21], [Pass], [Assignment 2 helper suite],
+    [Backend extended], [7], [33], [Pass], [Assignment 3 and midterm suite],
+    [Shared utils], [1], [1], [Pass], [Package-level utility check],
+    [Frontend unit isolated], [1], [4], [Pass], [Dedicated unit project],
+    [Frontend aggregated], [1 pass, 1 fail], [2 pass], [Fail], [Runner initialization failure in combined project run],
+  ),
+  caption: [Observed test execution outcomes],
+)
+
+== Performance Testing Results
+
+#figure(
+  table(
+    columns: (2fr, 1.1fr, 1.2fr, 1.2fr, 1.2fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*Scenario*], [*Auth*], [*Avg latency*], [*P99*], [*Avg RPS*],
+    [`/health` normal baseline], [No], [0.01 ms], [0 ms], [43,093.82],
+    [`/leaderboard?period=all` aggregate read], [Yes], [13.83 ms], [24 ms], [1,396.70],
+    [`/library/overview?range=30d` authenticated read], [Yes], [12.62 ms], [21 ms], [1,523.90],
+  ),
+  caption: [Local load-test results with 20 concurrent connections over 10 seconds],
+)
+
+All measured read scenarios stayed below the informal 200 ms P99 target in the local experiment.
+
+#figure(
+  table(
+    columns: (1.5fr, 1.2fr, 1.2fr, 1.2fr, 1.4fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*Metric*], [*Target*], [*Best observed*], [*Worst observed*], [*Status*],
+    [P99 latency], [<= 200 ms], [0 ms], [24 ms], [Pass],
+    [Average latency], [Report only], [0.01 ms], [13.83 ms], [Recorded],
+    [Throughput], [Report only], [1,396.70 RPS], [43,093.82 RPS], [Recorded],
+    [Error behavior], [0 critical route defects], [n/a], [Auth required on selected public route], [Finding],
+  ),
+  caption: [Performance quality-gate summary],
+)
+
+== Mutation Testing Results
+
+#figure(
+  table(
+    columns: (1.8fr, 1fr, 1fr, 1fr, 1fr, 1.1fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*File*], [*Total*], [*Killed*], [*Survived*], [*Timeout*], [*Score*],
+    [`range.ts`], [8], [8], [0], [0], [100.00%],
+    [`retry.ts`], [26], [19], [6], [1], [76.92%],
+    [`spotify-export.ts`], [16], [16], [0], [0], [100.00%],
+    [`zip.ts`], [8], [7], [1], [0], [87.50%],
+    [*All selected files*], [58], [50], [7], [1], [87.93%],
+  ),
+  caption: [Mutation testing results for selected backend helpers],
+)
+
+The mutation run generated 58 mutants and completed in 29 seconds. The selected helper scope passed the 80% mutation-score gate overall, but `retry.ts` alone stayed below that threshold.
+
+== Chaos Testing Outcomes
+
+#figure(
+  table(
+    columns: (1.6fr, 1.2fr, 2.7fr, 1.2fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*Experiment*], [*Failure injected*], [*System behavior*], [*Recovery*],
+    [Baseline request], [None], [`/library/overview?range=30d` returned HTTP 200], [n/a],
+    [Database outage], [PostgreSQL stopped], [Endpoint returned HTTP 500 with session lookup failure], [Not available during outage],
+    [Database restart], [PostgreSQL started], [Same endpoint returned HTTP 200 again], [Recovered without API restart],
+  ),
+  caption: [Chaos experiment against PostgreSQL availability],
+)
+
+#figure(
+  table(
+    columns: (1.5fr, 1.1fr, 1.4fr, 1.7fr),
+    align: left,
+    stroke: 0.5pt,
+    fill: (_, row) => if row == 0 { luma(220) } else { white },
+    [*Gate*], [*Threshold*], [*Observed*], [*Status*],
+    [Critical tests], [100% pass], [33/33 backend tests passed], [Pass],
+    [Critical-module coverage], [>= 80%], [57% high-risk module coverage in midterm], [Partial],
+    [Whole-backend coverage], [Configured high threshold], [Below 7%], [Fail],
+    [Mutation score], [>= 80%], [87.93% selected helper score], [Pass],
+    [Read latency], [P99 <= 200 ms], [Worst observed P99 24 ms], [Pass],
+    [Database availability], [No user-visible critical error], [HTTP 500 during outage], [Fail],
+  ),
+  caption: [Quality gate outcomes],
+)
