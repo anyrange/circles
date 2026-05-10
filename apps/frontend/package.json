@@ -7,7 +7,7 @@
     "dev": "vp dev --port 3000",
     "build": "vp build",
     "preview": "vp preview",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "vp build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "type-check": "tsc --noEmit",
     "test": "vp run test:unit && vp run test:browser",
