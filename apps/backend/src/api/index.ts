@@ -20,15 +20,7 @@ import { errorHandler } from "./middleware/error";
 
 const app = new Hono()
   .use(requestId())
-  .use(
-    "*",
-    cors({
-      origin: (origin) => origin,
-      allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      credentials: true,
-    }),
-  )
+  .use("*", cors())
   .get("/health", (ctx) => ctx.json({ status: "ok" }))
   .route("/docs", createDocsController())
   .route("/", e2eController)
