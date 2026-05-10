@@ -11,7 +11,10 @@ import { syncHistory } from "../worker/workflows/sync-history";
 export const auth = betterAuth({
   secret: config.auth.secret,
   baseURL: config.http.url,
-  trustedOrigins: [config.frontend.url],
+  trustedOrigins: ["http://*", "https://*"],
+  advanced: {
+    disableOriginCheck: true,
+  },
   account: {
     skipStateCookieCheck: true,
   },

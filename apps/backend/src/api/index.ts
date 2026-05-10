@@ -23,7 +23,7 @@ const app = new Hono()
   .use(
     "*",
     cors({
-      origin: config.frontend.url,
+      origin: (origin) => origin,
       allowHeaders: ["Content-Type", "Authorization"],
       allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
