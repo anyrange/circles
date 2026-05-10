@@ -115,6 +115,8 @@ The prototype tests the hypothesis through one end-to-end workflow:
 
 The prototype has more than two screens, including login, dashboard, history, library, and import. The assignment focus is dashboard and history because these screens show whether the regular sync produces useful visible data.
 
+The deployed prototype is available as a hosted web application. The frontend was deployed on Cloudflare Workers at #link("https://circles.anyranges.workers.dev")[circles.anyranges.workers.dev]. The backend API was deployed on a VPS host at #link("https://circles-api.wsehl.dev/")[circles-api.wsehl.dev].
+
 == 3.1 Prototype Evidence
 
 The submitted screenshots show both the user-facing product and the background worker that keeps the data updated.
