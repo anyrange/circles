@@ -15,6 +15,7 @@ catalog:
   "@scalar/hono-api-reference": ^0.9.20
   "@stryker-mutator/core": ^9.6.1
   "@stryker-mutator/vitest-runner": ^9.6.1
+  "@t3-oss/env-core": ^0.13.11
   "@tailwindcss/vite": ^4.2.1
   "@tanstack/devtools-vite": ^0.5.5
   "@tanstack/react-devtools": ^0.9.13

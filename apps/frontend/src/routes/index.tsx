@@ -16,7 +16,7 @@ function LoginPage() {
   const signIn = () =>
     authClient.signIn.social({
       provider: "spotify",
-      callbackURL: `${import.meta.env.VITE_APP_URL ?? "http://127.0.0.1:3000"}/dashboard`,
+      callbackURL: `${window.location.origin}/dashboard`,
     });
 
   return (

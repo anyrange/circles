@@ -6,6 +6,5 @@
   "main": "@tanstack/react-start/server-entry",
   "vars": {
     "VITE_API_URL": "https://circles-api.wsehl.dev",
-    "VITE_APP_URL": "https://circles.anyranges.workers.dev",
   },
 }
