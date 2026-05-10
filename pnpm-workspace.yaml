@@ -1,5 +1,6 @@
 packages:
   - apps/*
+  - docs/case-study/final
   - packages/*
   - tools/*
 

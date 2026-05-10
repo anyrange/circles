@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/sidebar";
 import { api } from "@/lib/api";
 import { authClient } from "@/lib/auth";
+import { clearSessionToken } from "@/lib/session-token";
 
 const NAV = [
   { label: "Home", icon: Home, to: "/dashboard" },
@@ -67,6 +68,7 @@ export function AppSidebar() {
   });
 
   async function logout() {
+    clearSessionToken();
     await authClient.signOut();
     await navigate({ to: "/" });
   }

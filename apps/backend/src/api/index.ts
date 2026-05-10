@@ -20,11 +20,37 @@ import { errorHandler } from "./middleware/error";
 
 const app = new Hono()
   .use(requestId())
-  .use("*", cors())
+  .use(
+    "*",
+    cors({
+      origin: config.frontend.url,
+      credentials: true,
+    }),
+  )
   .get("/health", (ctx) => ctx.json({ status: "ok" }))
   .route("/docs", createDocsController())
   .route("/", e2eController)
-  .on(["GET", "POST"], "/api/auth/*", (ctx) => auth.handler(ctx.req.raw))
+  .on(["GET", "POST"], "/api/auth/*", async (ctx) => {
+    const response = await auth.handler(ctx.req.raw);
+
+    if (ctx.req.path.startsWith("/api/auth/callback/")) {
+      const location = response.headers.get("location");
+      const setCookie = response.headers.get("set-cookie");
+      const sessionToken = setCookie?.match(
+        /(?:^|, )__Secure-better-auth\.session_token=([^;]+)/,
+      )?.[1];
+
+      if (location && sessionToken) {
+        const redirectUrl = new URL(location);
+        redirectUrl.searchParams.set("session_token", decodeURIComponent(sessionToken));
+        const headers = new Headers(response.headers);
+        headers.set("location", redirectUrl.toString());
+        return new Response(response.body, { headers, status: response.status });
+      }
+    }
+
+    return response;
+  })
   .route("/me", meController)
   .route("/users", usersController)
   .route("/", socialController)

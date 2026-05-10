@@ -5,10 +5,14 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { RightPanel } from "@/components/RightPanel";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth";
+import { consumeSessionTokenFromUrl, getSessionToken } from "@/lib/session-token";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
     if (typeof window !== "undefined") {
+      const token = consumeSessionTokenFromUrl() ?? getSessionToken();
+      if (token) return;
+
       const { data: session } = await authClient.getSession();
       if (!session) {
         throw redirect({ to: "/", search: { redirect: location.href } });

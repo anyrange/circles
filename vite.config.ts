@@ -12,6 +12,7 @@ export default defineConfig({
       "**/migrations/**",
       ".claude/**",
       ".agents/**",
+      "docs/case-study/final/slides.md",
       "routeTree.gen.ts",
     ],
     semi: true,
