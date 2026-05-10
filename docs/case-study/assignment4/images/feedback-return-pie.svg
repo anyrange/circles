@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">
+  <rect width="640" height="420" fill="#ffffff"/>
+  <text x="32" y="42" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#222">Would testers return after new data syncs?</text>
+  <g transform="translate(210 220)">
+    <path d="M 0 -135 A 135 135 0 1 1 -128.392 41.717 L 0 0 Z" fill="#4266c2"/>
+    <path d="M -128.392 41.717 A 135 135 0 0 1 0 -135 L 0 0 Z" fill="#dd4b2f"/>
+    <circle r="1" fill="#fff"/>
+  </g>
+  <text x="260" y="270" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#ffffff">80%</text>
+  <text x="112" y="171" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#ffffff">20%</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#222">
+    <rect x="420" y="145" width="22" height="22" fill="#4266c2"/>
+    <text x="456" y="163">Yes - 4</text>
+    <rect x="420" y="188" width="22" height="22" fill="#dd4b2f"/>
+    <text x="456" y="206">Maybe - 1</text>
+    <rect x="420" y="231" width="22" height="22" fill="#f4b400"/>
+    <text x="456" y="249">No - 0</text>
+  </g>
+  <text x="32" y="388" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#666">Draft sample, n=5</text>
+</svg>
