@@ -1,6 +1,6 @@
 import { defineProject } from "vite-plus";
 
-import { frontendVitestConfig } from "./vitest.shared";
+import { frontendVitestConfig } from "./vitest.shared.ts";
 
 const unitProject = {
   ...frontendVitestConfig,

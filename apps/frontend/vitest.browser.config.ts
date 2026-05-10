@@ -1,7 +1,7 @@
 import { defineProject } from "vite-plus";
 import { playwright } from "vite-plus/test/browser-playwright";
 
-import { frontendVitestConfig } from "./vitest.shared";
+import { frontendVitestConfig } from "./vitest.shared.ts";
 
 const browserProject = {
   ...frontendVitestConfig,
