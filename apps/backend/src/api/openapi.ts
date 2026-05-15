@@ -44,7 +44,7 @@ export const openApiDocument = {
     "/leaderboard": {
       get: {
         summary: "Get leaderboard",
-        description: "Returns the public scrobble leaderboard.",
+        description: "Returns the public stream leaderboard.",
         tags: ["Social"],
         parameters: [
           {
@@ -237,6 +237,36 @@ export const openApiDocument = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/PublicUser" },
+              },
+            },
+          },
+          403: { $ref: "#/components/responses/Forbidden" },
+          404: { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/users/{id}/stats": {
+      get: {
+        summary: "Get public user top tracks and artists",
+        description: "Returns top tracks and artists for a public user and selected time range.",
+        tags: ["Users"],
+        parameters: [
+          { $ref: "#/components/parameters/userIdPath" },
+          { $ref: "#/components/parameters/range" },
+        ],
+        responses: {
+          200: {
+            description: "Top tracks and artists.",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    topTracks: { type: "array", items: {} },
+                    topArtists: { type: "array", items: {} },
+                  },
+                  required: ["topTracks", "topArtists"],
+                },
               },
             },
           },
@@ -527,8 +557,8 @@ export const openApiDocument = {
     },
     "/library/scrobbles": {
       get: {
-        summary: "List library scrobbles",
-        description: "Returns paginated scrobbles for the current user.",
+        summary: "List library streams",
+        description: "Returns paginated streams for the current user.",
         tags: ["Library"],
         parameters: [
           { $ref: "#/components/parameters/range" },
@@ -541,7 +571,7 @@ export const openApiDocument = {
         ],
         responses: {
           200: {
-            description: "Scrobbles page.",
+            description: "Streams page.",
             content: {
               "application/json": {
                 schema: {

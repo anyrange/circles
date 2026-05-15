@@ -36,6 +36,7 @@
     "better-auth": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
+    "dayjs": "catalog:",
     "hono": "catalog:",
     "jsdom": "catalog:",
     "lucide-react": "catalog:",

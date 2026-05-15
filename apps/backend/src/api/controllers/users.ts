@@ -6,6 +6,8 @@ import { z } from "zod";
 import { db } from "../../db";
 import { sinceFromRange } from "../../library/range";
 
+const rangeSchema = z.enum(["7d", "30d", "90d", "365d", "all"]).default("all");
+
 export const usersController = new Hono()
   .get("/by-username/:username", async (ctx) => {
     const username = ctx.req.param("username");
@@ -45,11 +47,33 @@ export const usersController = new Hono()
     });
   })
   .get(
-    "/:id/stats/extended",
+    "/:id/stats",
     zValidator(
       "query",
-      z.object({ range: z.enum(["7d", "30d", "90d", "365d", "all"]).default("all") }),
+      z.object({
+        range: rangeSchema,
+      }),
     ),
+    async (ctx) => {
+      const id = ctx.req.param("id");
+      const { range } = ctx.req.valid("query");
+
+      const user = await db.user.findById(id);
+      if (!user) throw new HTTPException(404, { message: "User not found" });
+      if (!user.isPublic) throw new HTTPException(403, { message: "Profile is private" });
+
+      const since = sinceFromRange(range);
+      const [topTracks, topArtists] = await Promise.all([
+        db.history.getTopTracks(id, 10, since),
+        db.history.getTopArtists(id, 10, since),
+      ]);
+
+      return ctx.json({ topTracks, topArtists });
+    },
+  )
+  .get(
+    "/:id/stats/extended",
+    zValidator("query", z.object({ range: rangeSchema })),
     async (ctx) => {
       const id = ctx.req.param("id");
       const { range } = ctx.req.valid("query");
