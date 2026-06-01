@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import { config } from "../../config";
 import { db as drizzleDb } from "../../db/postgres";
 import { aiCache } from "../../db/postgres/schema";
-import { buildListeningContext } from "../../lib/ai-context";
+import { buildListeningContext } from "../../library/ai-context";
 import { logger } from "../../library/logger";
 import type { AuthVariables } from "../middleware/auth";
 import { authMiddleware } from "../middleware/auth";

@@ -4,8 +4,8 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 import { db } from "../../db";
-import { sinceFromRange } from "../../lib/range";
-import { hydrateAndStoreArtistsForUser } from "../../lib/spotify-artists";
+import { sinceFromRange } from "../../library/range";
+import { hydrateAndStoreArtistsForUser } from "../../library/spotify-artists";
 import type { AuthVariables } from "../middleware/auth";
 import { authMiddleware } from "../middleware/auth";
 

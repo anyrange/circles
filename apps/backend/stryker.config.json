@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/master/packages/api/schema/stryker-schema.json",
+  "packageManager": "pnpm",
+  "testRunner": "command",
+  "reporters": ["clear-text", "html", "json"],
+  "mutate": [
+    "src/library/range.ts",
+    "src/library/retry.ts",
+    "src/library/spotify-export.ts",
+    "src/library/zip.ts"
+  ],
+  "commandRunner": {
+    "command": "vp test run src/library/range.spec.ts src/library/retry.spec.ts src/library/spotify-export.spec.ts src/library/zip.spec.ts"
+  },
+  "tempDirName": ".stryker-tmp",
+  "timeoutMS": 5000,
+  "concurrency": 2
+}

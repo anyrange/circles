@@ -1,0 +1,450 @@
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import dayjs from "dayjs";
+import { CalendarDays, Clock3, Music2, Radio, UserCheck, UserPlus } from "lucide-react";
+import type { ComponentPropsWithoutRef } from "react";
+import { z } from "zod";
+
+import { Page, PageDescription, PageHeader, PageSectionTitle } from "@/components/page-shell";
+import { ScrobbleTimelineChart } from "@/components/scrobble-timeline-chart";
+import { TimeRangeTabs } from "@/components/time-range-tabs";
+import { TopArtistsRow } from "@/components/top-artists-row";
+import { TrackRow } from "@/components/track-row";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMeQuery } from "@/lib/queries/me";
+import { useFollow, useFollows, useUnfollow } from "@/lib/queries/social";
+import {
+  useUserByUsernameQuery,
+  useUserExtendedStatsQuery,
+  useUserStatsQuery,
+} from "@/lib/queries/users";
+
+const DEFAULT_RANGE = "30d";
+
+const searchSchema = z.object({
+  range: z.enum(["7d", "30d", "90d", "365d", "all"]).optional().catch(DEFAULT_RANGE),
+});
+
+export const Route = createFileRoute("/_authenticated/u/$username")({
+  validateSearch: searchSchema,
+  component: ProfilePage,
+});
+
+function ProfilePage() {
+  const { username } = Route.useParams();
+  const { range = DEFAULT_RANGE } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+
+  const { data: me } = useMeQuery();
+  const { data: user, isError, isLoading } = useUserByUsernameQuery(username);
+  const { data: follows } = useFollows();
+  const follow = useFollow();
+  const unfollow = useUnfollow();
+
+  const { data: lifetimeStats } = useUserExtendedStatsQuery(user?.id, "all");
+  const { data: extended, isLoading: extendedLoading } = useUserExtendedStatsQuery(user?.id, range);
+  const { data: stats, isLoading: statsLoading } = useUserStatsQuery(user?.id, range);
+
+  if (isLoading) {
+    return (
+      <Page>
+        <ProfileSkeleton />
+      </Page>
+    );
+  }
+
+  if (isError || !user) {
+    return (
+      <Page>
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile unavailable</CardTitle>
+            <PageDescription>This profile is private, missing, or unavailable.</PageDescription>
+          </CardHeader>
+        </Card>
+      </Page>
+    );
+  }
+
+  const isOwnProfile = me?.id === user.id;
+  const isFollowing = follows?.following.some((followed) => followed.id === user.id) ?? false;
+  const pendingFollow = follow.isPending || unfollow.isPending;
+  const joinedDate = dayjs(user.createdAt).format("MMMM YYYY");
+  const totalScrobbles = lifetimeStats?.totalScrobbles ?? extended?.totalScrobbles;
+  const listeningHours = extended ? Math.round(extended.totalListeningMs / 3_600_000) : 0;
+  const peakHour = getPeak(extended?.scrobblesByHour);
+  const peakDay = getPeak(extended?.scrobblesByDayOfWeek);
+  const topGenres = extended?.topGenres ?? [];
+
+  return (
+    <Page className="gap-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex min-w-0 items-center gap-4">
+          <Avatar className="size-20">
+            <AvatarImage src={user.avatarUrl ?? undefined} alt={user.displayName} />
+            <AvatarFallback className="text-xl">{getInitial(user.displayName)}</AvatarFallback>
+          </Avatar>
+          <PageHeader className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h1 className="truncate text-3xl font-bold">{user.displayName}</h1>
+              {user.username ? (
+                <Badge variant="outline" className="max-w-full">
+                  @{user.username}
+                </Badge>
+              ) : null}
+            </div>
+            {user.bio ? (
+              <PageDescription className="max-w-2xl text-pretty">{user.bio}</PageDescription>
+            ) : null}
+            <PageDescription>
+              Member since {joinedDate}
+              {typeof totalScrobbles === "number"
+                ? ` · ${totalScrobbles.toLocaleString()} streams`
+                : ""}
+            </PageDescription>
+          </PageHeader>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:justify-end">
+          <TimeRangeTabs
+            value={range}
+            onChange={(nextRange) =>
+              navigate({ search: (previous) => ({ ...previous, range: nextRange }) })
+            }
+          />
+          {!isOwnProfile ? (
+            <Button
+              variant={isFollowing ? "outline" : "default"}
+              disabled={pendingFollow}
+              onClick={() => {
+                if (isFollowing) {
+                  unfollow.mutate(user.id);
+                } else {
+                  follow.mutate(user.id);
+                }
+              }}
+            >
+              {isFollowing ? (
+                <UserCheck data-icon="inline-start" />
+              ) : (
+                <UserPlus data-icon="inline-start" />
+              )}
+              {isFollowing ? "Following" : "Follow"}
+            </Button>
+          ) : null}
+        </div>
+      </div>
+
+      {extendedLoading && !extended ? (
+        <StatsSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <Card size="sm">
+            <CardHeader>
+              <CardDescription>Streams</CardDescription>
+              <CardTitle className="text-2xl font-semibold">
+                {(extended?.totalScrobbles ?? 0).toLocaleString()}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card size="sm">
+            <CardHeader>
+              <CardDescription>Listening time</CardDescription>
+              <CardTitle className="text-2xl font-semibold">
+                {listeningHours.toLocaleString()}h
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card size="sm">
+            <CardHeader>
+              <CardDescription>Mainstream score</CardDescription>
+              <CardTitle className="text-2xl font-semibold">
+                {extended?.mainstreamScore ?? 0}
+              </CardTitle>
+              <CardDescription>avg track popularity</CardDescription>
+            </CardHeader>
+          </Card>
+          <Card size="sm">
+            <CardHeader>
+              <CardDescription>Most active</CardDescription>
+              <CardTitle className="text-2xl font-semibold">
+                {peakHour ? formatHour(peakHour.key) : "No data"}
+              </CardTitle>
+              <CardDescription>
+                {peakDay ? DAY_NAMES[peakDay.key] : "not enough plays"}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      )}
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          {statsLoading && !stats ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Top artists</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <HorizontalSkeleton />
+              </CardContent>
+            </Card>
+          ) : stats?.topArtists.length ? (
+            <section className="flex flex-col gap-3">
+              <PageSectionTitle>Top artists</PageSectionTitle>
+              <TopArtistsRow artists={stats.topArtists} />
+            </section>
+          ) : null}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Top tracks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {statsLoading && !stats ? (
+                <ListSkeleton />
+              ) : stats?.topTracks.length ? (
+                <ol className="flex flex-col gap-2">
+                  {stats.topTracks.map((item, index) => (
+                    <li key={item.track.id}>
+                      <TrackRow asChild>
+                        <Link to="/tracks/$trackId" params={{ trackId: item.track.id }}>
+                          <TrackRow.Leading>{index + 1}</TrackRow.Leading>
+                          <TrackRow.Artwork imageUrl={item.track.albumImageUrl} />
+                          <TrackRow.Content>
+                            <TrackRow.Title>{item.track.name}</TrackRow.Title>
+                            <TrackRow.Subtitle>
+                              {item.playCount.toLocaleString()} plays
+                            </TrackRow.Subtitle>
+                          </TrackRow.Content>
+                        </Link>
+                      </TrackRow>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <EmptyProfileSection>No top tracks for this range yet.</EmptyProfileSection>
+              )}
+            </CardContent>
+          </Card>
+
+          {extended?.scrobblesByDate.length ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Listening over time</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrobbleTimelineChart data={extended.scrobblesByDate} />
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Taste profile</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-5">
+              <ProfileSignal>
+                <ProfileSignal.Icon>
+                  <Music2 className="size-4" />
+                </ProfileSignal.Icon>
+                <ProfileSignal.Body>
+                  <ProfileSignal.Value>
+                    {(extended?.totalScrobbles ?? 0).toLocaleString()}
+                  </ProfileSignal.Value>
+                  <ProfileSignal.Label>Tracks played</ProfileSignal.Label>
+                </ProfileSignal.Body>
+              </ProfileSignal>
+              <ProfileSignal>
+                <ProfileSignal.Icon>
+                  <Clock3 className="size-4" />
+                </ProfileSignal.Icon>
+                <ProfileSignal.Body>
+                  <ProfileSignal.Value>{listeningHours.toLocaleString()}</ProfileSignal.Value>
+                  <ProfileSignal.Label>Listening hours</ProfileSignal.Label>
+                </ProfileSignal.Body>
+              </ProfileSignal>
+              <ProfileSignal>
+                <ProfileSignal.Icon>
+                  <Radio className="size-4" />
+                </ProfileSignal.Icon>
+                <ProfileSignal.Body>
+                  <ProfileSignal.Value>
+                    {peakHour ? formatHour(peakHour.key) : "No data"}
+                  </ProfileSignal.Value>
+                  <ProfileSignal.Label>Peak hour</ProfileSignal.Label>
+                </ProfileSignal.Body>
+              </ProfileSignal>
+              <ProfileSignal>
+                <ProfileSignal.Icon>
+                  <CalendarDays className="size-4" />
+                </ProfileSignal.Icon>
+                <ProfileSignal.Body>
+                  <ProfileSignal.Value>
+                    {peakDay ? DAY_NAMES[peakDay.key] : "No data"}
+                  </ProfileSignal.Value>
+                  <ProfileSignal.Label>Peak day</ProfileSignal.Label>
+                </ProfileSignal.Body>
+              </ProfileSignal>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Top genres</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {topGenres.length ? (
+                <GenreList genres={topGenres} />
+              ) : (
+                <EmptyProfileSection>No genre data for this range yet.</EmptyProfileSection>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-4">
+        <Skeleton className="size-20 rounded-full" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-72 max-w-full" />
+          <Skeleton className="h-4 w-56 max-w-full" />
+        </div>
+      </div>
+      <StatsSkeleton />
+      <ListSkeleton />
+    </div>
+  );
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+      {[1, 2, 3, 4].map((item) => (
+        <Skeleton key={item} className="h-24 rounded-2xl" />
+      ))}
+    </div>
+  );
+}
+
+function HorizontalSkeleton() {
+  return (
+    <div className="flex gap-3 overflow-hidden pb-2">
+      {[1, 2, 3, 4, 5].map((item) => (
+        <div key={item} className="flex w-28 shrink-0 flex-col items-center gap-2">
+          <Skeleton className="size-20 rounded-full" />
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-3 w-14" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <div className="flex flex-col gap-2">
+      {[1, 2, 3, 4, 5].map((item) => (
+        <Skeleton key={item} className="h-16 rounded-2xl" />
+      ))}
+    </div>
+  );
+}
+
+function EmptyProfileSection({ children }: { children: string }) {
+  return <p className="py-8 text-sm text-muted-foreground">{children}</p>;
+}
+
+function GenreList({ genres }: { genres: Array<{ genre: string; count: number }> }) {
+  const maxCount = Math.max(...genres.map((genre) => genre.count), 1);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {genres.map((genre) => (
+        <div key={genre.genre} className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <Link
+              to="/library"
+              search={{ tab: "artists", range: "all" }}
+              className="min-w-0 truncate text-sm font-medium capitalize hover:text-primary"
+            >
+              {genre.genre}
+            </Link>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              {genre.count.toLocaleString()}
+            </span>
+          </div>
+          <Progress value={(genre.count / maxCount) * 100} className="h-2" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProfileSignalRoot(props: ComponentPropsWithoutRef<"div">) {
+  return <div className="flex items-center gap-3" {...props} />;
+}
+
+function ProfileSignalIcon(props: ComponentPropsWithoutRef<"div">) {
+  return (
+    <div
+      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+      {...props}
+    />
+  );
+}
+
+function ProfileSignalBody(props: ComponentPropsWithoutRef<"div">) {
+  return <div className="min-w-0" {...props} />;
+}
+
+function ProfileSignalValue(props: ComponentPropsWithoutRef<"p">) {
+  return <p className="truncate text-sm font-medium" {...props} />;
+}
+
+function ProfileSignalLabel(props: ComponentPropsWithoutRef<"p">) {
+  return <p className="truncate text-xs text-muted-foreground" {...props} />;
+}
+
+const ProfileSignal = Object.assign(ProfileSignalRoot, {
+  Icon: ProfileSignalIcon,
+  Body: ProfileSignalBody,
+  Value: ProfileSignalValue,
+  Label: ProfileSignalLabel,
+});
+
+function getPeak(items?: Array<{ count: number; dow?: number; hour?: number }>) {
+  if (!items?.length) return null;
+
+  return items.reduce<{ key: number; count: number } | null>((peak, item) => {
+    const key = item.hour ?? item.dow;
+    if (key === undefined) return peak;
+
+    const candidate = { key, count: item.count };
+    if (!peak || candidate.count > peak.count) return candidate;
+    return peak;
+  }, null);
+}
+
+function formatHour(hour: number) {
+  return dayjs().hour(hour).minute(0).format("h A");
+}
+
+function getInitial(name: string) {
+  return name.trim().charAt(0).toUpperCase() || "?";
+}
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

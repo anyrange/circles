@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { cleanEnv, num, str } from "envalid";
+import { bool, cleanEnv, num, str } from "envalid";
 
 export const env = cleanEnv(process.env, {
   NODE_ENV: str({
@@ -18,6 +18,7 @@ export const env = cleanEnv(process.env, {
   }),
 
   BETTER_AUTH_SECRET: str({ default: "dev-secret-change-in-production-32ch" }),
+  ENABLE_E2E_AUTH: bool({ default: false }),
 
   SPOTIFY_CLIENT_ID: str({ default: "" }),
   SPOTIFY_CLIENT_SECRET: str({ default: "" }),
@@ -48,6 +49,9 @@ export const config = {
   },
   auth: {
     secret: env.BETTER_AUTH_SECRET,
+  },
+  e2e: {
+    enableAuth: env.ENABLE_E2E_AUTH,
   },
   spotify: {
     clientId: env.SPOTIFY_CLIENT_ID,

@@ -7,6 +7,8 @@ import { config } from "../config";
 import { auth } from "../library/auth";
 import { logger } from "../library/logger";
 import { aiController } from "./controllers/ai";
+import { createDocsController } from "./controllers/docs";
+import { e2eController } from "./controllers/e2e";
 import { importController } from "./controllers/import";
 import { leaderboardController } from "./controllers/leaderboard";
 import { libraryController } from "./controllers/library";
@@ -22,13 +24,33 @@ const app = new Hono()
     "*",
     cors({
       origin: config.frontend.url,
-      allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
     }),
   )
   .get("/health", (ctx) => ctx.json({ status: "ok" }))
-  .on(["GET", "POST"], "/api/auth/*", (ctx) => auth.handler(ctx.req.raw))
+  .route("/docs", createDocsController())
+  .route("/", e2eController)
+  .on(["GET", "POST"], "/api/auth/*", async (ctx) => {
+    const response = await auth.handler(ctx.req.raw);
+
+    if (ctx.req.path.startsWith("/api/auth/callback/")) {
+      const location = response.headers.get("location");
+      const setCookie = response.headers.get("set-cookie");
+      const sessionToken = setCookie?.match(
+        /(?:^|, )__Secure-better-auth\.session_token=([^;]+)/,
+      )?.[1];
+
+      if (location && sessionToken) {
+        const redirectUrl = new URL(location);
+        redirectUrl.searchParams.set("session_token", decodeURIComponent(sessionToken));
+        const headers = new Headers(response.headers);
+        headers.set("location", redirectUrl.toString());
+        return new Response(response.body, { headers, status: response.status });
+      }
+    }
+
+    return response;
+  })
   .route("/me", meController)
   .route("/users", usersController)
   .route("/", socialController)

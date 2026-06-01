@@ -1,5 +1,6 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
+import { testUtils } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 import { config } from "../config";
@@ -11,6 +12,13 @@ export const auth = betterAuth({
   secret: config.auth.secret,
   baseURL: config.http.url,
   trustedOrigins: [config.frontend.url],
+  advanced: {
+    useSecureCookies: !config.isDevelopment,
+    defaultCookieAttributes: {
+      sameSite: config.isDevelopment ? "lax" : "none",
+      secure: !config.isDevelopment,
+    },
+  },
   account: {
     skipStateCookieCheck: true,
   },
@@ -23,6 +31,7 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
+  plugins: config.e2e.enableAuth ? [testUtils()] : [],
   socialProviders: {
     spotify: {
       clientId: config.spotify.clientId,

@@ -28,6 +28,10 @@
   },
   "scripts": {
     "pack": "vp pack",
+    "test": "vp test",
+    "test:coverage": "vp test run --coverage",
+    "test:mutation": "stryker run",
+    "dev": "run-p dev:api dev:worker",
     "dev:api": "tsx watch src/api/index.ts | pino-pretty",
     "dev:worker": "tsx src/worker/index.ts",
     "start:api": "node dist/api/index.mjs",
@@ -44,6 +48,7 @@
     "@hatchet-dev/typescript-sdk": "catalog:",
     "@hono/node-server": "^1.19.8",
     "@hono/zod-validator": "^0.7.6",
+    "@scalar/hono-api-reference": "catalog:",
     "@spotify/web-api-ts-sdk": "^1.2.0",
     "better-auth": "catalog:",
     "dotenv": "^17.2.3",
@@ -57,6 +62,8 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "catalog:",
+    "@stryker-mutator/vitest-runner": "catalog:",
     "@types/node": "catalog:",
     "@types/pg": "^8.16.0",
     "drizzle-kit": "1.0.0-beta.15-859cf75",
