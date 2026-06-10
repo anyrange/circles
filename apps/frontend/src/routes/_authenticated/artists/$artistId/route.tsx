@@ -3,7 +3,14 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
 import { TrackRow } from "@/components/track-row";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useArtistQuery } from "@/lib/queries/artists";
 
@@ -19,9 +26,9 @@ function ArtistPage() {
   if (!data) return <Page>Artist not found.</Page>;
 
   return (
-    <Page>
-      <section className="flex flex-col gap-5 sm:flex-row sm:items-end">
-        <div className="flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted sm:size-36">
+    <Page className="gap-10">
+      <section className="flex flex-col gap-6 lg:flex-row lg:items-end">
+        <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted lg:size-48">
           {data.artist.images?.[0]?.url ? (
             <img src={data.artist.images[0].url} alt="" className="size-full object-cover" />
           ) : (
@@ -32,7 +39,9 @@ function ArtistPage() {
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">Artist</p>
-          <h1 className="text-4xl font-semibold tracking-tight">{data.artist.name}</h1>
+          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance lg:text-5xl">
+            {data.artist.name}
+          </h1>
           <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
             <span>{data.artist.playCount.toLocaleString()} plays</span>
             <span>•</span>
@@ -61,97 +70,86 @@ function ArtistPage() {
         </div>
       </section>
 
-      <div className="flex flex-col gap-6">
-        <PageSection>
-          <PageSectionTitle>Most played tracks</PageSectionTitle>
-          <ol className="flex flex-col gap-2">
-            {data.topTracks.map((item: ArtistTopTrack) => (
-              <li key={item.track.id}>
-                <TrackRow>
-                  <TrackRow.Artwork imageUrl={item.track.album?.imageUrl} />
-                  <TrackRow.Content>
-                    <TrackRow.Title>
-                      <Link
-                        to="/tracks/$trackId"
-                        params={{ trackId: item.track.id }}
-                        className="hover:text-muted-foreground"
-                      >
-                        {item.track.name}
-                      </Link>
-                    </TrackRow.Title>
-                    {item.track.album ? (
-                      <TrackRow.Subtitle>
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="flex min-w-0 flex-col gap-10">
+          <PageSection>
+            <PageSectionTitle>Most played tracks</PageSectionTitle>
+            <ol className="flex flex-col gap-2">
+              {data.topTracks.map((item: ArtistTopTrack) => (
+                <li key={item.track.id}>
+                  <TrackRow>
+                    <TrackRow.Artwork>
+                      {item.track.album?.imageUrl ? (
+                        <TrackRow.Image src={item.track.album.imageUrl} alt="" />
+                      ) : null}
+                    </TrackRow.Artwork>
+                    <TrackRow.Content>
+                      <TrackRow.Title>
                         <Link
-                          to="/albums/$albumId"
-                          params={{ albumId: item.track.album.id }}
-                          className="hover:text-foreground"
+                          to="/tracks/$trackId"
+                          params={{ trackId: item.track.id }}
+                          className="hover:text-muted-foreground"
                         >
-                          {item.track.album.name}
+                          {item.track.name}
                         </Link>
-                      </TrackRow.Subtitle>
-                    ) : null}
-                  </TrackRow.Content>
-                  <TrackRow.Trailing>{item.playCount} plays</TrackRow.Trailing>
-                </TrackRow>
-              </li>
-            ))}
-          </ol>
-        </PageSection>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent plays</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="flex flex-col gap-3">
-              {data.recentPlays.map((play: ArtistRecentPlay) => (
-                <li key={`${play.track.id}-${play.playedAt}`}>
-                  <Link
-                    to="/tracks/$trackId"
-                    params={{ trackId: play.track.id }}
-                    className="block rounded-xl px-3 py-2 transition-colors hover:bg-muted/50"
-                  >
-                    <p className="truncate text-sm font-medium">{play.track.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(play.playedAt).toLocaleString()}
-                    </p>
-                  </Link>
+                      </TrackRow.Title>
+                      {item.track.album ? (
+                        <TrackRow.Subtitle>
+                          <Link
+                            to="/albums/$albumId"
+                            params={{ albumId: item.track.album.id }}
+                            className="hover:text-foreground"
+                          >
+                            {item.track.album.name}
+                          </Link>
+                        </TrackRow.Subtitle>
+                      ) : null}
+                    </TrackRow.Content>
+                    <TrackRow.Trailing>{item.playCount} plays</TrackRow.Trailing>
+                  </TrackRow>
                 </li>
               ))}
             </ol>
-          </CardContent>
-        </Card>
+          </PageSection>
 
-        <PageSection>
-          <PageSectionTitle>Albums</PageSectionTitle>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {data.albums.map((item: ArtistAlbum) => (
-              <Link
-                key={item.album.id}
-                to="/albums/$albumId"
-                params={{ albumId: item.album.id }}
-                className="block"
-              >
-                <Card size="sm" className="h-full">
-                  <CardContent>
-                    <div className="aspect-square overflow-hidden rounded-xl bg-muted">
-                      {item.album.imageUrl ? (
-                        <img src={item.album.imageUrl} alt="" className="size-full object-cover" />
-                      ) : null}
-                    </div>
-                  </CardContent>
-                  <CardHeader>
-                    <CardTitle className="truncate">{item.album.name}</CardTitle>
-                    <CardDescription>
-                      {item.playCount} plays
-                      {item.album.releaseDate ? ` • ${item.album.releaseDate}` : ""}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
+          <PageSection>
+            <PageSectionTitle>Albums</PageSectionTitle>
+            <ItemGroup>
+              {data.albums.map((item: ArtistAlbum) => (
+                <Item key={item.album.id} asChild size="sm">
+                  <Link to="/albums/$albumId" params={{ albumId: item.album.id }}>
+                    <ItemMedia variant={item.album.imageUrl ? "image" : "icon"}>
+                      {item.album.imageUrl ? <img src={item.album.imageUrl} alt="" /> : null}
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{item.album.name}</ItemTitle>
+                      <ItemDescription>
+                        {item.playCount} plays
+                        {item.album.releaseDate ? ` • ${item.album.releaseDate}` : ""}
+                      </ItemDescription>
+                    </ItemContent>
+                  </Link>
+                </Item>
+              ))}
+            </ItemGroup>
+          </PageSection>
+        </div>
+
+        <section className="flex min-w-0 flex-col gap-3">
+          <h2 className="text-base font-semibold">Recent plays</h2>
+          <ItemGroup>
+            {data.recentPlays.map((play: ArtistRecentPlay) => (
+              <Item key={`${play.track.id}-${play.playedAt}`} asChild size="sm">
+                <Link to="/tracks/$trackId" params={{ trackId: play.track.id }}>
+                  <ItemContent>
+                    <ItemTitle>{play.track.name}</ItemTitle>
+                    <ItemDescription>{new Date(play.playedAt).toLocaleString()}</ItemDescription>
+                  </ItemContent>
+                </Link>
+              </Item>
             ))}
-          </div>
-        </PageSection>
+          </ItemGroup>
+        </section>
       </div>
     </Page>
   );

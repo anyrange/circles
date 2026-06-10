@@ -1,7 +1,6 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { CalendarDays, Clock3, Music2, Radio, UserCheck, UserPlus } from "lucide-react";
-import type { ComponentPropsWithoutRef } from "react";
 import { z } from "zod";
 
 import { Page, PageDescription, PageHeader, PageSectionTitle } from "@/components/page-shell";
@@ -13,6 +12,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMeQuery } from "@/lib/queries/me";
@@ -165,7 +172,6 @@ function ProfilePage() {
               <CardTitle className="text-2xl font-semibold">
                 {extended?.mainstreamScore ?? 0}
               </CardTitle>
-              <CardDescription>avg track popularity</CardDescription>
             </CardHeader>
           </Card>
           <Card size="sm">
@@ -174,9 +180,6 @@ function ProfilePage() {
               <CardTitle className="text-2xl font-semibold">
                 {peakHour ? formatHour(peakHour.key) : "No data"}
               </CardTitle>
-              <CardDescription>
-                {peakDay ? DAY_NAMES[peakDay.key] : "not enough plays"}
-              </CardDescription>
             </CardHeader>
           </Card>
         </div>
@@ -214,7 +217,11 @@ function ProfilePage() {
                       <TrackRow asChild>
                         <Link to="/tracks/$trackId" params={{ trackId: item.track.id }}>
                           <TrackRow.Leading>{index + 1}</TrackRow.Leading>
-                          <TrackRow.Artwork imageUrl={item.track.albumImageUrl} />
+                          <TrackRow.Artwork>
+                            {item.track.albumImageUrl ? (
+                              <TrackRow.Image src={item.track.albumImageUrl} alt="" />
+                            ) : null}
+                          </TrackRow.Artwork>
                           <TrackRow.Content>
                             <TrackRow.Title>{item.track.name}</TrackRow.Title>
                             <TrackRow.Subtitle>
@@ -249,49 +256,45 @@ function ProfilePage() {
             <CardHeader>
               <CardTitle>Taste profile</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-5">
-              <ProfileSignal>
-                <ProfileSignal.Icon>
-                  <Music2 className="size-4" />
-                </ProfileSignal.Icon>
-                <ProfileSignal.Body>
-                  <ProfileSignal.Value>
-                    {(extended?.totalScrobbles ?? 0).toLocaleString()}
-                  </ProfileSignal.Value>
-                  <ProfileSignal.Label>Tracks played</ProfileSignal.Label>
-                </ProfileSignal.Body>
-              </ProfileSignal>
-              <ProfileSignal>
-                <ProfileSignal.Icon>
-                  <Clock3 className="size-4" />
-                </ProfileSignal.Icon>
-                <ProfileSignal.Body>
-                  <ProfileSignal.Value>{listeningHours.toLocaleString()}</ProfileSignal.Value>
-                  <ProfileSignal.Label>Listening hours</ProfileSignal.Label>
-                </ProfileSignal.Body>
-              </ProfileSignal>
-              <ProfileSignal>
-                <ProfileSignal.Icon>
-                  <Radio className="size-4" />
-                </ProfileSignal.Icon>
-                <ProfileSignal.Body>
-                  <ProfileSignal.Value>
-                    {peakHour ? formatHour(peakHour.key) : "No data"}
-                  </ProfileSignal.Value>
-                  <ProfileSignal.Label>Peak hour</ProfileSignal.Label>
-                </ProfileSignal.Body>
-              </ProfileSignal>
-              <ProfileSignal>
-                <ProfileSignal.Icon>
-                  <CalendarDays className="size-4" />
-                </ProfileSignal.Icon>
-                <ProfileSignal.Body>
-                  <ProfileSignal.Value>
-                    {peakDay ? DAY_NAMES[peakDay.key] : "No data"}
-                  </ProfileSignal.Value>
-                  <ProfileSignal.Label>Peak day</ProfileSignal.Label>
-                </ProfileSignal.Body>
-              </ProfileSignal>
+            <CardContent>
+              <ItemGroup>
+                <Item size="sm">
+                  <ItemMedia variant="icon" className="rounded-full">
+                    <Music2 />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{(extended?.totalScrobbles ?? 0).toLocaleString()}</ItemTitle>
+                    <ItemDescription>Tracks played</ItemDescription>
+                  </ItemContent>
+                </Item>
+                <Item size="sm">
+                  <ItemMedia variant="icon" className="rounded-full">
+                    <Clock3 />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{listeningHours.toLocaleString()}</ItemTitle>
+                    <ItemDescription>Listening hours</ItemDescription>
+                  </ItemContent>
+                </Item>
+                <Item size="sm">
+                  <ItemMedia variant="icon" className="rounded-full">
+                    <Radio />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{peakHour ? formatHour(peakHour.key) : "No data"}</ItemTitle>
+                    <ItemDescription>Peak hour</ItemDescription>
+                  </ItemContent>
+                </Item>
+                <Item size="sm">
+                  <ItemMedia variant="icon" className="rounded-full">
+                    <CalendarDays />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{peakDay ? DAY_NAMES[peakDay.key] : "No data"}</ItemTitle>
+                    <ItemDescription>Peak day</ItemDescription>
+                  </ItemContent>
+                </Item>
+              </ItemGroup>
             </CardContent>
           </Card>
 
@@ -393,38 +396,6 @@ function GenreList({ genres }: { genres: Array<{ genre: string; count: number }>
     </div>
   );
 }
-
-function ProfileSignalRoot(props: ComponentPropsWithoutRef<"div">) {
-  return <div className="flex items-center gap-3" {...props} />;
-}
-
-function ProfileSignalIcon(props: ComponentPropsWithoutRef<"div">) {
-  return (
-    <div
-      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
-      {...props}
-    />
-  );
-}
-
-function ProfileSignalBody(props: ComponentPropsWithoutRef<"div">) {
-  return <div className="min-w-0" {...props} />;
-}
-
-function ProfileSignalValue(props: ComponentPropsWithoutRef<"p">) {
-  return <p className="truncate text-sm font-medium" {...props} />;
-}
-
-function ProfileSignalLabel(props: ComponentPropsWithoutRef<"p">) {
-  return <p className="truncate text-xs text-muted-foreground" {...props} />;
-}
-
-const ProfileSignal = Object.assign(ProfileSignalRoot, {
-  Icon: ProfileSignalIcon,
-  Body: ProfileSignalBody,
-  Value: ProfileSignalValue,
-  Label: ProfileSignalLabel,
-});
 
 function getPeak(items?: Array<{ count: number; dow?: number; hour?: number }>) {
   if (!items?.length) return null;

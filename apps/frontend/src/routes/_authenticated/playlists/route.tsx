@@ -132,7 +132,7 @@ function PlaylistTrackList({ id }: { id: string }) {
     <ol className="flex flex-col gap-2">
       {data.tracks.map((item, i) => (
         <li key={item.track.id}>
-          <TrackRow compact asChild>
+          <TrackRow.Compact asChild>
             <Link to="/tracks/$trackId" params={{ trackId: item.track.id }}>
               <TrackRow.Leading>{i + 1}</TrackRow.Leading>
               <TrackRow.Artwork />
@@ -140,7 +140,7 @@ function PlaylistTrackList({ id }: { id: string }) {
                 <TrackRow.Title>{item.track.name}</TrackRow.Title>
               </TrackRow.Content>
             </Link>
-          </TrackRow>
+          </TrackRow.Compact>
         </li>
       ))}
     </ol>

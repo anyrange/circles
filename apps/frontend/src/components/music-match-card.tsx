@@ -1,5 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 
 interface Match {
   id: string;
@@ -15,22 +23,26 @@ interface Props {
 
 export function MusicMatchCard({ match }: Props) {
   return (
-    <Card size="sm">
-      <CardContent className="flex items-center gap-3">
-        <Avatar>
-          <AvatarImage src={match.image ?? undefined} alt={match.name} />
-          <AvatarFallback>{match.name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{match.name}</p>
-          {match.username && (
-            <p className="truncate text-sm text-muted-foreground">@{match.username}</p>
-          )}
-        </div>
-        <div className="text-right">
-          <p className="text-lg font-bold">{match.sharedCount}</p>
-          <p className="text-xs text-muted-foreground">shared artists</p>
-        </div>
+    <Card>
+      <CardContent>
+        <Item className="p-0">
+          <ItemMedia>
+            <Avatar>
+              <AvatarImage src={match.image ?? undefined} alt={match.name} />
+              <AvatarFallback>{match.name[0]}</AvatarFallback>
+            </Avatar>
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{match.name}</ItemTitle>
+            {match.username ? <ItemDescription>@{match.username}</ItemDescription> : null}
+          </ItemContent>
+          <ItemActions className="text-right">
+            <div>
+              <p className="text-lg font-bold">{match.sharedCount}</p>
+              <p className="text-xs text-muted-foreground">shared artists</p>
+            </div>
+          </ItemActions>
+        </Item>
       </CardContent>
     </Card>
   );

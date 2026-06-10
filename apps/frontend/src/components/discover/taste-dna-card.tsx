@@ -51,14 +51,11 @@ const ScoreBar = Object.assign(ScoreBarRoot, {
 export function TasteDNACard() {
   const mutation = useTasteDNA();
   const [data, setData] = useState<TasteDNA | null>(null);
-  const [cached, setCached] = useState(false);
 
   async function generate() {
-    const start = Date.now();
     const result = await mutation.mutateAsync();
-    if ("archetype" in result) {
-      setCached(Date.now() - start < 400);
-      setData(result as unknown as TasteDNA);
+    if (isTasteDNA(result)) {
+      setData(result);
     }
   }
 
@@ -67,30 +64,18 @@ export function TasteDNACard() {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            {data ? (
-              <>
-                <CardTitle>{data.archetype}</CardTitle>
-                <CardDescription>{data.tagline}</CardDescription>
-              </>
-            ) : (
-              <>
-                <CardTitle>Taste DNA</CardTitle>
-                <CardDescription>What kind of listener are you?</CardDescription>
-              </>
-            )}
+            <CardTitle>{data ? data.archetype : "Taste DNA"}</CardTitle>
+            <CardDescription>
+              {data ? data.tagline : "What kind of listener are you?"}
+            </CardDescription>
           </div>
-          {cached && data && (
-            <Badge variant="secondary" className="mt-1 shrink-0 text-xs">
-              This week
-            </Badge>
-          )}
         </div>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-5">
-        {mutation.isPending && <TasteDNASkeleton />}
+        {mutation.isPending ? <TasteDNASkeleton /> : null}
 
-        {data && !mutation.isPending && (
+        {data && !mutation.isPending ? (
           <>
             <p className="text-sm leading-relaxed">{data.persona}</p>
 
@@ -125,20 +110,24 @@ export function TasteDNACard() {
               Regenerate
             </Button>
           </>
-        )}
+        ) : null}
 
-        {!data && !mutation.isPending && (
+        {!data && !mutation.isPending ? (
           <Button onClick={generate} variant="outline" size="sm">
             Reveal my DNA
           </Button>
-        )}
+        ) : null}
 
-        {mutation.isError && (
+        {mutation.isError ? (
           <p className="text-sm text-destructive">Something went wrong. Try again.</p>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
+}
+
+function isTasteDNA(result: unknown): result is TasteDNA {
+  return Boolean(result && typeof result === "object" && "archetype" in result);
 }
 
 function TasteDNASkeleton() {

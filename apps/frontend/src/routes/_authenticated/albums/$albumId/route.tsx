@@ -3,7 +3,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
 import { TrackRow } from "@/components/track-row";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAlbumQuery } from "@/lib/queries/albums";
 
@@ -19,16 +19,18 @@ function AlbumPage() {
   if (!data) return <Page>Album not found.</Page>;
 
   return (
-    <Page>
-      <section className="flex flex-col gap-5 sm:flex-row sm:items-end">
-        <div className="size-36 shrink-0 overflow-hidden rounded-2xl bg-muted">
+    <Page className="gap-10">
+      <section className="flex flex-col gap-6 lg:flex-row lg:items-end">
+        <div className="size-40 shrink-0 overflow-hidden rounded-2xl bg-muted lg:size-48">
           {data.album.images?.[0]?.url ? (
             <img src={data.album.images[0].url} alt="" className="size-full object-cover" />
           ) : null}
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">{data.album.albumType ?? "Album"}</p>
-          <h1 className="text-4xl font-semibold tracking-tight">{data.album.name}</h1>
+          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance lg:text-5xl">
+            {data.album.name}
+          </h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>By</span>
             {data.artists.map((item: AlbumArtist) => (
@@ -60,13 +62,13 @@ function AlbumPage() {
         </div>
       </section>
 
-      <div className="flex flex-col gap-6">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <PageSection>
           <PageSectionTitle>Tracklist</PageSectionTitle>
           <ol className="flex flex-col gap-2">
             {data.tracks.map((item: AlbumTrack, index: number) => (
               <li key={item.track.id}>
-                <TrackRow compact asChild>
+                <TrackRow.Compact asChild>
                   <Link to="/tracks/$trackId" params={{ trackId: item.track.id }}>
                     <TrackRow.Leading>{index + 1}</TrackRow.Leading>
                     <TrackRow.Artwork />
@@ -75,35 +77,27 @@ function AlbumPage() {
                     </TrackRow.Content>
                     <TrackRow.Trailing>{item.playCount} plays</TrackRow.Trailing>
                   </Link>
-                </TrackRow>
+                </TrackRow.Compact>
               </li>
             ))}
           </ol>
         </PageSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent plays</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="flex flex-col gap-3">
-              {data.recentPlays.map((play: AlbumRecentPlay) => (
-                <li key={`${play.track.id}-${play.playedAt}`}>
-                  <Link
-                    to="/tracks/$trackId"
-                    params={{ trackId: play.track.id }}
-                    className="block rounded-xl px-3 py-2 transition-colors hover:bg-muted/50"
-                  >
-                    <p className="truncate text-sm font-medium">{play.track.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(play.playedAt).toLocaleString()}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
+        <section className="flex min-w-0 flex-col gap-3">
+          <h2 className="text-base font-semibold">Recent plays</h2>
+          <ItemGroup>
+            {data.recentPlays.map((play: AlbumRecentPlay) => (
+              <Item key={`${play.track.id}-${play.playedAt}`} asChild size="sm">
+                <Link to="/tracks/$trackId" params={{ trackId: play.track.id }}>
+                  <ItemContent>
+                    <ItemTitle>{play.track.name}</ItemTitle>
+                    <ItemDescription>{new Date(play.playedAt).toLocaleString()}</ItemDescription>
+                  </ItemContent>
+                </Link>
+              </Item>
+            ))}
+          </ItemGroup>
+        </section>
       </div>
     </Page>
   );

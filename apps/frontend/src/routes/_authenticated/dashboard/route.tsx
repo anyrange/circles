@@ -58,7 +58,6 @@ function DashboardPage() {
             <CardHeader>
               <CardDescription>Mainstream score</CardDescription>
               <CardTitle className="text-2xl font-semibold">{extended.mainstreamScore}</CardTitle>
-              <CardDescription>avg track popularity</CardDescription>
             </CardHeader>
           </Card>
         </div>

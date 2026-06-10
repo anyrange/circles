@@ -1,5 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFollowingActivity } from "@/lib/queries/social";
 
@@ -75,21 +83,23 @@ function FeedGroup({ group }: { group: Group }) {
   const relTime = relativeTime(group.from);
 
   return (
-    <Card size="sm">
+    <Card>
       <CardContent className="flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={group.user.image ?? undefined} />
-            <AvatarFallback>{group.user.name[0]}</AvatarFallback>
-          </Avatar>
-          <div>
-            <span className="text-sm font-semibold">{group.user.name}</span>
-            <span className="ml-1.5 text-sm text-muted-foreground">
+        <Item className="p-0">
+          <ItemMedia>
+            <Avatar>
+              <AvatarImage src={group.user.image ?? undefined} />
+              <AvatarFallback>{group.user.name[0]}</AvatarFallback>
+            </Avatar>
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{group.user.name}</ItemTitle>
+            <ItemDescription>
               listened to {group.plays.length} track{group.plays.length > 1 ? "s" : ""}
-            </span>
-          </div>
-          <span className="ml-auto text-xs text-muted-foreground">{relTime}</span>
-        </div>
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions className="text-xs text-muted-foreground">{relTime}</ItemActions>
+        </Item>
 
         <div className="flex flex-col gap-1.5 pl-11">
           {group.plays.slice(0, 5).map((play, i) => (
@@ -111,7 +121,7 @@ function FeedGroup({ group }: { group: Group }) {
 
 function FeedSkeleton() {
   return (
-    <Card size="sm">
+    <Card>
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <Skeleton className="size-8 rounded-full" />

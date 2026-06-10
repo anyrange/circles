@@ -39,7 +39,9 @@ describe("TrackRow", () => {
   it("renders an image when artwork imageUrl is provided", async () => {
     const screen = await render(
       <TrackRow>
-        <TrackRow.Artwork imageUrl="https://example.com/cover.jpg" />
+        <TrackRow.Artwork>
+          <TrackRow.Image src="https://example.com/cover.jpg" alt="" />
+        </TrackRow.Artwork>
         <TrackRow.Content>
           <TrackRow.Title>Dream On</TrackRow.Title>
         </TrackRow.Content>

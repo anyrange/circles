@@ -66,7 +66,11 @@ function HistoryPage() {
                           hour12: false,
                         })}
                       </TrackRow.Leading>
-                      <TrackRow.Artwork imageUrl={item.track.albumImageUrl} />
+                      <TrackRow.Artwork>
+                        {item.track.albumImageUrl ? (
+                          <TrackRow.Image src={item.track.albumImageUrl} alt="" />
+                        ) : null}
+                      </TrackRow.Artwork>
                       <TrackRow.Content>
                         <TrackRow.Title>
                           <Link

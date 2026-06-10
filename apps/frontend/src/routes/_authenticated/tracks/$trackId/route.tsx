@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from "react";
 
 import { Page } from "@/components/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackQuery } from "@/lib/queries/tracks";
 
@@ -19,16 +19,18 @@ function TrackPage() {
   if (!data) return <Page>Track not found.</Page>;
 
   return (
-    <Page>
-      <section className="flex flex-col gap-5 sm:flex-row sm:items-end">
-        <div className="size-32 shrink-0 overflow-hidden rounded-2xl bg-muted">
+    <Page className="gap-10">
+      <section className="flex flex-col gap-6 lg:flex-row lg:items-end">
+        <div className="size-40 shrink-0 overflow-hidden rounded-2xl bg-muted lg:size-48">
           {data.track.album?.imageUrl ? (
             <img src={data.track.album.imageUrl} alt="" className="size-full object-cover" />
           ) : null}
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">Track</p>
-          <h1 className="text-4xl font-semibold tracking-tight">{data.track.name}</h1>
+          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance lg:text-5xl">
+            {data.track.name}
+          </h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>By</span>
             {data.artists.map((item: TrackArtist) => (
@@ -81,12 +83,10 @@ function TrackPage() {
         </div>
       </section>
 
-      <div className="flex flex-col gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Audio features</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="flex min-w-0 flex-col gap-10">
+          <section className="flex flex-col gap-4">
+            <h2 className="text-xl font-semibold">Audio features</h2>
             <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
               <Metric>
                 <Metric.Label>Danceability</Metric.Label>
@@ -131,14 +131,10 @@ function TrackPage() {
                 <Metric.Value>{formatTempo(data.track.audioFeatures?.tempo)}</Metric.Value>
               </Metric>
             </dl>
-          </CardContent>
-        </Card>
+          </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Playback window</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <section className="flex flex-col gap-4">
+            <h2 className="text-xl font-semibold">Playback window</h2>
             <dl className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1">
                 <dt className="text-sm text-muted-foreground">First play</dt>
@@ -157,23 +153,21 @@ function TrackPage() {
                 </dd>
               </div>
             </dl>
-          </CardContent>
-        </Card>
+          </section>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent plays</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="flex flex-col gap-3">
-              {data.recentPlays.map((play: { playedAt: string }) => (
-                <li key={play.playedAt} className="rounded-xl px-3 py-2 hover:bg-muted/50">
-                  <p className="text-sm font-medium">{new Date(play.playedAt).toLocaleString()}</p>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
+        <section className="flex min-w-0 flex-col gap-4">
+          <h2 className="text-xl font-semibold">Recent plays</h2>
+          <ItemGroup>
+            {data.recentPlays.map((play: { playedAt: string }) => (
+              <Item key={play.playedAt} size="sm">
+                <ItemContent>
+                  <ItemTitle>{new Date(play.playedAt).toLocaleString()}</ItemTitle>
+                </ItemContent>
+              </Item>
+            ))}
+          </ItemGroup>
+        </section>
       </div>
     </Page>
   );

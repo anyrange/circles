@@ -27,14 +27,11 @@ function Stars({ n }: { n: number }) {
 export function RoastCard() {
   const mutation = useRoast();
   const [data, setData] = useState<Roast | null>(null);
-  const [cached, setCached] = useState(false);
 
   async function generate() {
-    const start = Date.now();
     const result = await mutation.mutateAsync();
-    if ("verdict" in result) {
-      setCached(Date.now() - start < 400);
-      setData(result as unknown as Roast);
+    if (isRoast(result)) {
+      setData(result);
     }
   }
 
@@ -55,18 +52,13 @@ export function RoastCard() {
               </>
             )}
           </div>
-          {cached && data && (
-            <Badge variant="secondary" className="mt-1 shrink-0 text-xs">
-              This week
-            </Badge>
-          )}
         </div>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        {mutation.isPending && <RoastSkeleton />}
+        {mutation.isPending ? <RoastSkeleton /> : null}
 
-        {data && !mutation.isPending && (
+        {data && !mutation.isPending ? (
           <>
             <p className="text-sm leading-relaxed">{data.roast}</p>
 
@@ -87,20 +79,24 @@ export function RoastCard() {
               Roast me again
             </Button>
           </>
-        )}
+        ) : null}
 
-        {!data && !mutation.isPending && (
+        {!data && !mutation.isPending ? (
           <Button onClick={generate} variant="outline" size="sm">
             Roast me
           </Button>
-        )}
+        ) : null}
 
-        {mutation.isError && (
+        {mutation.isError ? (
           <p className="text-sm text-destructive">Something went wrong. Try again.</p>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
+}
+
+function isRoast(result: unknown): result is Roast {
+  return Boolean(result && typeof result === "object" && "verdict" in result);
 }
 
 function RoastSkeleton() {

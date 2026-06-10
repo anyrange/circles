@@ -1,10 +1,11 @@
 import { type UseInfiniteQueryResult } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Disc3, LibraryBig, Music2, Users } from "lucide-react";
-import { useMemo, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { z } from "zod";
 
 import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
+import { RankedList } from "@/components/ranked-list";
 import { TimeRangeTabs } from "@/components/time-range-tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,7 +19,6 @@ import {
   useLibraryOverview,
 } from "@/lib/queries/library";
 import type { Range } from "@/lib/queries/stats";
-import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
   tab: z.enum(["scrobbles", "artists", "albums", "tracks"]).catch("scrobbles"),
@@ -97,18 +97,20 @@ function LibraryPage() {
             <OverviewSkeleton />
           ) : (
             <div className="flex flex-wrap gap-x-12 gap-y-4">
-              <OverviewMetric>
-                <OverviewMetric.Label>Streams</OverviewMetric.Label>
-                <OverviewMetric.Value>
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold text-muted-foreground">Streams</p>
+                <p className="text-3xl font-bold text-foreground tabular-nums">
                   {overview.totalScrobbles.toLocaleString()}
-                </OverviewMetric.Value>
-              </OverviewMetric>
-              <OverviewMetric>
-                <OverviewMetric.Label>Streams per day (average)</OverviewMetric.Label>
-                <OverviewMetric.Value>
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  Streams per day (average)
+                </p>
+                <p className="text-3xl font-bold text-foreground tabular-nums">
                   {overview.averagePerDay.toLocaleString()}
-                </OverviewMetric.Value>
-              </OverviewMetric>
+                </p>
+              </div>
             </div>
           )}
 
@@ -211,31 +213,29 @@ function ArtistsList({ pages }: { pages: Array<{ items: ArtistItem[] }> }) {
   const maxPlayCount = getMaxPlayCount(items);
 
   return (
-    <ChartList>
+    <RankedList>
       {items.map((item, index) => (
-        <li key={item.artist.id} className="border-b border-border/70 last:border-b-0">
-          <Link
-            to="/artists/$artistId"
-            params={{ artistId: item.artist.id }}
-            className="grid grid-cols-[2.25rem_2.75rem_minmax(0,1fr)] items-center gap-3 py-3 transition-colors hover:bg-muted/40 sm:grid-cols-[3rem_3rem_minmax(0,1fr)_minmax(12rem,0.48fr)] sm:gap-4"
-          >
-            <ChartRank>{index + 1}</ChartRank>
-            <Avatar size="lg" className="size-11 sm:size-12">
-              <AvatarImage src={item.artist.images?.[0]?.url} alt={item.artist.name} />
-              <AvatarFallback>{item.artist.name[0]}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-foreground">{item.artist.name}</p>
-              <p className="truncate text-xs text-muted-foreground sm:hidden">
-                {formatScrobbleCount(item.playCount)} • {item.albumCount.toLocaleString()} albums •{" "}
-                {item.trackCount.toLocaleString()} tracks
-              </p>
-            </div>
-            <ChartMetricBar value={item.playCount} max={maxPlayCount} />
-          </Link>
-        </li>
+        <RankedList.Item key={item.artist.id}>
+          <RankedList.Link>
+            <Link to="/artists/$artistId" params={{ artistId: item.artist.id }}>
+              <RankedList.Rank>{index + 1}</RankedList.Rank>
+              <Avatar size="lg" className="size-11 sm:size-12">
+                <AvatarImage src={item.artist.images?.[0]?.url} alt={item.artist.name} />
+                <AvatarFallback>{item.artist.name[0]}</AvatarFallback>
+              </Avatar>
+              <RankedList.Body>
+                <RankedList.Title>{item.artist.name}</RankedList.Title>
+                <RankedList.Subtitle className="text-xs sm:hidden">
+                  {formatScrobbleCount(item.playCount)} • {item.albumCount.toLocaleString()} albums
+                  • {item.trackCount.toLocaleString()} tracks
+                </RankedList.Subtitle>
+              </RankedList.Body>
+              <RankedList.Metric value={item.playCount} max={maxPlayCount} />
+            </Link>
+          </RankedList.Link>
+        </RankedList.Item>
       ))}
-    </ChartList>
+    </RankedList>
   );
 }
 
@@ -244,31 +244,33 @@ function AlbumsList({ pages }: { pages: Array<{ items: AlbumItem[] }> }) {
   const maxPlayCount = getMaxPlayCount(items);
 
   return (
-    <ChartList>
+    <RankedList>
       {items.map((item, index) => (
-        <li key={item.album.id} className="border-b border-border/70 last:border-b-0">
-          <Link
-            to="/albums/$albumId"
-            params={{ albumId: item.album.id }}
-            className="grid grid-cols-[2.25rem_2.75rem_minmax(0,1fr)] items-center gap-3 py-3 transition-colors hover:bg-muted/40 sm:grid-cols-[3rem_3rem_minmax(0,1fr)_minmax(12rem,0.48fr)] sm:gap-4"
-          >
-            <ChartRank>{index + 1}</ChartRank>
-            <ChartArtwork imageUrl={item.album.images?.[0]?.url} imageAlt={item.album.name}>
-              <Disc3 className="size-4" />
-            </ChartArtwork>
-            <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-foreground">{item.album.name}</p>
-              <p className="truncate text-sm text-muted-foreground">
-                {item.artistNames || "Unknown artist"}
-                {item.album.releaseDate ? ` • ${item.album.releaseDate}` : ""}
-                <span className="sm:hidden"> • {formatScrobbleCount(item.playCount)}</span>
-              </p>
-            </div>
-            <ChartMetricBar value={item.playCount} max={maxPlayCount} />
-          </Link>
-        </li>
+        <RankedList.Item key={item.album.id}>
+          <RankedList.Link>
+            <Link to="/albums/$albumId" params={{ albumId: item.album.id }}>
+              <RankedList.Rank>{index + 1}</RankedList.Rank>
+              <RankedList.Artwork>
+                {item.album.images?.[0]?.url ? (
+                  <RankedList.Image src={item.album.images[0].url} alt={item.album.name} />
+                ) : (
+                  <Disc3 className="size-4" />
+                )}
+              </RankedList.Artwork>
+              <RankedList.Body>
+                <RankedList.Title>{item.album.name}</RankedList.Title>
+                <RankedList.Subtitle>
+                  {item.artistNames || "Unknown artist"}
+                  {item.album.releaseDate ? ` • ${item.album.releaseDate}` : ""}
+                  <span className="sm:hidden"> • {formatScrobbleCount(item.playCount)}</span>
+                </RankedList.Subtitle>
+              </RankedList.Body>
+              <RankedList.Metric value={item.playCount} max={maxPlayCount} />
+            </Link>
+          </RankedList.Link>
+        </RankedList.Item>
       ))}
-    </ChartList>
+    </RankedList>
   );
 }
 
@@ -277,86 +279,32 @@ function TracksList({ pages }: { pages: Array<{ items: TrackItem[] }> }) {
   const maxPlayCount = getMaxPlayCount(items);
 
   return (
-    <ChartList>
+    <RankedList>
       {items.map((item, index) => (
-        <li key={item.track.id} className="border-b border-border/70 last:border-b-0">
-          <Link
-            to="/tracks/$trackId"
-            params={{ trackId: item.track.id }}
-            className="grid grid-cols-[2.25rem_2.75rem_minmax(0,1fr)] items-center gap-3 py-3 transition-colors hover:bg-muted/40 sm:grid-cols-[3rem_3rem_minmax(0,1fr)_minmax(12rem,0.48fr)] sm:gap-4"
-          >
-            <ChartRank>{index + 1}</ChartRank>
-            <ChartArtwork imageUrl={item.album?.imageUrl} imageAlt={item.track.name}>
-              <Music2 className="size-4" />
-            </ChartArtwork>
-            <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-foreground">{item.track.name}</p>
-              <p className="truncate text-sm text-muted-foreground">
-                {item.artistNames || item.album?.name || "Unknown artist"}
-                <span className="sm:hidden"> • {formatScrobbleCount(item.playCount)}</span>
-              </p>
-            </div>
-            <ChartMetricBar value={item.playCount} max={maxPlayCount} />
-          </Link>
-        </li>
+        <RankedList.Item key={item.track.id}>
+          <RankedList.Link>
+            <Link to="/tracks/$trackId" params={{ trackId: item.track.id }}>
+              <RankedList.Rank>{index + 1}</RankedList.Rank>
+              <RankedList.Artwork>
+                {item.album?.imageUrl ? (
+                  <RankedList.Image src={item.album.imageUrl} alt={item.track.name} />
+                ) : (
+                  <Music2 className="size-4" />
+                )}
+              </RankedList.Artwork>
+              <RankedList.Body>
+                <RankedList.Title>{item.track.name}</RankedList.Title>
+                <RankedList.Subtitle>
+                  {item.artistNames || item.album?.name || "Unknown artist"}
+                  <span className="sm:hidden"> • {formatScrobbleCount(item.playCount)}</span>
+                </RankedList.Subtitle>
+              </RankedList.Body>
+              <RankedList.Metric value={item.playCount} max={maxPlayCount} />
+            </Link>
+          </RankedList.Link>
+        </RankedList.Item>
       ))}
-    </ChartList>
-  );
-}
-
-function ChartList({ className, ...props }: ComponentPropsWithoutRef<"ol">) {
-  return <ol className={cn("flex flex-col border-y border-border/70", className)} {...props} />;
-}
-
-function ChartRank({ className, ...props }: ComponentPropsWithoutRef<"div">) {
-  return (
-    <div
-      className={cn(
-        "text-right text-sm text-muted-foreground tabular-nums sm:text-base",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-function ChartArtwork({
-  imageUrl,
-  imageAlt,
-  children,
-  className,
-  ...props
-}: ComponentPropsWithoutRef<"div"> & {
-  imageUrl?: string | null;
-  imageAlt: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground sm:size-12",
-        className,
-      )}
-      {...props}
-    >
-      {imageUrl ? (
-        <img src={imageUrl} alt={imageAlt} className="size-full object-cover" />
-      ) : (
-        children
-      )}
-    </div>
-  );
-}
-
-function ChartMetricBar({ value, max }: { value: number; max: number }) {
-  const width = max > 0 ? (value / max) * 100 : 0;
-
-  return (
-    <div className="relative hidden h-10 min-w-0 overflow-hidden sm:block">
-      <div className="absolute inset-y-0 left-0 bg-destructive/15" style={{ width: `${width}%` }} />
-      <p className="relative flex h-full items-center px-3 text-sm font-medium text-foreground tabular-nums">
-        {formatScrobbleCount(value)}
-      </p>
-    </div>
+    </RankedList>
   );
 }
 
@@ -378,23 +326,6 @@ function ListSkeleton() {
     </div>
   );
 }
-
-function OverviewMetricRoot(props: ComponentPropsWithoutRef<"div">) {
-  return <div className="flex flex-col gap-1" {...props} />;
-}
-
-function OverviewMetricLabel(props: ComponentPropsWithoutRef<"p">) {
-  return <p className="text-sm font-semibold text-muted-foreground" {...props} />;
-}
-
-function OverviewMetricValue(props: ComponentPropsWithoutRef<"p">) {
-  return <p className="text-3xl font-bold text-foreground tabular-nums" {...props} />;
-}
-
-const OverviewMetric = Object.assign(OverviewMetricRoot, {
-  Label: OverviewMetricLabel,
-  Value: OverviewMetricValue,
-});
 
 function DateRangePanel({
   data,

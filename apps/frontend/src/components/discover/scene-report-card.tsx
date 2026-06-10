@@ -17,14 +17,11 @@ interface SceneReport {
 export function SceneReportCard() {
   const mutation = useSceneReport();
   const [data, setData] = useState<SceneReport | null>(null);
-  const [cached, setCached] = useState(false);
 
   async function generate() {
-    const start = Date.now();
     const result = await mutation.mutateAsync();
-    if ("scene_name" in result) {
-      setCached(Date.now() - start < 400);
-      setData(result as unknown as SceneReport);
+    if (isSceneReport(result)) {
+      setData(result);
     }
   }
 
@@ -33,30 +30,16 @@ export function SceneReportCard() {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            {data ? (
-              <>
-                <CardTitle>{data.scene_name}</CardTitle>
-                <CardDescription>Scene report</CardDescription>
-              </>
-            ) : (
-              <>
-                <CardTitle>Scene report</CardTitle>
-                <CardDescription>Where do you belong?</CardDescription>
-              </>
-            )}
+            <CardTitle>{data ? data.scene_name : "Scene report"}</CardTitle>
+            <CardDescription>{data ? "Scene report" : "Where do you belong?"}</CardDescription>
           </div>
-          {cached && data && (
-            <Badge variant="secondary" className="mt-1 shrink-0 text-xs">
-              This week
-            </Badge>
-          )}
         </div>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        {mutation.isPending && <SceneSkeleton />}
+        {mutation.isPending ? <SceneSkeleton /> : null}
 
-        {data && !mutation.isPending && (
+        {data && !mutation.isPending ? (
           <>
             <p className="text-sm leading-relaxed">{data.description}</p>
 
@@ -88,20 +71,24 @@ export function SceneReportCard() {
               Regenerate
             </Button>
           </>
-        )}
+        ) : null}
 
-        {!data && !mutation.isPending && (
+        {!data && !mutation.isPending ? (
           <Button onClick={generate} variant="outline" size="sm">
             Find my scene
           </Button>
-        )}
+        ) : null}
 
-        {mutation.isError && (
+        {mutation.isError ? (
           <p className="text-sm text-destructive">Something went wrong. Try again.</p>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
+}
+
+function isSceneReport(result: unknown): result is SceneReport {
+  return Boolean(result && typeof result === "object" && "scene_name" in result);
 }
 
 function SceneSkeleton() {

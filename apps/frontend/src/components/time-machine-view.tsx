@@ -69,7 +69,7 @@ export function TimeMachineView() {
               <ol className="flex flex-col gap-2">
                 {yearEntry.plays.slice(0, 20).map((play, i) => (
                   <li key={i}>
-                    <TrackRow compact asChild>
+                    <TrackRow.Compact asChild>
                       <Link to="/tracks/$trackId" params={{ trackId: play.track.id }}>
                         <TrackRow.Leading>
                           {new Date(play.playedAt).toLocaleTimeString([], {
@@ -83,7 +83,7 @@ export function TimeMachineView() {
                           <TrackRow.Title>{play.track.name}</TrackRow.Title>
                         </TrackRow.Content>
                       </Link>
-                    </TrackRow>
+                    </TrackRow.Compact>
                   </li>
                 ))}
                 {yearEntry.plays.length > 20 && (

@@ -2,6 +2,14 @@ import { Link } from "@tanstack/react-router";
 import { Music2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStats } from "@/lib/queries/stats";
 
@@ -20,27 +28,27 @@ export function RightPanel() {
           <section className="flex flex-col gap-2">
             <h3 className="px-2 text-sm font-medium">Current obsessions</h3>
             {stats ? (
-              <div className="flex flex-col gap-1">
+              <ItemGroup>
                 {stats.topArtists.slice(0, 5).map((item) => (
-                  <Link
-                    key={item.artist.id}
-                    to="/artists/$artistId"
-                    params={{ artistId: item.artist.id }}
-                    className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/50"
-                  >
-                    <Avatar size="lg">
-                      <AvatarImage src={item.artist.images?.[0]?.url} className="object-cover" />
-                      <AvatarFallback>{item.artist.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {item.artist.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{item.playCount} plays</p>
-                    </div>
-                  </Link>
+                  <Item key={item.artist.id} asChild size="sm" className="rounded-2xl">
+                    <Link to="/artists/$artistId" params={{ artistId: item.artist.id }}>
+                      <ItemMedia>
+                        <Avatar size="lg">
+                          <AvatarImage
+                            src={item.artist.images?.[0]?.url}
+                            className="object-cover"
+                          />
+                          <AvatarFallback>{item.artist.name[0]}</AvatarFallback>
+                        </Avatar>
+                      </ItemMedia>
+                      <ItemContent>
+                        <ItemTitle>{item.artist.name}</ItemTitle>
+                        <ItemDescription>{item.playCount} plays</ItemDescription>
+                      </ItemContent>
+                    </Link>
+                  </Item>
                 ))}
-              </div>
+              </ItemGroup>
             ) : (
               <div className="flex flex-col gap-2 px-2 py-1">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -59,36 +67,25 @@ export function RightPanel() {
           {stats && stats.topTracks.length > 0 && (
             <section className="flex flex-col gap-2">
               <h3 className="px-2 text-sm font-medium">Top tracks</h3>
-              <div className="flex flex-col gap-1">
+              <ItemGroup>
                 {stats.topTracks.slice(0, 5).map((item) => (
-                  <Link
-                    key={item.track.id}
-                    to="/tracks/$trackId"
-                    params={{ trackId: item.track.id }}
-                    className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted text-muted-foreground">
-                      {item.track.albumImageUrl ? (
-                        <img
-                          src={item.track.albumImageUrl}
-                          alt=""
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <Music2 className="size-4" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {item.track.name}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {item.playCount} plays
-                      </p>
-                    </div>
-                  </Link>
+                  <Item key={item.track.id} asChild size="sm" className="rounded-2xl">
+                    <Link to="/tracks/$trackId" params={{ trackId: item.track.id }}>
+                      <ItemMedia variant={item.track.albumImageUrl ? "image" : "icon"}>
+                        {item.track.albumImageUrl ? (
+                          <img src={item.track.albumImageUrl} alt="" />
+                        ) : (
+                          <Music2 />
+                        )}
+                      </ItemMedia>
+                      <ItemContent>
+                        <ItemTitle>{item.track.name}</ItemTitle>
+                        <ItemDescription>{item.playCount} plays</ItemDescription>
+                      </ItemContent>
+                    </Link>
+                  </Item>
                 ))}
-              </div>
+              </ItemGroup>
             </section>
           )}
         </div>
