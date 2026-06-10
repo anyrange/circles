@@ -1,8 +1,9 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { zValidator } from "@hono/zod-validator";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 import { config } from "../../config";
@@ -26,7 +27,14 @@ export const importController = new Hono<{ Variables: AuthVariables }>()
       ...(config.s3.endpoint && { endpoint: config.s3.endpoint, forcePathStyle: true }),
     });
 
-    const s3Key = `imports/${userId}/${Date.now()}.bin`;
+    const [job] = await drizzleDb
+      .insert(importJobs)
+      .values({ userId, s3Key: "", status: "pending_upload" })
+      .returning();
+
+    const s3Key = `imports/${userId}/${job!.id}.bin`;
+
+    await drizzleDb.update(importJobs).set({ s3Key }).where(eq(importJobs.id, job!.id));
 
     const url = await getSignedUrl(
       s3,
@@ -37,20 +45,39 @@ export const importController = new Hono<{ Variables: AuthVariables }>()
       { expiresIn: 3600 },
     );
 
-    return ctx.json({ uploadUrl: url, s3Key });
+    return ctx.json({ uploadUrl: url, jobId: job!.id });
   })
-  .post("/me/import/process", zValidator("json", z.object({ s3Key: z.string() })), async (ctx) => {
+  .post("/me/import/process", zValidator("json", z.object({ jobId: z.string() })), async (ctx) => {
     const userId = ctx.get("userId");
-    const { s3Key } = ctx.req.valid("json");
+    const { jobId } = ctx.req.valid("json");
 
     const [job] = await drizzleDb
-      .insert(importJobs)
-      .values({ userId, s3Key, status: "pending" })
+      .select()
+      .from(importJobs)
+      .where(and(eq(importJobs.id, jobId), eq(importJobs.userId, userId)))
+      .limit(1);
+
+    if (!job) {
+      throw new HTTPException(404, { message: "Import job not found" });
+    }
+
+    if (job.status !== "pending_upload") {
+      throw new HTTPException(409, { message: "Import job already processing" });
+    }
+
+    const [claimedJob] = await drizzleDb
+      .update(importJobs)
+      .set({ status: "pending" })
+      .where(and(eq(importJobs.id, job.id), eq(importJobs.status, "pending_upload")))
       .returning();
 
-    await processImport.runNoWait({ userId, jobId: job!.id, s3Key });
+    if (!claimedJob) {
+      throw new HTTPException(409, { message: "Import job already processing" });
+    }
 
-    return ctx.json({ jobId: job!.id }, 201);
+    await processImport.runNoWait({ userId, jobId: job.id, s3Key: job.s3Key });
+
+    return ctx.json({ jobId: job.id }, 201);
   })
   .get("/me/import/status", async (ctx) => {
     const userId = ctx.get("userId");

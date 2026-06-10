@@ -226,7 +226,7 @@ export const importJobs = pgTable("import_jobs", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  status: varchar("status", { length: 20 }).notNull().default("pending_upload"),
   s3Key: varchar("s3_key", { length: 500 }).notNull(),
   totalTracks: integer("total_tracks"),
   importedTracks: integer("imported_tracks"),

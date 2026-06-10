@@ -2,15 +2,14 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ArrowRight, Music2, Sparkles } from "lucide-react";
 
 import { authClient } from "@/lib/auth";
-import { getSessionToken } from "@/lib/session-token";
 
 export const Route = createFileRoute("/")({
+  ssr: false,
   beforeLoad: async () => {
-    if (typeof window !== "undefined") {
-      if (getSessionToken()) throw redirect({ to: "/dashboard" });
+    const { data: session } = await authClient.getSession();
 
-      const { data: session } = await authClient.getSession();
-      if (session) throw redirect({ to: "/dashboard" });
+    if (session) {
+      throw redirect({ to: "/dashboard" });
     }
   },
   component: LoginPage,

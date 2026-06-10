@@ -31,25 +31,7 @@ const app = new Hono()
   .route("/docs", createDocsController())
   .route("/", e2eController)
   .on(["GET", "POST"], "/api/auth/*", async (ctx) => {
-    const response = await auth.handler(ctx.req.raw);
-
-    if (ctx.req.path.startsWith("/api/auth/callback/")) {
-      const location = response.headers.get("location");
-      const setCookie = response.headers.get("set-cookie");
-      const sessionToken = setCookie?.match(
-        /(?:^|, )__Secure-better-auth\.session_token=([^;]+)/,
-      )?.[1];
-
-      if (location && sessionToken) {
-        const redirectUrl = new URL(location);
-        redirectUrl.searchParams.set("session_token", decodeURIComponent(sessionToken));
-        const headers = new Headers(response.headers);
-        headers.set("location", redirectUrl.toString());
-        return new Response(response.body, { headers, status: response.status });
-      }
-    }
-
-    return response;
+    return auth.handler(ctx.req.raw);
   })
   .route("/me", meController)
   .route("/users", usersController)

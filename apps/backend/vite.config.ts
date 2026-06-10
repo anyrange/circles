@@ -14,12 +14,7 @@ export default defineConfig({
       reporter: ["text", "html", "lcov", "json-summary"],
       reportsDirectory: "./coverage",
       include: ["src/**/*.{ts,tsx}"],
-      exclude: [
-        "src/**/*.spec.ts",
-        "src/**/*-midterm.spec.ts",
-        "src/api/controllers/*.ts",
-        "src/worker/workflows/*.ts",
-      ],
+      exclude: ["src/**/*.spec.ts", "src/**/*-midterm.spec.ts"],
       thresholds: {
         lines: 90,
         functions: 90,

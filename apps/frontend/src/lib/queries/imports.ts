@@ -19,7 +19,7 @@ export function useTriggerImport() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (file: File) => {
-      const { uploadUrl, s3Key } = await parseResponse(api.me.import.upload.$post());
+      const { uploadUrl, jobId } = await parseResponse(api.me.import.upload.$post());
 
       const s3Res = await fetch(uploadUrl, {
         method: "PUT",
@@ -27,7 +27,7 @@ export function useTriggerImport() {
       });
       if (!s3Res.ok) throw new Error("Failed to upload file");
 
-      return parseResponse(api.me.import.process.$post({ json: { s3Key } }));
+      return parseResponse(api.me.import.process.$post({ json: { jobId } }));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["me", "import", "status"] }),
   });

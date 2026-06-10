@@ -4,13 +4,21 @@ import { Progress } from "@/components/ui/progress";
 import { useImportStatus, useTriggerImport } from "@/lib/queries/imports";
 import { cn } from "@/lib/utils";
 
+const MAX_IMPORT_BYTES = 50 * 1024 * 1024;
+
 export function ImportUploader() {
   const [dragging, setDragging] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
   const trigger = useTriggerImport();
   const { data: status } = useImportStatus();
 
   const handleFile = useCallback(
     (file: File) => {
+      if (file.size > MAX_IMPORT_BYTES) {
+        setFileError("Import file must be 50 MB or smaller.");
+        return;
+      }
+      setFileError(null);
       trigger.mutate(file);
     },
     [trigger],
@@ -64,6 +72,8 @@ export function ImportUploader() {
           onChange={onInputChange}
         />
       </div>
+
+      {fileError && <p className="text-sm text-destructive">{fileError}</p>}
 
       {trigger.isPending && <p className="text-sm text-muted-foreground">Uploading...</p>}
 

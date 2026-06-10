@@ -1,14 +1,16 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { JsonObject } from "@hatchet-dev/typescript-sdk";
 import { eq } from "drizzle-orm";
-import { unzipSync } from "fflate";
 
 import { config } from "../../config";
 import { db as drizzleDb } from "../../db/postgres";
 import { importJobs } from "../../db/postgres/schema";
+import {
+  MAX_IMPORT_BYTES,
+  parseSpotifyImport,
+  splitIntoBatches,
+} from "../../library/import-parser";
 import { logger } from "../../library/logger";
-import { isValidEntry, type SpotifyExportEntry } from "../../library/spotify-export";
-import { isZip } from "../../library/zip";
 import { hatchet } from "../client";
 import { BATCH_SIZE, importBatch } from "./import-batch";
 
@@ -45,54 +47,41 @@ processImport.task({
       });
 
       const obj = await s3.send(new GetObjectCommand({ Bucket: config.s3.bucket, Key: s3Key }));
-      const bodyBytes = await streamToBuffer(obj.Body as NodeJS.ReadableStream);
-
-      let entries: SpotifyExportEntry[] = [];
-
-      if (isZip(bodyBytes)) {
-        const decompressed = unzipSync(bodyBytes);
-        for (const [filename, data] of Object.entries(decompressed)) {
-          if (filename.endsWith(".json")) {
-            try {
-              const parsed = JSON.parse(new TextDecoder().decode(data));
-              if (Array.isArray(parsed)) entries.push(...parsed);
-            } catch {
-              logger.worker.warn({ filename }, "failed to parse JSON file in zip");
-            }
-          }
-        }
-      } else {
-        entries = JSON.parse(new TextDecoder().decode(bodyBytes));
+      if (obj.ContentLength && obj.ContentLength > MAX_IMPORT_BYTES) {
+        throw new Error("Import file is too large");
       }
-
-      const valid = entries.filter(isValidEntry);
+      const bodyBytes = await streamToBuffer(obj.Body as NodeJS.ReadableStream, MAX_IMPORT_BYTES);
+      const valid = parseSpotifyImport(bodyBytes);
 
       logger.worker.info({ userId, total: valid.length }, "parsed import, spawning batches");
 
-      const validKey = s3Key.replace(/\.bin$/, "-valid.json");
-      await s3.send(
-        new PutObjectCommand({
-          Bucket: config.s3.bucket,
-          Key: validKey,
-          Body: JSON.stringify(valid),
-          ContentType: "application/json",
-        }),
-      );
-
       await updateJob({ totalTracks: valid.length, importedTracks: 0 });
 
-      const totalBatches = Math.ceil(valid.length / BATCH_SIZE);
+      const batches = splitIntoBatches(valid, BATCH_SIZE);
+      const totalBatches = batches.length;
       const CONCURRENCY = 3;
+      const batchKeys: string[] = [];
+
+      for (const [index, batch] of batches.entries()) {
+        const batchKey = `${s3Key.replace(/\.bin$/, "")}/batch-${String(index).padStart(5, "0")}.json`;
+        await s3.send(
+          new PutObjectCommand({
+            Bucket: config.s3.bucket,
+            Key: batchKey,
+            Body: JSON.stringify(batch),
+            ContentType: "application/json",
+          }),
+        );
+        batchKeys.push(batchKey);
+      }
 
       for (let i = 0; i < totalBatches; i += CONCURRENCY) {
-        const group = Array.from({ length: Math.min(CONCURRENCY, totalBatches - i) }, (_, j) => ({
+        const group = batchKeys.slice(i, i + CONCURRENCY).map((batchKey) => ({
           workflow: importBatch,
           input: {
             userId,
             jobId,
-            validKey,
-            offset: (i + j) * BATCH_SIZE,
-            limit: BATCH_SIZE,
+            batchKey,
           },
         }));
         await ctx.bulkRunChildren(group);
@@ -111,10 +100,19 @@ processImport.task({
   },
 });
 
-async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Uint8Array> {
+async function streamToBuffer(
+  stream: NodeJS.ReadableStream,
+  maxBytes: number,
+): Promise<Uint8Array> {
   const chunks: Buffer[] = [];
+  let size = 0;
   for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string));
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
+    size += buffer.byteLength;
+    if (size > maxBytes) {
+      throw new Error("Import file is too large");
+    }
+    chunks.push(buffer);
   }
   return Buffer.concat(chunks);
 }

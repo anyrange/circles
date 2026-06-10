@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth";
 import { useMeQuery } from "@/lib/queries/me";
-import { clearSessionToken } from "@/lib/session-token";
 
 const NAV = [
   { label: "Home", icon: Home, to: "/dashboard" },
@@ -60,7 +59,6 @@ export function AppSidebar() {
   const { data: me } = useMeQuery();
 
   async function logout() {
-    clearSessionToken();
     await authClient.signOut();
     await navigate({ to: "/" });
   }

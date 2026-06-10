@@ -18,9 +18,7 @@ export type { SpotifyExportEntry };
 interface Input extends JsonObject {
   userId: string;
   jobId: string;
-  validKey: string;
-  offset: number;
-  limit: number;
+  batchKey: string;
 }
 
 export const BATCH_SIZE = 50;
@@ -33,7 +31,7 @@ importBatch.task({
   name: "run",
   executionTimeout: "5m",
   fn: async (input) => {
-    const { userId, jobId, validKey, offset, limit } = input;
+    const { userId, jobId, batchKey } = input;
 
     const s3 = new S3Client({
       region: config.s3.region,
@@ -44,10 +42,9 @@ importBatch.task({
       ...(config.s3.endpoint && { endpoint: config.s3.endpoint, forcePathStyle: true }),
     });
 
-    const obj = await s3.send(new GetObjectCommand({ Bucket: config.s3.bucket, Key: validKey }));
+    const obj = await s3.send(new GetObjectCommand({ Bucket: config.s3.bucket, Key: batchKey }));
     const bodyBytes = await streamToBuffer(obj.Body as NodeJS.ReadableStream);
-    const valid: SpotifyExportEntry[] = JSON.parse(new TextDecoder().decode(bodyBytes));
-    const chunk = valid.slice(offset, offset + limit);
+    const chunk: SpotifyExportEntry[] = JSON.parse(new TextDecoder().decode(bodyBytes));
 
     const [spotifyAccount] = await drizzleDb
       .select()
@@ -132,7 +129,7 @@ importBatch.task({
       .where(eq(importJobs.id, jobId));
 
     logger.worker.info(
-      { userId, jobId, offset, importedCount: historyRows.length },
+      { userId, jobId, batchKey, importedCount: historyRows.length },
       "batch complete",
     );
   },
