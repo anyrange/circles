@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, inArray, or, sql } from "drizzle-orm";
 
-import { db } from "../postgres";
+import type { Database } from "../postgres";
 import { albums, artists, audioFeatures, history, trackArtists, tracks } from "../postgres/schema";
 
 export type Track = typeof tracks.$inferSelect;
@@ -9,12 +9,18 @@ export type NewTrackArtist = typeof trackArtists.$inferInsert;
 export type NewAudioFeatures = typeof audioFeatures.$inferInsert;
 
 export class TrackModel {
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
+
   async upsertMany(data: NewTrack[]) {
     if (data.length === 0) {
       return [];
     }
 
-    return db
+    return this.db
       .insert(tracks)
       .values(data)
       .onConflictDoUpdate({
@@ -35,7 +41,7 @@ export class TrackModel {
       return;
     }
 
-    await db.insert(trackArtists).values(data).onConflictDoNothing();
+    await this.db.insert(trackArtists).values(data).onConflictDoNothing();
   }
 
   async upsertAudioFeatures(data: NewAudioFeatures[]) {
@@ -43,7 +49,7 @@ export class TrackModel {
       return;
     }
 
-    await db
+    await this.db
       .insert(audioFeatures)
       .values(data)
       .onConflictDoUpdate({
@@ -70,11 +76,11 @@ export class TrackModel {
       return [];
     }
 
-    return db.select().from(tracks).where(inArray(tracks.spotifyId, spotifyIds));
+    return this.db.select().from(tracks).where(inArray(tracks.spotifyId, spotifyIds));
   }
 
   async findDetailForUser(userId: string, trackId: string) {
-    const [track] = await db
+    const [track] = await this.db
       .select({
         id: tracks.id,
         spotifyId: tracks.spotifyId,
@@ -136,7 +142,7 @@ export class TrackModel {
     }
 
     const [trackArtistsList, recentPlays] = await Promise.all([
-      db
+      this.db
         .select({
           artist: {
             id: artists.id,
@@ -150,7 +156,7 @@ export class TrackModel {
         .where(eq(trackArtists.trackId, trackId))
         .groupBy(artists.id, artists.spotifyId, artists.name, artists.images)
         .orderBy(artists.name),
-      db
+      this.db
         .select({ playedAt: history.playedAt })
         .from(history)
         .where(and(eq(history.userId, userId), eq(history.trackId, trackId)))
@@ -173,7 +179,7 @@ export class TrackModel {
     const conditions = [eq(history.userId, userId)];
     if (since) conditions.push(gte(history.playedAt, since));
 
-    const baseQuery = db
+    const baseQuery = this.db
       .select({
         track: {
           id: tracks.id,
@@ -223,7 +229,7 @@ export class TrackModel {
     const items = hasMore ? rows.slice(0, limit) : rows;
     const lastItem = items.at(-1);
 
-    const [{ totalCount }] = await db
+    const [{ totalCount }] = await this.db
       .select({ totalCount: sql<number>`count(distinct ${tracks.id})` })
       .from(history)
       .innerJoin(tracks, eq(history.trackId, tracks.id))

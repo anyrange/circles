@@ -1,18 +1,24 @@
 import { and, avg, count, desc, eq, gte, inArray, sql } from "drizzle-orm";
 
-import { db } from "../postgres";
+import type { Database } from "../postgres";
 import { albums, artists, audioFeatures, history, trackArtists, tracks } from "../postgres/schema";
 
 export type History = typeof history.$inferSelect;
 export type NewHistory = typeof history.$inferInsert;
 
 export class HistoryModel {
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
+
   async insertMany(data: NewHistory[]) {
     if (data.length === 0) {
       return;
     }
 
-    await db.insert(history).values(data).onConflictDoNothing();
+    await this.db.insert(history).values(data).onConflictDoNothing();
   }
 
   async findByUser(userId: string, opts: { limit?: number; before?: Date; after?: Date } = {}) {
@@ -21,7 +27,7 @@ export class HistoryModel {
     if (before) conditions.push(sql`${history.playedAt} < ${before}`);
     if (after) conditions.push(gte(history.playedAt, after));
 
-    const pageRows = await db
+    const pageRows = await this.db
       .select({
         playedAt: history.playedAt,
         trackId: history.trackId,
@@ -47,7 +53,7 @@ export class HistoryModel {
 
     const artistRows =
       trackIds.length > 0
-        ? await db
+        ? await this.db
             .select({
               trackId: trackArtists.trackId,
               artistId: artists.id,
@@ -86,7 +92,7 @@ export class HistoryModel {
   }
 
   async getLatestPlayedAt(userId: string) {
-    const [row] = await db
+    const [row] = await this.db
       .select({ playedAt: history.playedAt })
       .from(history)
       .where(eq(history.userId, userId))
@@ -100,7 +106,7 @@ export class HistoryModel {
     if (since) conditions.push(gte(history.playedAt, since));
 
     const [totals, scrobblesByYear] = await Promise.all([
-      db
+      this.db
         .select({
           totalScrobbles: count(history.id),
           totalArtists: sql<number>`count(distinct ${trackArtists.artistId})`,
@@ -111,7 +117,7 @@ export class HistoryModel {
         .innerJoin(tracks, eq(history.trackId, tracks.id))
         .leftJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
         .where(and(...conditions)),
-      db.execute<{ year: string; count: string }>(sql`
+      this.db.execute<{ year: string; count: string }>(sql`
         SELECT EXTRACT(YEAR FROM ${history.playedAt})::int as year, count(*)::int as count
         FROM ${history}
         WHERE ${history.userId} = ${userId}
@@ -122,14 +128,14 @@ export class HistoryModel {
     ]);
 
     const totalScrobbles = Number(totals[0]?.totalScrobbles ?? 0);
-    const firstScrobble = await db
+    const firstScrobble = await this.db
       .select({ playedAt: history.playedAt })
       .from(history)
       .where(and(...conditions))
       .orderBy(history.playedAt)
       .limit(1);
 
-    const lastScrobble = await db
+    const lastScrobble = await this.db
       .select({ playedAt: history.playedAt })
       .from(history)
       .where(and(...conditions))
@@ -165,7 +171,7 @@ export class HistoryModel {
     if (since) totalConditions.push(gte(history.playedAt, since));
 
     const page = await this.findByUser(userId, { limit, before, after: since });
-    const [{ totalCount }] = await db
+    const [{ totalCount }] = await this.db
       .select({ totalCount: count(history.id) })
       .from(history)
       .where(and(...totalConditions));
@@ -180,7 +186,7 @@ export class HistoryModel {
     const conditions = [eq(history.userId, userId)];
     if (since) conditions.push(gte(history.playedAt, since));
 
-    return db
+    return this.db
       .select({
         track: {
           id: tracks.id,
@@ -203,7 +209,7 @@ export class HistoryModel {
     const conditions = [eq(history.userId, userId)];
     if (since) conditions.push(gte(history.playedAt, since));
 
-    return db
+    return this.db
       .select({
         artist: {
           id: artists.id,
@@ -229,7 +235,7 @@ export class HistoryModel {
     const whereClause = and(...conditions);
 
     // Total scrobbles + listening time + mainstream score
-    const [totals] = await db
+    const [totals] = await this.db
       .select({
         totalScrobbles: count(history.id),
         totalListeningMs: sql<number>`coalesce(sum(${tracks.durationMs}), 0)`,
@@ -240,7 +246,7 @@ export class HistoryModel {
       .where(whereClause);
 
     // Audio features averages
-    const [features] = await db
+    const [features] = await this.db
       .select({
         energy: avg(audioFeatures.energy),
         valence: avg(audioFeatures.valence),
@@ -255,7 +261,7 @@ export class HistoryModel {
       .where(whereClause);
 
     // Top genres via jsonb_array_elements_text
-    const genreRows = await db.execute<{ genre: string; count: string }>(sql`
+    const genreRows = await this.db.execute<{ genre: string; count: string }>(sql`
       SELECT genre, count(*)::int as count
       FROM ${history}
       JOIN ${tracks} ON ${history.trackId} = ${tracks.id}
@@ -270,7 +276,7 @@ export class HistoryModel {
     `);
 
     // Scrobbles by hour
-    const hourRows = await db.execute<{ hour: string; count: string }>(sql`
+    const hourRows = await this.db.execute<{ hour: string; count: string }>(sql`
       SELECT EXTRACT(HOUR FROM ${history.playedAt})::int as hour, count(*)::int as count
       FROM ${history}
       WHERE ${history.userId} = ${userId}
@@ -280,7 +286,7 @@ export class HistoryModel {
     `);
 
     // Scrobbles by day of week (0=Sun, 6=Sat)
-    const dowRows = await db.execute<{ dow: string; count: string }>(sql`
+    const dowRows = await this.db.execute<{ dow: string; count: string }>(sql`
       SELECT EXTRACT(DOW FROM ${history.playedAt})::int as dow, count(*)::int as count
       FROM ${history}
       WHERE ${history.userId} = ${userId}
@@ -290,7 +296,7 @@ export class HistoryModel {
     `);
 
     // Scrobbles by date
-    const dateRows = await db.execute<{ date: string; count: string }>(sql`
+    const dateRows = await this.db.execute<{ date: string; count: string }>(sql`
       SELECT DATE(${history.playedAt}) as date, count(*)::int as count
       FROM ${history}
       WHERE ${history.userId} = ${userId}
@@ -324,7 +330,7 @@ export class HistoryModel {
   }
 
   async getTimeMachine(userId: string, month: number, day: number) {
-    const rows = await db.execute<{
+    const rows = await this.db.execute<{
       year: string;
       played_at: string;
       track_id: string;
@@ -379,7 +385,7 @@ export class HistoryModel {
     const since = new Date();
     since.setDate(since.getDate() - weeks * 7);
 
-    const rows = await db.execute<{ week: string; genre: string; count: string }>(sql`
+    const rows = await this.db.execute<{ week: string; genre: string; count: string }>(sql`
       SELECT
         DATE_TRUNC('week', ${history.playedAt})::date::text as week,
         genre,

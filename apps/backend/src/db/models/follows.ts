@@ -1,21 +1,27 @@
 import { and, eq } from "drizzle-orm";
 
-import { db } from "../postgres";
+import type { Database } from "../postgres";
 import { follows, user } from "../postgres/schema";
 
 export class FollowsModel {
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
+
   async follow(followerId: string, followingId: string) {
-    await db.insert(follows).values({ followerId, followingId }).onConflictDoNothing();
+    await this.db.insert(follows).values({ followerId, followingId }).onConflictDoNothing();
   }
 
   async unfollow(followerId: string, followingId: string) {
-    await db
+    await this.db
       .delete(follows)
       .where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)));
   }
 
   async getFollowing(userId: string) {
-    return db
+    return this.db
       .select({
         id: user.id,
         name: user.name,
@@ -28,7 +34,7 @@ export class FollowsModel {
   }
 
   async getFollowers(userId: string) {
-    return db
+    return this.db
       .select({
         id: user.id,
         name: user.name,
@@ -41,7 +47,7 @@ export class FollowsModel {
   }
 
   async isFollowing(followerId: string, followingId: string): Promise<boolean> {
-    const [row] = await db
+    const [row] = await this.db
       .select({ followerId: follows.followerId })
       .from(follows)
       .where(and(eq(follows.followerId, followerId), eq(follows.followingId, followingId)))

@@ -5,13 +5,14 @@ import { HistoryModel } from "./models/history";
 import { PlaylistModel } from "./models/playlist";
 import { TrackModel } from "./models/track";
 import { UserModel } from "./models/user";
+import { db as postgresDb } from "./postgres";
 
 export const db = {
-  user: new UserModel(),
-  album: new AlbumModel(),
-  artist: new ArtistModel(),
-  track: new TrackModel(),
-  history: new HistoryModel(),
-  follows: new FollowsModel(),
-  playlist: new PlaylistModel(),
+  user: new UserModel(postgresDb),
+  album: new AlbumModel(postgresDb),
+  artist: new ArtistModel(postgresDb),
+  track: new TrackModel(postgresDb),
+  history: new HistoryModel(postgresDb),
+  follows: new FollowsModel(postgresDb),
+  playlist: new PlaylistModel(postgresDb),
 };
