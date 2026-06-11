@@ -17,8 +17,6 @@ dist-ssr
 .vinxi
 .env
 *.local
-.stryker-tmp
-reports/*
 
 # Editor directories and files
 .vscode/*

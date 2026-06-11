@@ -10,7 +10,6 @@ const PROTECTED_ROUTES = [
   "/social",
   "/time-machine",
   "/tools",
-  "/import",
 ];
 
 test.describe("Unauthorized access", () => {
