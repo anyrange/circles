@@ -3,15 +3,22 @@ import dayjs from "dayjs";
 import { CalendarDays, Clock3, Music2, Radio, UserCheck, UserPlus } from "lucide-react";
 import { z } from "zod";
 
-import { Page, PageDescription, PageHeader, PageSectionTitle } from "@/components/page-shell";
-import { ScrobbleTimelineChart } from "@/components/scrobble-timeline-chart";
+import {
+  Page,
+  PageDescription,
+  PageHeader,
+  PageSection,
+  PageSectionTitle,
+} from "@/components/page-shell";
+import { StreamsTimelineChart } from "@/components/streams-timeline-chart";
 import { TimeRangeTabs } from "@/components/time-range-tabs";
 import { TopArtistsRow } from "@/components/top-artists-row";
 import { TrackRow } from "@/components/track-row";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import {
   Item,
   ItemContent,
@@ -185,29 +192,25 @@ function ProfilePage() {
         </div>
       )}
 
+      {statsLoading && !stats ? (
+        <PageSection>
+          <PageSectionTitle>Top artists</PageSectionTitle>
+          <div>
+            <HorizontalSkeleton />
+          </div>
+        </PageSection>
+      ) : stats?.topArtists.length ? (
+        <PageSection>
+          <PageSectionTitle>Top artists</PageSectionTitle>
+          <TopArtistsRow artists={stats.topArtists} />
+        </PageSection>
+      ) : null}
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="flex min-w-0 flex-col gap-6">
-          {statsLoading && !stats ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Top artists</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <HorizontalSkeleton />
-              </CardContent>
-            </Card>
-          ) : stats?.topArtists.length ? (
-            <section className="flex flex-col gap-3">
-              <PageSectionTitle>Top artists</PageSectionTitle>
-              <TopArtistsRow artists={stats.topArtists} />
-            </section>
-          ) : null}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Top tracks</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <PageSection>
+            <PageSectionTitle>Top tracks</PageSectionTitle>
+            <div>
               {statsLoading && !stats ? (
                 <ListSkeleton />
               ) : stats?.topTracks.length ? (
@@ -234,29 +237,32 @@ function ProfilePage() {
                   ))}
                 </ol>
               ) : (
-                <EmptyProfileSection>No top tracks for this range yet.</EmptyProfileSection>
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyTitle>No top tracks</EmptyTitle>
+                    <EmptyDescription>
+                      This profile has no top tracks for the selected range yet.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </PageSection>
 
           {extended?.scrobblesByDate.length ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Listening over time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrobbleTimelineChart data={extended.scrobblesByDate} />
-              </CardContent>
-            </Card>
+            <PageSection>
+              <PageSectionTitle>Listening over time</PageSectionTitle>
+              <div>
+                <StreamsTimelineChart data={extended.scrobblesByDate} />
+              </div>
+            </PageSection>
           ) : null}
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Taste profile</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <PageSection>
+            <PageSectionTitle>Taste profile</PageSectionTitle>
+            <div>
               <ItemGroup>
                 <Item size="sm">
                   <ItemMedia variant="icon" className="rounded-full">
@@ -295,21 +301,26 @@ function ProfilePage() {
                   </ItemContent>
                 </Item>
               </ItemGroup>
-            </CardContent>
-          </Card>
+            </div>
+          </PageSection>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Top genres</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <PageSection>
+            <PageSectionTitle>Top genres</PageSectionTitle>
+            <div>
               {topGenres.length ? (
                 <GenreList genres={topGenres} />
               ) : (
-                <EmptyProfileSection>No genre data for this range yet.</EmptyProfileSection>
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyTitle>No genre data</EmptyTitle>
+                    <EmptyDescription>
+                      This profile has no genre data for the selected range yet.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </PageSection>
         </div>
       </div>
     </Page>
@@ -337,7 +348,12 @@ function StatsSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
       {[1, 2, 3, 4].map((item) => (
-        <Skeleton key={item} className="h-24 rounded-2xl" />
+        <Card key={item} size="sm" aria-hidden="true">
+          <CardHeader>
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-8 w-20" />
+          </CardHeader>
+        </Card>
       ))}
     </div>
   );
@@ -365,10 +381,6 @@ function ListSkeleton() {
       ))}
     </div>
   );
-}
-
-function EmptyProfileSection({ children }: { children: string }) {
-  return <p className="py-8 text-sm text-muted-foreground">{children}</p>;
 }
 
 function GenreList({ genres }: { genres: Array<{ genre: string; count: number }> }) {

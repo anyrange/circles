@@ -15,13 +15,14 @@ import { Route as AuthCallbackRouteRouteImport } from './routes/auth/callback/ro
 import { Route as AuthenticatedToolsRouteRouteImport } from './routes/_authenticated/tools/route'
 import { Route as AuthenticatedTimeMachineRouteRouteImport } from './routes/_authenticated/time-machine/route'
 import { Route as AuthenticatedSocialRouteRouteImport } from './routes/_authenticated/social/route'
-import { Route as AuthenticatedPlaylistsRouteRouteImport } from './routes/_authenticated/playlists/route'
+import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedLibraryRouteRouteImport } from './routes/_authenticated/library/route'
 import { Route as AuthenticatedImportRouteRouteImport } from './routes/_authenticated/import/route'
 import { Route as AuthenticatedHistoryRouteRouteImport } from './routes/_authenticated/history/route'
 import { Route as AuthenticatedDashboardRouteRouteImport } from './routes/_authenticated/dashboard/route'
 import { Route as AuthenticatedUUsernameRouteRouteImport } from './routes/_authenticated/u/$username/route'
 import { Route as AuthenticatedTracksTrackIdRouteRouteImport } from './routes/_authenticated/tracks/$trackId/route'
+import { Route as AuthenticatedDataImportRouteRouteImport } from './routes/_authenticated/data/import/route'
 import { Route as AuthenticatedArtistsArtistIdRouteRouteImport } from './routes/_authenticated/artists/$artistId/route'
 import { Route as AuthenticatedAlbumsAlbumIdRouteRouteImport } from './routes/_authenticated/albums/$albumId/route'
 
@@ -56,10 +57,10 @@ const AuthenticatedSocialRouteRoute =
     path: '/social',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPlaylistsRouteRoute =
-  AuthenticatedPlaylistsRouteRouteImport.update({
-    id: '/playlists',
-    path: '/playlists',
+const AuthenticatedSettingsRouteRoute =
+  AuthenticatedSettingsRouteRouteImport.update({
+    id: '/settings',
+    path: '/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedLibraryRouteRoute =
@@ -98,6 +99,12 @@ const AuthenticatedTracksTrackIdRouteRoute =
     path: '/tracks/$trackId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDataImportRouteRoute =
+  AuthenticatedDataImportRouteRouteImport.update({
+    id: '/data/import',
+    path: '/data/import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedArtistsArtistIdRouteRoute =
   AuthenticatedArtistsArtistIdRouteRouteImport.update({
     id: '/artists/$artistId',
@@ -117,13 +124,14 @@ export interface FileRoutesByFullPath {
   '/history': typeof AuthenticatedHistoryRouteRoute
   '/import': typeof AuthenticatedImportRouteRoute
   '/library': typeof AuthenticatedLibraryRouteRoute
-  '/playlists': typeof AuthenticatedPlaylistsRouteRoute
+  '/settings': typeof AuthenticatedSettingsRouteRoute
   '/social': typeof AuthenticatedSocialRouteRoute
   '/time-machine': typeof AuthenticatedTimeMachineRouteRoute
   '/tools': typeof AuthenticatedToolsRouteRoute
   '/auth/callback': typeof AuthCallbackRouteRoute
   '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
+  '/data/import': typeof AuthenticatedDataImportRouteRoute
   '/tracks/$trackId': typeof AuthenticatedTracksTrackIdRouteRoute
   '/u/$username': typeof AuthenticatedUUsernameRouteRoute
 }
@@ -133,13 +141,14 @@ export interface FileRoutesByTo {
   '/history': typeof AuthenticatedHistoryRouteRoute
   '/import': typeof AuthenticatedImportRouteRoute
   '/library': typeof AuthenticatedLibraryRouteRoute
-  '/playlists': typeof AuthenticatedPlaylistsRouteRoute
+  '/settings': typeof AuthenticatedSettingsRouteRoute
   '/social': typeof AuthenticatedSocialRouteRoute
   '/time-machine': typeof AuthenticatedTimeMachineRouteRoute
   '/tools': typeof AuthenticatedToolsRouteRoute
   '/auth/callback': typeof AuthCallbackRouteRoute
   '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
+  '/data/import': typeof AuthenticatedDataImportRouteRoute
   '/tracks/$trackId': typeof AuthenticatedTracksTrackIdRouteRoute
   '/u/$username': typeof AuthenticatedUUsernameRouteRoute
 }
@@ -151,13 +160,14 @@ export interface FileRoutesById {
   '/_authenticated/history': typeof AuthenticatedHistoryRouteRoute
   '/_authenticated/import': typeof AuthenticatedImportRouteRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRouteRoute
-  '/_authenticated/playlists': typeof AuthenticatedPlaylistsRouteRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRouteRoute
   '/_authenticated/social': typeof AuthenticatedSocialRouteRoute
   '/_authenticated/time-machine': typeof AuthenticatedTimeMachineRouteRoute
   '/_authenticated/tools': typeof AuthenticatedToolsRouteRoute
   '/auth/callback': typeof AuthCallbackRouteRoute
   '/_authenticated/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/_authenticated/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
+  '/_authenticated/data/import': typeof AuthenticatedDataImportRouteRoute
   '/_authenticated/tracks/$trackId': typeof AuthenticatedTracksTrackIdRouteRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRouteRoute
 }
@@ -169,13 +179,14 @@ export interface FileRouteTypes {
     | '/history'
     | '/import'
     | '/library'
-    | '/playlists'
+    | '/settings'
     | '/social'
     | '/time-machine'
     | '/tools'
     | '/auth/callback'
     | '/albums/$albumId'
     | '/artists/$artistId'
+    | '/data/import'
     | '/tracks/$trackId'
     | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
@@ -185,13 +196,14 @@ export interface FileRouteTypes {
     | '/history'
     | '/import'
     | '/library'
-    | '/playlists'
+    | '/settings'
     | '/social'
     | '/time-machine'
     | '/tools'
     | '/auth/callback'
     | '/albums/$albumId'
     | '/artists/$artistId'
+    | '/data/import'
     | '/tracks/$trackId'
     | '/u/$username'
   id:
@@ -202,13 +214,14 @@ export interface FileRouteTypes {
     | '/_authenticated/history'
     | '/_authenticated/import'
     | '/_authenticated/library'
-    | '/_authenticated/playlists'
+    | '/_authenticated/settings'
     | '/_authenticated/social'
     | '/_authenticated/time-machine'
     | '/_authenticated/tools'
     | '/auth/callback'
     | '/_authenticated/albums/$albumId'
     | '/_authenticated/artists/$artistId'
+    | '/_authenticated/data/import'
     | '/_authenticated/tracks/$trackId'
     | '/_authenticated/u/$username'
   fileRoutesById: FileRoutesById
@@ -263,11 +276,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSocialRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/playlists': {
-      id: '/_authenticated/playlists'
-      path: '/playlists'
-      fullPath: '/playlists'
-      preLoaderRoute: typeof AuthenticatedPlaylistsRouteRouteImport
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/library': {
@@ -312,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTracksTrackIdRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/data/import': {
+      id: '/_authenticated/data/import'
+      path: '/data/import'
+      fullPath: '/data/import'
+      preLoaderRoute: typeof AuthenticatedDataImportRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/artists/$artistId': {
       id: '/_authenticated/artists/$artistId'
       path: '/artists/$artistId'
@@ -334,12 +354,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistoryRouteRoute: typeof AuthenticatedHistoryRouteRoute
   AuthenticatedImportRouteRoute: typeof AuthenticatedImportRouteRoute
   AuthenticatedLibraryRouteRoute: typeof AuthenticatedLibraryRouteRoute
-  AuthenticatedPlaylistsRouteRoute: typeof AuthenticatedPlaylistsRouteRoute
+  AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRoute
   AuthenticatedSocialRouteRoute: typeof AuthenticatedSocialRouteRoute
   AuthenticatedTimeMachineRouteRoute: typeof AuthenticatedTimeMachineRouteRoute
   AuthenticatedToolsRouteRoute: typeof AuthenticatedToolsRouteRoute
   AuthenticatedAlbumsAlbumIdRouteRoute: typeof AuthenticatedAlbumsAlbumIdRouteRoute
   AuthenticatedArtistsArtistIdRouteRoute: typeof AuthenticatedArtistsArtistIdRouteRoute
+  AuthenticatedDataImportRouteRoute: typeof AuthenticatedDataImportRouteRoute
   AuthenticatedTracksTrackIdRouteRoute: typeof AuthenticatedTracksTrackIdRouteRoute
   AuthenticatedUUsernameRouteRoute: typeof AuthenticatedUUsernameRouteRoute
 }
@@ -349,13 +370,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistoryRouteRoute: AuthenticatedHistoryRouteRoute,
   AuthenticatedImportRouteRoute: AuthenticatedImportRouteRoute,
   AuthenticatedLibraryRouteRoute: AuthenticatedLibraryRouteRoute,
-  AuthenticatedPlaylistsRouteRoute: AuthenticatedPlaylistsRouteRoute,
+  AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRoute,
   AuthenticatedSocialRouteRoute: AuthenticatedSocialRouteRoute,
   AuthenticatedTimeMachineRouteRoute: AuthenticatedTimeMachineRouteRoute,
   AuthenticatedToolsRouteRoute: AuthenticatedToolsRouteRoute,
   AuthenticatedAlbumsAlbumIdRouteRoute: AuthenticatedAlbumsAlbumIdRouteRoute,
   AuthenticatedArtistsArtistIdRouteRoute:
     AuthenticatedArtistsArtistIdRouteRoute,
+  AuthenticatedDataImportRouteRoute: AuthenticatedDataImportRouteRoute,
   AuthenticatedTracksTrackIdRouteRoute: AuthenticatedTracksTrackIdRouteRoute,
   AuthenticatedUUsernameRouteRoute: AuthenticatedUUsernameRouteRoute,
 }

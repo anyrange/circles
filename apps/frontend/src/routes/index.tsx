@@ -68,7 +68,7 @@ function LoginPage() {
             </p>
             <p className="mt-4 max-w-2xl text-base leading-7 text-white/56 sm:text-lg">
               Turn Spotify history into artist maps, listening rituals, compatibility scores, and
-              weekly playlists that actually sound like you.
+              time-based patterns that actually sound like you.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -93,7 +93,7 @@ function LoginPage() {
         </div>
         <div className="relative z-10 mx-auto flex w-full max-w-7xl px-5 pb-8 text-xs text-white/35 sm:px-8 lg:px-10">
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 backdrop-blur">
-            Artist maps · Listening history · Weekly playlists · Social match
+            Artist maps · Listening history · Time machine · Social match
           </span>
         </div>
       </section>

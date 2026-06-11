@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
 
 import { FeedSection } from "@/components/feed-section";
 import {
@@ -10,7 +10,7 @@ import {
   PageSectionTitle,
   PageTitle,
 } from "@/components/page-shell";
-import { ScrobbleTimelineChart } from "@/components/scrobble-timeline-chart";
+import { StreamsTimelineChart } from "@/components/streams-timeline-chart";
 import { TimeRangeTabs } from "@/components/time-range-tabs";
 import { TopArtistsRow } from "@/components/top-artists-row";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,12 +18,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Range } from "@/lib/queries/stats";
 import { useExtendedStats, useStats } from "@/lib/queries/stats";
 
+const DEFAULT_RANGE = "30d";
+
+const searchSchema = z.object({
+  range: z.enum(["7d", "30d", "90d", "365d", "all"]).optional().catch(DEFAULT_RANGE),
+});
+
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  validateSearch: searchSchema,
   component: DashboardPage,
 });
 
 function DashboardPage() {
-  const [range, setRange] = useState<Range>("30d");
+  const { range = DEFAULT_RANGE } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+
   const { data: stats } = useStats(range);
   const { data: extended } = useExtendedStats(range);
 
@@ -36,7 +45,12 @@ function DashboardPage() {
         <PageDescription>Your listening universe</PageDescription>
       </PageHeader>
 
-      <TimeRangeTabs value={range} onChange={setRange} />
+      <TimeRangeTabs
+        value={range}
+        onChange={(nextRange: Range) =>
+          navigate({ search: (previous) => ({ ...previous, range: nextRange }) })
+        }
+      />
 
       {extended ? (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -64,7 +78,12 @@ function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 rounded-xl" />
+            <Card key={i} size="sm" aria-hidden="true">
+              <CardHeader>
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-8 w-20" />
+              </CardHeader>
+            </Card>
           ))}
         </div>
       )}
@@ -79,7 +98,7 @@ function DashboardPage() {
       {extended?.scrobblesByDate && extended.scrobblesByDate.length > 0 && (
         <PageSection>
           <PageSectionTitle>Listening over time</PageSectionTitle>
-          <ScrobbleTimelineChart data={extended.scrobblesByDate} />
+          <StreamsTimelineChart data={extended.scrobblesByDate} />
         </PageSection>
       )}
 

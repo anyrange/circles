@@ -1,9 +1,10 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { Music2 } from "lucide-react";
 import type { ComponentPropsWithoutRef } from "react";
 
 import { Page } from "@/components/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Item, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
+import { Item, ItemContent, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackQuery } from "@/lib/queries/tracks";
 
@@ -18,13 +19,17 @@ function TrackPage() {
   if (isLoading) return <EntitySkeleton />;
   if (!data) return <Page>Track not found.</Page>;
 
+  const albumImageUrl = data.track.album?.imageUrl;
+
   return (
     <Page className="gap-10">
       <section className="flex flex-col gap-6 lg:flex-row lg:items-end">
-        <div className="size-40 shrink-0 overflow-hidden rounded-2xl bg-muted lg:size-48">
-          {data.track.album?.imageUrl ? (
-            <img src={data.track.album.imageUrl} alt="" className="size-full object-cover" />
-          ) : null}
+        <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted text-muted-foreground lg:size-48">
+          {albumImageUrl ? (
+            <img src={albumImageUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <Music2 className="size-16" />
+          )}
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">Track</p>
@@ -161,6 +166,9 @@ function TrackPage() {
           <ItemGroup>
             {data.recentPlays.map((play: { playedAt: string }) => (
               <Item key={play.playedAt} size="sm">
+                <ItemMedia variant={albumImageUrl ? "image" : "icon"}>
+                  {albumImageUrl ? <img src={albumImageUrl} alt="" /> : <Music2 />}
+                </ItemMedia>
                 <ItemContent>
                   <ItemTitle>{new Date(play.playedAt).toLocaleString()}</ItemTitle>
                 </ItemContent>

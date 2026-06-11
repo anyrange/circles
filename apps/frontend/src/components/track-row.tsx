@@ -16,7 +16,7 @@ function TrackRowRoot({ asChild, className, ...props }: TrackRowRootProps) {
       data-slot="track-row"
       data-interactive={asChild ? "" : undefined}
       className={cn(
-        "group/track-row flex items-center gap-3 rounded-lg px-2 py-2 transition-colors data-[interactive]:hover:bg-muted/50",
+        "group/track-row flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50 data-[interactive]:hover:bg-muted/50",
         className,
       )}
       {...props}
@@ -55,7 +55,7 @@ function TrackRowArtwork({ children, className, ...props }: ComponentPropsWithou
     <div
       data-slot="track-row-artwork"
       className={cn(
-        "flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground",
+        "flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground [&_svg:not([class*='size-'])]:size-5",
         className,
       )}
       {...props}

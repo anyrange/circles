@@ -15,7 +15,7 @@ function RankedListLink({ className, ...props }: ComponentPropsWithoutRef<typeof
   return (
     <Slot.Root
       className={cn(
-        "grid grid-cols-[2.25rem_2.75rem_minmax(0,1fr)] items-center gap-3 py-3 transition-colors hover:bg-muted/40 sm:grid-cols-[3rem_3rem_minmax(0,1fr)_minmax(12rem,0.48fr)] sm:gap-4",
+        "grid min-h-20 grid-cols-[2.25rem_2.75rem_minmax(0,1fr)] items-center gap-3 py-3 transition-colors hover:bg-muted/40 sm:grid-cols-[3rem_3rem_minmax(0,1fr)_minmax(12rem,0.48fr)] sm:gap-4",
         className,
       )}
       {...props}
@@ -72,7 +72,7 @@ function RankedListMetric({ value, max }: { value: number; max: number }) {
 
   return (
     <div className="relative hidden h-10 min-w-0 overflow-hidden sm:block">
-      <div className="absolute inset-y-0 left-0 bg-destructive/15" style={{ width: `${width}%` }} />
+      <div className="absolute inset-y-0 left-0 bg-chart-1/30" style={{ width: `${width}%` }} />
       <p className="relative flex h-full items-center px-3 text-sm font-medium text-foreground tabular-nums">
         {value.toLocaleString()} plays
       </p>

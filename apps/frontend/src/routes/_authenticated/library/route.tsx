@@ -1,27 +1,28 @@
 import { type UseInfiniteQueryResult } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Disc3, LibraryBig, Music2, Users } from "lucide-react";
+import { Disc3, Music2, Users } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { z } from "zod";
 
 import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
 import { RankedList } from "@/components/ranked-list";
 import { TimeRangeTabs } from "@/components/time-range-tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useInfinityQuery } from "@/lib/hooks/use-infinity-query";
-import {
-  albumsQuery,
-  artistsQuery,
-  scrobblesQuery,
-  tracksQuery,
-  useLibraryOverview,
-} from "@/lib/queries/library";
+import { albumsQuery, artistsQuery, tracksQuery, useLibraryOverview } from "@/lib/queries/library";
 import type { Range } from "@/lib/queries/stats";
 
 const searchSchema = z.object({
-  tab: z.enum(["scrobbles", "artists", "albums", "tracks"]).catch("scrobbles"),
+  tab: z.enum(["artists", "albums", "tracks"]).catch("artists"),
   range: z.enum(["7d", "30d", "90d", "365d", "all"]).catch("all"),
 });
 
@@ -38,7 +39,6 @@ function LibraryPage() {
   const artQ = artistsQuery(search);
   const albQ = albumsQuery(search);
   const trackQ = tracksQuery(search);
-  const scrobQ = scrobblesQuery(search);
 
   const tabBasedQuery: Record<"artists" | "albums" | "tracks", UseInfiniteQueryResult> = useMemo(
     () => ({
@@ -49,7 +49,7 @@ function LibraryPage() {
     [artQ, albQ, trackQ],
   );
 
-  const activeQuery = tabBasedQuery[search.tab as keyof typeof tabBasedQuery] || scrobQ;
+  const activeQuery = tabBasedQuery[search.tab];
 
   const hasItems = Boolean(
     (activeQuery.data as { pages: { items: unknown[] }[] })?.pages[0]?.items?.length,
@@ -58,7 +58,6 @@ function LibraryPage() {
   const loadMoreRef = useInfinityQuery(activeQuery);
 
   const TabToComponent: Record<string, ReactNode> = {
-    scrobbles: <ScrobblesList pages={scrobQ.data?.pages || []} />,
     artists: <ArtistsList pages={artQ.data?.pages || []} />,
     albums: <AlbumsList pages={albQ.data?.pages || []} />,
     tracks: <TracksList pages={trackQ.data?.pages || []} />,
@@ -66,7 +65,7 @@ function LibraryPage() {
 
   const TabListComponent = TabToComponent[search.tab];
   const activeTab = TABS.find((tab) => tab.value === search.tab);
-  const listTitle = search.tab === "scrobbles" ? "Today" : (activeTab?.label ?? "Library");
+  const listTitle = activeTab?.label ?? "Library";
 
   return (
     <Page className="gap-8 pt-4">
@@ -155,58 +154,10 @@ function LibraryPage() {
 }
 
 const TABS = [
-  { value: "scrobbles", label: "Streams", icon: LibraryBig },
   { value: "artists", label: "Artists", icon: Users },
   { value: "albums", label: "Albums", icon: Disc3 },
   { value: "tracks", label: "Tracks", icon: Music2 },
 ] as const;
-
-function ScrobblesList({ pages }: { pages: Array<{ items: ScrobbleItem[] }> }) {
-  const items = pages.flatMap((page) => page.items);
-
-  return (
-    <ol className="flex flex-col border-y border-border/70">
-      {items.map((item, index) => (
-        <ScrobbleRow key={`${item.track.id}-${item.playedAt}-${index}`} item={item} />
-      ))}
-    </ol>
-  );
-}
-
-function ScrobbleRow({ item }: { item: ScrobbleItem }) {
-  return (
-    <li className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-border/70 py-2.5 last:border-b-0">
-      <Link
-        to="/tracks/$trackId"
-        params={{ trackId: item.track.id }}
-        className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground"
-      >
-        {item.track.albumImageUrl ? (
-          <img src={item.track.albumImageUrl} alt="" className="size-full object-cover" />
-        ) : (
-          <Music2 className="size-4" />
-        )}
-      </Link>
-
-      <div className="min-w-0">
-        <Link
-          to="/tracks/$trackId"
-          params={{ trackId: item.track.id }}
-          className="block truncate text-sm font-semibold hover:text-primary"
-        >
-          {item.track.name}
-        </Link>
-        <p className="truncate text-xs text-muted-foreground">
-          {formatArtistNames(item.track.artists)}
-        </p>
-      </div>
-
-      <p className="shrink-0 text-xs whitespace-nowrap text-muted-foreground">
-        {relativeTime(item.playedAt)}
-      </p>
-    </li>
-  );
-}
 
 function ArtistsList({ pages }: { pages: Array<{ items: ArtistItem[] }> }) {
   const items = pages.flatMap((page) => page.items);
@@ -226,8 +177,8 @@ function ArtistsList({ pages }: { pages: Array<{ items: ArtistItem[] }> }) {
               <RankedList.Body>
                 <RankedList.Title>{item.artist.name}</RankedList.Title>
                 <RankedList.Subtitle className="text-xs sm:hidden">
-                  {formatScrobbleCount(item.playCount)} • {item.albumCount.toLocaleString()} albums
-                  • {item.trackCount.toLocaleString()} tracks
+                  {formatStreamCount(item.playCount)} • {item.albumCount.toLocaleString()} albums •{" "}
+                  {item.trackCount.toLocaleString()} tracks
                 </RankedList.Subtitle>
               </RankedList.Body>
               <RankedList.Metric value={item.playCount} max={maxPlayCount} />
@@ -262,7 +213,7 @@ function AlbumsList({ pages }: { pages: Array<{ items: AlbumItem[] }> }) {
                 <RankedList.Subtitle>
                   {item.artistNames || "Unknown artist"}
                   {item.album.releaseDate ? ` • ${item.album.releaseDate}` : ""}
-                  <span className="sm:hidden"> • {formatScrobbleCount(item.playCount)}</span>
+                  <span className="sm:hidden"> • {formatStreamCount(item.playCount)}</span>
                 </RankedList.Subtitle>
               </RankedList.Body>
               <RankedList.Metric value={item.playCount} max={maxPlayCount} />
@@ -296,7 +247,7 @@ function TracksList({ pages }: { pages: Array<{ items: TrackItem[] }> }) {
                 <RankedList.Title>{item.track.name}</RankedList.Title>
                 <RankedList.Subtitle>
                   {item.artistNames || item.album?.name || "Unknown artist"}
-                  <span className="sm:hidden"> • {formatScrobbleCount(item.playCount)}</span>
+                  <span className="sm:hidden"> • {formatStreamCount(item.playCount)}</span>
                 </RankedList.Subtitle>
               </RankedList.Body>
               <RankedList.Metric value={item.playCount} max={maxPlayCount} />
@@ -358,60 +309,51 @@ function DateRangePanel({
   );
 }
 
+const dateRangeChartConfig = {
+  streams: {
+    label: "Streams",
+    color: "var(--chart-1)",
+  },
+} satisfies ChartConfig;
+
 function DateRangeBars({ data }: { data: DateRangeItem[] }) {
-  const max = Math.max(...data.map((item) => item.count), 1);
+  const chartData = data.map((item) => ({
+    year: String(item.year),
+    streams: item.count,
+  }));
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3">
-        {data.map((item) => (
-          <div key={item.year} className="grid grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3">
-            <p className="text-sm text-muted-foreground tabular-nums">{item.year}</p>
-            <div className="relative h-9 overflow-hidden">
-              <div
-                className="h-full bg-destructive/15"
-                style={{ width: `${(item.count / max) * 100}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="text-center text-sm font-semibold text-muted-foreground">Scrobbles</p>
-    </div>
+    <ChartContainer config={dateRangeChartConfig} className="h-64 w-full">
+      <BarChart
+        accessibilityLayer
+        data={chartData}
+        layout="vertical"
+        margin={{ left: 0, right: 8 }}
+      >
+        <CartesianGrid horizontal={false} />
+        <XAxis type="number" hide />
+        <YAxis
+          dataKey="year"
+          type="category"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          width={48}
+        />
+        <ChartTooltip content={<ChartTooltipContent hideLabel />} cursor={false} />
+        <Bar dataKey="streams" fill="var(--color-streams)" radius={4} />
+      </BarChart>
+    </ChartContainer>
   );
-}
-
-function formatArtistNames(artists: ScrobbleItem["track"]["artists"]) {
-  return artists.map((artist) => artist.name).join(", ");
 }
 
 function getMaxPlayCount(items: Array<{ playCount: number }>) {
   return Math.max(...items.map((item) => item.playCount), 1);
 }
 
-function formatScrobbleCount(value: number) {
-  return `${value.toLocaleString()} ${value === 1 ? "scrobble" : "scrobbles"}`;
+function formatStreamCount(value: number) {
+  return `${value.toLocaleString()} ${value === 1 ? "stream" : "streams"}`;
 }
-
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.max(0, Math.floor(diff / 60_000));
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
-type ScrobbleItem = {
-  playedAt: string;
-  track: {
-    id: string;
-    name: string;
-    albumImageUrl?: string | null;
-    artists: Array<{ id: string; name: string }>;
-  };
-};
 
 type ArtistItem = {
   artist: { id: string; name: string; images?: { url: string }[] | null };

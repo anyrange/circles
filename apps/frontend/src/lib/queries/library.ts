@@ -87,21 +87,3 @@ export const tracksQuery = (search: SearchParams) =>
       ),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
-
-export const scrobblesQuery = (search: SearchParams) =>
-  useInfiniteQuery({
-    queryKey: ["library", "scrobbles", search.range],
-    enabled: search.tab === "scrobbles",
-    initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) =>
-      parseResponse(
-        api.library.scrobbles.$get({
-          query: {
-            range: search.range,
-            limit: "40",
-            ...(pageParam ? { cursor: pageParam } : {}),
-          },
-        }),
-      ),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });

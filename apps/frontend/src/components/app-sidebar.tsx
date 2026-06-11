@@ -3,11 +3,10 @@ import {
   ChevronsUpDown,
   Clock,
   Disc3,
-  Download,
   Home,
   LibraryBig,
-  LayoutList,
   LogOut,
+  Settings,
   Sparkles,
   UserRound,
   Users,
@@ -43,9 +42,7 @@ const NAV = [
   { label: "Library", icon: LibraryBig, to: "/library" },
   { label: "History", icon: Clock, to: "/history" },
   { label: "Social", icon: Users, to: "/social" },
-  { label: "Playlists", icon: LayoutList, to: "/playlists" },
   { label: "Discover", icon: Sparkles, to: "/tools" },
-  { label: "Import", icon: Download, to: "/import" },
   { label: "Time Machine", icon: Disc3, to: "/time-machine" },
 ] as const;
 
@@ -157,6 +154,13 @@ export function AppSidebar() {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings">
+                    <Settings />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
                   <LogOut />
                   <span>Sign out</span>

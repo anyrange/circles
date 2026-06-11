@@ -1,9 +1,17 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { Disc3, Music2 } from "lucide-react";
 
 import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
 import { TrackRow } from "@/components/track-row";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "@/components/ui/item";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAlbumQuery } from "@/lib/queries/albums";
 
@@ -18,13 +26,17 @@ function AlbumPage() {
   if (isLoading) return <EntitySkeleton />;
   if (!data) return <Page>Album not found.</Page>;
 
+  const albumImageUrl = data.album.images?.[0]?.url;
+
   return (
     <Page className="gap-10">
       <section className="flex flex-col gap-6 lg:flex-row lg:items-end">
-        <div className="size-40 shrink-0 overflow-hidden rounded-2xl bg-muted lg:size-48">
-          {data.album.images?.[0]?.url ? (
-            <img src={data.album.images[0].url} alt="" className="size-full object-cover" />
-          ) : null}
+        <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted text-muted-foreground lg:size-48">
+          {albumImageUrl ? (
+            <img src={albumImageUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <Disc3 className="size-16" />
+          )}
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">{data.album.albumType ?? "Album"}</p>
@@ -71,7 +83,9 @@ function AlbumPage() {
                 <TrackRow.Compact asChild>
                   <Link to="/tracks/$trackId" params={{ trackId: item.track.id }}>
                     <TrackRow.Leading>{index + 1}</TrackRow.Leading>
-                    <TrackRow.Artwork />
+                    <TrackRow.Artwork>
+                      {albumImageUrl ? <TrackRow.Image src={albumImageUrl} alt="" /> : null}
+                    </TrackRow.Artwork>
                     <TrackRow.Content>
                       <TrackRow.Title>{item.track.name}</TrackRow.Title>
                     </TrackRow.Content>
@@ -89,6 +103,9 @@ function AlbumPage() {
             {data.recentPlays.map((play: AlbumRecentPlay) => (
               <Item key={`${play.track.id}-${play.playedAt}`} asChild size="sm">
                 <Link to="/tracks/$trackId" params={{ trackId: play.track.id }}>
+                  <ItemMedia variant={albumImageUrl ? "image" : "icon"}>
+                    {albumImageUrl ? <img src={albumImageUrl} alt="" /> : <Music2 />}
+                  </ItemMedia>
                   <ItemContent>
                     <ItemTitle>{play.track.name}</ItemTitle>
                     <ItemDescription>{new Date(play.playedAt).toLocaleString()}</ItemDescription>

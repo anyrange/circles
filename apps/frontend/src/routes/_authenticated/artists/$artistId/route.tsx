@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { Disc3, Music2, UserRound } from "lucide-react";
 
 import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
 import { TrackRow } from "@/components/track-row";
@@ -32,9 +33,7 @@ function ArtistPage() {
           {data.artist.images?.[0]?.url ? (
             <img src={data.artist.images[0].url} alt="" className="size-full object-cover" />
           ) : (
-            <span className="text-3xl font-medium text-muted-foreground">
-              {data.artist.name[0]}
-            </span>
+            <UserRound className="size-16 text-muted-foreground" />
           )}
         </div>
         <div className="flex flex-col gap-3">
@@ -119,7 +118,7 @@ function ArtistPage() {
                 <Item key={item.album.id} asChild size="sm">
                   <Link to="/albums/$albumId" params={{ albumId: item.album.id }}>
                     <ItemMedia variant={item.album.imageUrl ? "image" : "icon"}>
-                      {item.album.imageUrl ? <img src={item.album.imageUrl} alt="" /> : null}
+                      {item.album.imageUrl ? <img src={item.album.imageUrl} alt="" /> : <Disc3 />}
                     </ItemMedia>
                     <ItemContent>
                       <ItemTitle>{item.album.name}</ItemTitle>
@@ -141,6 +140,13 @@ function ArtistPage() {
             {data.recentPlays.map((play: ArtistRecentPlay) => (
               <Item key={`${play.track.id}-${play.playedAt}`} asChild size="sm">
                 <Link to="/tracks/$trackId" params={{ trackId: play.track.id }}>
+                  <ItemMedia variant={play.track.albumImageUrl ? "image" : "icon"}>
+                    {play.track.albumImageUrl ? (
+                      <img src={play.track.albumImageUrl} alt="" />
+                    ) : (
+                      <Music2 />
+                    )}
+                  </ItemMedia>
                   <ItemContent>
                     <ItemTitle>{play.track.name}</ItemTitle>
                     <ItemDescription>{new Date(play.playedAt).toLocaleString()}</ItemDescription>
@@ -171,7 +177,7 @@ type ArtistAlbum = {
 
 type ArtistRecentPlay = {
   playedAt: string;
-  track: { id: string; name: string };
+  track: { id: string; name: string; albumImageUrl?: string | null };
 };
 
 function EntitySkeleton() {

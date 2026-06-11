@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import {
   Item,
   ItemActions,
@@ -26,13 +27,12 @@ export function FeedSection() {
 
   if (!data || data.plays.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No activity yet. Follow people to see what they're listening to.
-          </p>
-        </CardContent>
-      </Card>
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>No activity yet</EmptyTitle>
+          <EmptyDescription>Follow people to see what they're listening to.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
