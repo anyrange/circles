@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { bool, cleanEnv, num, str } from "envalid";
+import { cleanEnv, num, str } from "envalid";
 
 export const env = cleanEnv(process.env, {
   NODE_ENV: str({
@@ -18,14 +18,11 @@ export const env = cleanEnv(process.env, {
   }),
 
   BETTER_AUTH_SECRET: str({ default: "dev-secret-change-in-production-32ch" }),
-  ENABLE_E2E_AUTH: bool({ default: false }),
-
+  OAUTH_CLIENT_ID: str({ default: "circles-frontend" }),
   SPOTIFY_CLIENT_ID: str({ default: "" }),
   SPOTIFY_CLIENT_SECRET: str({ default: "" }),
 
   HATCHET_CLIENT_TOKEN: str({ default: "" }),
-
-  ANTHROPIC_API_KEY: str({ default: "" }),
 
   S3_BUCKET: str({ default: "" }),
   S3_REGION: str({ default: "us-east-1" }),
@@ -49,21 +46,15 @@ export const config = {
   },
   auth: {
     secret: env.BETTER_AUTH_SECRET,
-  },
-  e2e: {
-    enableAuth: env.ENABLE_E2E_AUTH,
+    clientId: env.OAUTH_CLIENT_ID,
   },
   spotify: {
     clientId: env.SPOTIFY_CLIENT_ID,
     clientSecret: env.SPOTIFY_CLIENT_SECRET,
-    redirectUri: `${env.SERVER_URL}/auth/spotify/callback`,
-    scopes: ["user-read-private", "user-read-email", "user-read-recently-played"],
+    scopes: ["user-read-private", "user-read-recently-played"],
   },
   hatchet: {
     token: env.HATCHET_CLIENT_TOKEN,
-  },
-  anthropic: {
-    apiKey: env.ANTHROPIC_API_KEY,
   },
   s3: {
     bucket: env.S3_BUCKET,

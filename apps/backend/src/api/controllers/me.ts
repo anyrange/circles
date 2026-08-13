@@ -30,6 +30,12 @@ export const meController = new Hono<{ Variables: AuthVariables }>()
       createdAt: user.createdAt,
     });
   })
+  .delete("/", async (ctx) => {
+    const deleted = await db.user.delete(ctx.get("userId"));
+    if (!deleted) throw new HTTPException(404, { message: "User not found" });
+
+    return ctx.json({ ok: true });
+  })
   .get(
     "/history",
     zValidator(

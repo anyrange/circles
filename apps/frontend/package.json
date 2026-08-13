@@ -13,10 +13,10 @@
     "test": "vp run test:unit",
     "test:unit": "vp test run --config vitest.unit.config.ts --passWithNoTests",
     "test:browser": "vp test run --config vitest.browser.config.ts --passWithNoTests",
-    "test:coverage": "vp test run --config vitest.unit.config.ts --coverage --passWithNoTests",
-    "test:e2e": "playwright test"
+    "test:coverage": "vp test run --config vitest.unit.config.ts --coverage --passWithNoTests"
   },
   "dependencies": {
+    "@better-auth/oauth-provider": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "@tanstack/react-devtools": "catalog:",
@@ -25,7 +25,6 @@
     "@tanstack/react-query-persist-client": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-router-devtools": "catalog:",
-    "@tanstack/react-router-ssr-query": "catalog:",
     "@tanstack/react-start": "catalog:",
     "@tanstack/react-table": "catalog:",
     "@tanstack/router-plugin": "catalog:",
@@ -56,7 +55,6 @@
   "devDependencies": {
     "@circles/backend": "workspace:*",
     "@cloudflare/vite-plugin": "catalog:",
-    "@playwright/test": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/devtools-vite": "catalog:",
     "@types/node": "catalog:",

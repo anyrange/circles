@@ -4,7 +4,7 @@ export const openApiDocument = {
     title: "Circles API",
     version: "1.0.0",
     description:
-      "Circles backend API. Most routes rely on an active Better Auth session. Auth handler routes under `/api/auth/*` are provided by Better Auth and are not yet described in this document.",
+      "Circles backend API. Protected routes require a Better Auth OAuth access token in the Authorization header.",
   },
   servers: [{ url: "/" }],
   tags: [
@@ -14,7 +14,6 @@ export const openApiDocument = {
     { name: "Social" },
     { name: "Library" },
     { name: "Playlists" },
-    { name: "AI" },
     { name: "Import" },
   ],
   paths: {
@@ -90,6 +89,27 @@ export const openApiDocument = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/CurrentUser" },
+              },
+            },
+          },
+          401: { $ref: "#/components/responses/Unauthorized" },
+          404: { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      delete: {
+        summary: "Delete current account",
+        description: "Permanently deletes the authenticated user and their Circles data.",
+        tags: ["Me"],
+        responses: {
+          200: {
+            description: "Account deleted.",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: { ok: { type: "boolean", example: true } },
+                  required: ["ok"],
+                },
               },
             },
           },
@@ -247,8 +267,9 @@ export const openApiDocument = {
     },
     "/users/{id}/stats": {
       get: {
-        summary: "Get public user top tracks and artists",
-        description: "Returns top tracks and artists for a public user and selected time range.",
+        summary: "Get public user top music",
+        description:
+          "Returns top tracks, artists, and albums for a public user and selected time range.",
         tags: ["Users"],
         parameters: [
           { $ref: "#/components/parameters/userIdPath" },
@@ -256,7 +277,7 @@ export const openApiDocument = {
         ],
         responses: {
           200: {
-            description: "Top tracks and artists.",
+            description: "Top tracks, artists, and albums.",
             content: {
               "application/json": {
                 schema: {
@@ -264,8 +285,9 @@ export const openApiDocument = {
                   properties: {
                     topTracks: { type: "array", items: {} },
                     topArtists: { type: "array", items: {} },
+                    topAlbums: { type: "array", items: {} },
                   },
-                  required: ["topTracks", "topArtists"],
+                  required: ["topTracks", "topArtists", "topAlbums"],
                 },
               },
             },
@@ -695,7 +717,10 @@ export const openApiDocument = {
         description:
           "Returns artist detail for the authenticated user and may enqueue hydration if metadata is missing.",
         tags: ["Library"],
-        parameters: [{ $ref: "#/components/parameters/idPath" }],
+        parameters: [
+          { $ref: "#/components/parameters/idPath" },
+          { $ref: "#/components/parameters/range" },
+        ],
         responses: {
           200: {
             description: "Artist detail.",
@@ -715,7 +740,10 @@ export const openApiDocument = {
         summary: "Get album detail",
         description: "Returns album detail for the authenticated user.",
         tags: ["Library"],
-        parameters: [{ $ref: "#/components/parameters/idPath" }],
+        parameters: [
+          { $ref: "#/components/parameters/idPath" },
+          { $ref: "#/components/parameters/range" },
+        ],
         responses: {
           200: {
             description: "Album detail.",
@@ -735,7 +763,10 @@ export const openApiDocument = {
         summary: "Get track detail",
         description: "Returns track detail for the authenticated user.",
         tags: ["Library"],
-        parameters: [{ $ref: "#/components/parameters/idPath" }],
+        parameters: [
+          { $ref: "#/components/parameters/idPath" },
+          { $ref: "#/components/parameters/range" },
+        ],
         responses: {
           200: {
             description: "Track detail.",
@@ -747,63 +778,6 @@ export const openApiDocument = {
           },
           401: { $ref: "#/components/responses/Unauthorized" },
           404: { $ref: "#/components/responses/NotFound" },
-        },
-      },
-    },
-    "/me/ai/taste-dna": {
-      post: {
-        summary: "Generate taste DNA",
-        description: "Builds the listener's taste DNA profile, with weekly caching.",
-        tags: ["AI"],
-        responses: {
-          200: {
-            description: "Taste DNA result.",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/TasteDNA" },
-              },
-            },
-          },
-          401: { $ref: "#/components/responses/Unauthorized" },
-          500: { $ref: "#/components/responses/InternalError" },
-        },
-      },
-    },
-    "/me/ai/roast": {
-      post: {
-        summary: "Generate roast",
-        description: "Generates a comedic roast of the listener's taste, with weekly caching.",
-        tags: ["AI"],
-        responses: {
-          200: {
-            description: "Roast result.",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/Roast" },
-              },
-            },
-          },
-          401: { $ref: "#/components/responses/Unauthorized" },
-          500: { $ref: "#/components/responses/InternalError" },
-        },
-      },
-    },
-    "/me/ai/scene-report": {
-      post: {
-        summary: "Generate scene report",
-        description: "Generates a scene report for the listener, with weekly caching.",
-        tags: ["AI"],
-        responses: {
-          200: {
-            description: "Scene report result.",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/SceneReport" },
-              },
-            },
-          },
-          401: { $ref: "#/components/responses/Unauthorized" },
-          500: { $ref: "#/components/responses/InternalError" },
         },
       },
     },
@@ -1068,50 +1042,6 @@ export const openApiDocument = {
           },
         },
         required: ["items", "hasMore", "nextCursor"],
-      },
-      TasteDNA: {
-        type: "object",
-        properties: {
-          archetype: { type: "string" },
-          tagline: { type: "string" },
-          traits: { type: "array", items: { type: "string" } },
-          top_moods: { type: "array", items: { type: "string" } },
-          persona: { type: "string" },
-          discovery_score: { type: "number" },
-          underground_score: { type: "number" },
-        },
-        required: [
-          "archetype",
-          "tagline",
-          "traits",
-          "top_moods",
-          "persona",
-          "discovery_score",
-          "underground_score",
-        ],
-      },
-      Roast: {
-        type: "object",
-        properties: {
-          roast: { type: "string" },
-          verdict: { type: "string" },
-          guilty_pleasure: { type: "string" },
-          award: { type: "string" },
-          rating: { type: "number" },
-          defense: { type: "string" },
-        },
-        required: ["roast", "verdict", "guilty_pleasure", "award", "rating", "defense"],
-      },
-      SceneReport: {
-        type: "object",
-        properties: {
-          scene_name: { type: "string" },
-          description: { type: "string" },
-          vibe_words: { type: "array", items: { type: "string" } },
-          anthem: { type: "string" },
-          kindred_artists: { type: "array", items: { type: "string" } },
-        },
-        required: ["scene_name", "description", "vibe_words", "anthem", "kindred_artists"],
       },
       ImportStatus: {
         type: "object",

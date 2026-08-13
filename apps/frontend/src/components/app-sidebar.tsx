@@ -4,10 +4,8 @@ import {
   Clock,
   Disc3,
   Home,
-  LibraryBig,
   LogOut,
   Settings,
-  Sparkles,
   UserRound,
   Users,
 } from "lucide-react";
@@ -34,15 +32,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth";
+import { setAccessToken } from "@/lib/access-token";
+import { clearAppSessionFn } from "@/lib/auth-session";
 import { useMeQuery } from "@/lib/queries/me";
 
 const NAV = [
   { label: "Home", icon: Home, to: "/dashboard" },
-  { label: "Library", icon: LibraryBig, to: "/library" },
   { label: "History", icon: Clock, to: "/history" },
   { label: "Social", icon: Users, to: "/social" },
-  { label: "Discover", icon: Sparkles, to: "/tools" },
   { label: "Time Machine", icon: Disc3, to: "/time-machine" },
 ] as const;
 
@@ -56,7 +53,8 @@ export function AppSidebar() {
   const { data: me } = useMeQuery();
 
   async function logout() {
-    await authClient.signOut();
+    await clearAppSessionFn();
+    setAccessToken(null);
     await navigate({ to: "/" });
   }
 
@@ -91,7 +89,7 @@ export function AppSidebar() {
                 const active = path === to || (to !== "/dashboard" && path.startsWith(to));
                 return (
                   <SidebarMenuItem key={to}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={label}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={{ children: label }}>
                       <Link to={to}>
                         <Icon />
                         <span>{label}</span>
@@ -110,7 +108,11 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg" className="h-auto py-2" tooltip="Account">
+                <SidebarMenuButton
+                  size="lg"
+                  className="h-auto py-2"
+                  tooltip={{ children: "Account" }}
+                >
                   <Avatar className="size-8 shrink-0">
                     <AvatarImage src={me?.avatarUrl ?? undefined} />
                     <AvatarFallback className="text-xs">
@@ -149,7 +151,18 @@ export function AppSidebar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/u/$username" params={{ username: me?.username ?? "" }}>
+                  <Link
+                    to="/u/$username"
+                    params={{ username: me?.username ?? "" }}
+                    search={{
+                      view: "overview",
+                      tab: "artists",
+                      range: "30d",
+                      artistsRange: "30d",
+                      albumsRange: "30d",
+                      tracksRange: "30d",
+                    }}
+                  >
                     <UserRound />
                     <span>Profile</span>
                   </Link>

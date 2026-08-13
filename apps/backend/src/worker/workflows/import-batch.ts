@@ -1,6 +1,7 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { JsonObject } from "@hatchet-dev/typescript-sdk";
 import { and, eq, sql } from "drizzle-orm";
+import { z } from "zod";
 
 import { config } from "../../config";
 import { db } from "../../db";
@@ -23,6 +24,21 @@ interface Input extends JsonObject {
 
 export const BATCH_SIZE = 50;
 
+const spotifyExportEntrySchema = z.object({
+  ts: z.string(),
+  master_metadata_track_name: z.string().nullable(),
+  master_metadata_album_artist_name: z.string().nullable(),
+  master_metadata_album_album_name: z.string().nullable(),
+  spotify_track_uri: z.string().nullable(),
+  ms_played: z.number(),
+});
+
+function requiredId(ids: Record<string, string>, spotifyId: string, entity: string) {
+  const id = ids[spotifyId];
+  if (!id) throw new Error(`Missing saved ${entity} for Spotify ID ${spotifyId}`);
+  return id;
+}
+
 export const importBatch = hatchet.workflow<Input>({
   name: "import-batch",
 });
@@ -43,8 +59,11 @@ importBatch.task({
     });
 
     const obj = await s3.send(new GetObjectCommand({ Bucket: config.s3.bucket, Key: batchKey }));
-    const bodyBytes = await streamToBuffer(obj.Body as NodeJS.ReadableStream);
-    const chunk: SpotifyExportEntry[] = JSON.parse(new TextDecoder().decode(bodyBytes));
+    if (!obj.Body) throw new Error("Import batch is empty");
+    const bodyBytes = await obj.Body.transformToByteArray();
+    const chunk = z
+      .array(spotifyExportEntrySchema)
+      .parse(JSON.parse(new TextDecoder().decode(bodyBytes)));
 
     const [spotifyAccount] = await drizzleDb
       .select()
@@ -57,8 +76,14 @@ importBatch.task({
     const accessToken = await refreshAndStoreToken(spotifyAccount);
     const spotify = createSpotifyClient(accessToken);
 
-    const trackUris = [...new Set(chunk.map((e) => e.spotify_track_uri!))];
-    const trackIds = trackUris.map(trackIdFromUri).filter(Boolean) as string[];
+    const trackUris = [
+      ...new Set(
+        chunk.flatMap((entry) => (entry.spotify_track_uri ? [entry.spotify_track_uri] : [])),
+      ),
+    ];
+    const trackIds = trackUris
+      .map(trackIdFromUri)
+      .filter((trackId): trackId is string => trackId !== undefined);
 
     const trackDetails = await withRetry(() => spotify.tracks.get(trackIds));
     const tracksArray = Array.isArray(trackDetails) ? trackDetails : [trackDetails];
@@ -104,20 +129,22 @@ importBatch.task({
     await db.track.upsertTrackArtists(
       tracksArray.flatMap((track) =>
         track.artists.map((artist) => ({
-          trackId: trackIdBySpotifyId[track.id]!,
-          artistId: artistIdBySpotifyId[artist.id]!,
+          trackId: requiredId(trackIdBySpotifyId, track.id, "track"),
+          artistId: requiredId(artistIdBySpotifyId, artist.id, "artist"),
         })),
       ),
     );
 
     const historyRows = chunk
       .map((entry) => {
-        const spotifyId = trackIdFromUri(entry.spotify_track_uri!);
+        const spotifyId = entry.spotify_track_uri
+          ? trackIdFromUri(entry.spotify_track_uri)
+          : undefined;
         const trackId = spotifyId ? trackIdBySpotifyId[spotifyId] : undefined;
         if (!trackId) return null;
         return { userId, trackId, playedAt: new Date(entry.ts) };
       })
-      .filter(Boolean) as { userId: string; trackId: string; playedAt: Date }[];
+      .filter((row): row is { userId: string; trackId: string; playedAt: Date } => row !== null);
 
     await db.history.insertMany(historyRows);
 
@@ -134,11 +161,3 @@ importBatch.task({
     );
   },
 });
-
-async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Uint8Array> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string));
-  }
-  return Buffer.concat(chunks);
-}

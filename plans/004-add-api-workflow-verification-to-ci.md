@@ -23,7 +23,7 @@ The backend coverage configuration explicitly excludes API controllers and worke
 - Root `package.json:6` defines `"ready": "vp fmt && vp lint"`, so tests are not included.
 - `apps/backend/vite.config.ts:18-19` excludes `src/api/controllers/*.ts` and `src/worker/workflows/*.ts` from coverage.
 - Existing backend tests cover only library helpers such as `range`, `retry`, `spotify-export`, and `zip`.
-- Existing frontend tests cover component/browser specs, and e2e specs exist under `apps/frontend/e2e`.
+- Existing frontend tests cover unit and component/browser specs.
 
 ## Commands you will need
 
@@ -45,7 +45,7 @@ The backend coverage configuration explicitly excludes API controllers and worke
 
 **Out of scope**
 
-- Full e2e browser CI unless credentials and deployment secrets are already available.
+- Browser automation requiring credentials or deployment secrets.
 - Raising coverage thresholds before excluded code has tests.
 
 ## Steps

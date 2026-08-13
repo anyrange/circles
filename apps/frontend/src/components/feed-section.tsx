@@ -52,7 +52,12 @@ interface Play {
   playedAt: string;
   userId: string;
   track: { id: string; spotifyId: string; name: string };
-  user: { id: string; name: string; username: string | null; image: string | null };
+  user: {
+    id: string;
+    name: string;
+    username: string | null;
+    image: string | null;
+  };
 }
 
 interface Group {
@@ -71,7 +76,12 @@ function groupByUser(plays: Play[]): Group[] {
       current.plays.push(play);
       current.to = play.playedAt;
     } else {
-      current = { user: play.user, plays: [play], from: play.playedAt, to: play.playedAt };
+      current = {
+        user: play.user,
+        plays: [play],
+        from: play.playedAt,
+        to: play.playedAt,
+      };
       groups.push(current);
     }
   }
@@ -95,7 +105,8 @@ function FeedGroup({ group }: { group: Group }) {
           <ItemContent>
             <ItemTitle>{group.user.name}</ItemTitle>
             <ItemDescription>
-              listened to {group.plays.length} track{group.plays.length > 1 ? "s" : ""}
+              listened to {group.plays.length} track
+              {group.plays.length > 1 ? "s" : ""}
             </ItemDescription>
           </ItemContent>
           <ItemActions className="text-xs text-muted-foreground">{relTime}</ItemActions>

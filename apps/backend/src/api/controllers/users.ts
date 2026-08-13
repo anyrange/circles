@@ -63,12 +63,13 @@ export const usersController = new Hono()
       if (!user.isPublic) throw new HTTPException(403, { message: "Profile is private" });
 
       const since = sinceFromRange(range);
-      const [topTracks, topArtists] = await Promise.all([
+      const [topTracks, topArtists, topAlbums] = await Promise.all([
         db.history.getTopTracks(id, 10, since),
         db.history.getTopArtists(id, 10, since),
+        db.album.getLibraryAlbums(id, { since, limit: 8 }),
       ]);
 
-      return ctx.json({ topTracks, topArtists });
+      return ctx.json({ topTracks, topArtists, topAlbums: topAlbums.items });
     },
   )
   .get(

@@ -1,11 +1,18 @@
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 import { config } from "../config";
 import { db as drizzleDb } from "../db/postgres";
 import { account } from "../db/postgres/schema";
 
 export type { AccessToken } from "@spotify/web-api-ts-sdk";
+
+const refreshTokenResponseSchema = z.object({
+  access_token: z.string(),
+  refresh_token: z.string().optional(),
+  expires_in: z.number(),
+});
 
 export function createSpotifyClient(accessToken: string) {
   return SpotifyApi.withAccessToken(config.spotify.clientId, {
@@ -14,59 +21,6 @@ export function createSpotifyClient(accessToken: string) {
     expires_in: 3600,
     refresh_token: "",
   });
-}
-
-export function buildAuthUrl(state: string): string {
-  const params = new URLSearchParams({
-    client_id: config.spotify.clientId,
-    response_type: "code",
-    redirect_uri: config.spotify.redirectUri,
-    state,
-    scope: config.spotify.scopes.join(" "),
-  });
-  return `https://accounts.spotify.com/authorize?${params.toString()}`;
-}
-
-export async function exchangeCode(code: string): Promise<{
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}> {
-  const body = new URLSearchParams({
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: config.spotify.redirectUri,
-  });
-
-  const credentials = Buffer.from(
-    `${config.spotify.clientId}:${config.spotify.clientSecret}`,
-  ).toString("base64");
-
-  const res = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: body.toString(),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Spotify token exchange failed: ${text}`);
-  }
-
-  const data = (await res.json()) as {
-    access_token: string;
-    refresh_token: string;
-    expires_in: number;
-  };
-
-  return {
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token,
-    expiresIn: data.expires_in,
-  };
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<{
@@ -97,11 +51,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
     throw new Error(`Spotify token refresh failed: ${text}`);
   }
 
-  const data = (await res.json()) as {
-    access_token: string;
-    refresh_token?: string;
-    expires_in: number;
-  };
+  const data = refreshTokenResponseSchema.parse(await res.json());
 
   return {
     accessToken: data.access_token,
@@ -118,13 +68,15 @@ export async function refreshAndStoreToken(
   accountRow: typeof account.$inferSelect,
 ): Promise<string> {
   if (
+    accountRow.accessToken &&
     accountRow.accessTokenExpiresAt &&
     accountRow.accessTokenExpiresAt.getTime() - Date.now() >= 60_000
   ) {
-    return accountRow.accessToken!;
+    return accountRow.accessToken;
   }
 
-  const refreshed = await refreshAccessToken(accountRow.refreshToken!);
+  if (!accountRow.refreshToken) throw new Error("Spotify account has no refresh token");
+  const refreshed = await refreshAccessToken(accountRow.refreshToken);
 
   await drizzleDb
     .update(account)

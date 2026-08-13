@@ -51,9 +51,7 @@ describe("TimeRangeTabs", () => {
     const screen = await render(<TimeRangeTabs value="all" />);
 
     const tabs = screen.container.querySelectorAll("[role='tab']");
-    const firstTab = tabs[0] as HTMLElement;
-
-    expect(() => firstTab.click()).not.toThrow();
+    expect(() => tabs.item(0).dispatchEvent(new MouseEvent("click"))).not.toThrow();
   });
 
   it("renders five tab options in total", async () => {

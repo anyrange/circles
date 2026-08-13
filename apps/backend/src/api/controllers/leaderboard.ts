@@ -61,7 +61,7 @@ async function getLeaderboard(period: "week" | "all"): Promise<LeaderboardEntry[
 }
 
 export const leaderboardController = new Hono().get("/leaderboard", async (ctx) => {
-  const period = (ctx.req.query("period") ?? "all") as "week" | "all";
+  const period = ctx.req.query("period") === "week" ? "week" : "all";
   const data = await getLeaderboard(period);
   return ctx.json({ leaderboard: data });
 });

@@ -1,9 +1,9 @@
 import type { JsonObject } from "@hatchet-dev/typescript-sdk";
-import { and, eq, notExists } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "../../db";
 import { db as drizzleDb } from "../../db/postgres";
-import { account, audioFeatures, tracks } from "../../db/postgres/schema";
+import { account } from "../../db/postgres/schema";
 import { logger } from "../../library/logger";
 import { createSpotifyClient, refreshAndStoreToken } from "../../library/spotify";
 import { fetchHydratedArtists } from "../../library/spotify-artists";
@@ -125,75 +125,6 @@ syncHistory.task({
         playedAt: new Date(item.played_at),
       })),
     );
-
-    // Sync audio features for newly inserted tracks that don't have them
-    const tracksWithoutFeatures = await drizzleDb
-      .select({ id: tracks.id, spotifyId: tracks.spotifyId })
-      .from(tracks)
-      .where(
-        and(
-          notExists(
-            drizzleDb
-              .select({ trackId: audioFeatures.trackId })
-              .from(audioFeatures)
-              .where(eq(audioFeatures.trackId, tracks.id)),
-          ),
-          eq(
-            tracks.id,
-            // Only check tracks we just saved
-            tracks.id,
-          ),
-        ),
-      )
-      .limit(100);
-
-    // Filter to only the tracks we just upserted
-    const newTrackIds = new Set(savedTracks.map((t) => t.id));
-    const tracksNeedingFeatures = tracksWithoutFeatures.filter((t) => newTrackIds.has(t.id));
-
-    if (tracksNeedingFeatures.length > 0) {
-      const spotifyIds = tracksNeedingFeatures.map((t) => t.spotifyId);
-
-      for (let i = 0; i < spotifyIds.length; i += 100) {
-        const batch = spotifyIds.slice(i, i + 100);
-        try {
-          const validFeatures = (await spotify.tracks.audioFeatures(batch)).filter(Boolean);
-
-          if (validFeatures.length > 0) {
-            await db.track.upsertAudioFeatures(
-              validFeatures.map((f) => ({
-                trackId:
-                  trackIdBySpotifyId[f.id] ??
-                  tracksNeedingFeatures.find((t) => t.spotifyId === f.id)?.id ??
-                  "",
-                danceability: f.danceability,
-                energy: f.energy,
-                key: f.key,
-                loudness: f.loudness,
-                mode: f.mode,
-                speechiness: f.speechiness,
-                acousticness: f.acousticness,
-                instrumentalness: f.instrumentalness,
-                liveness: f.liveness,
-                valence: f.valence,
-                tempo: f.tempo,
-                timeSignature: f.time_signature,
-              })),
-            );
-          }
-        } catch (err: unknown) {
-          const status = (err as { status?: number })?.status;
-          if (status === 403 || status === 404) {
-            logger.worker.warn(
-              { userId },
-              "audio features endpoint unavailable (deprecated), skipping",
-            );
-          } else {
-            logger.worker.warn({ err, userId }, "failed to fetch audio features");
-          }
-        }
-      }
-    }
 
     logger.worker.info({ userId, count: items.length }, "sync complete");
   },

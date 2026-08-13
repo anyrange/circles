@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - circles_postgres_data:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d circles_dev -U circles"]
       interval: 10s
@@ -19,26 +19,37 @@ services:
       retries: 5
       start_period: 10s
 
-  minio:
-    image: minio/minio
-    container_name: circles-minio
-    command: server /data --console-address ":9001"
+  rustfs-permissions:
+    image: alpine:3.22
+    user: root
+    volumes:
+      - ./data/rustfs:/data
+    command: chown -R 10001:10001 /data
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: circles-rustfs
+    command: /data
     restart: always
+    depends_on:
+      rustfs-permissions:
+        condition: service_completed_successfully
     environment:
-      MINIO_ROOT_USER: circles
-      MINIO_ROOT_PASSWORD: password
+      RUSTFS_ACCESS_KEY: circles
+      RUSTFS_SECRET_KEY: password
+      RUSTFS_CONSOLE_ENABLE: "true"
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - circles_minio_data:/data
+      - ./data/rustfs:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:9000/health && curl -f http://localhost:9001/health",
+        ]
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 10s
-
-volumes:
-  circles_postgres_data:
-  circles_minio_data:
+      start_period: 30s

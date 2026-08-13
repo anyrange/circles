@@ -1,20 +1,29 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Music2 } from "lucide-react";
 import type { ComponentPropsWithoutRef } from "react";
+import { z } from "zod";
 
+import { ListeningByYearChart } from "@/components/listening-by-year-chart";
 import { Page } from "@/components/page-shell";
+import { TimeRangeSelect } from "@/components/time-range-select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Item, ItemContent, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackQuery } from "@/lib/queries/tracks";
 
 export const Route = createFileRoute("/_authenticated/tracks/$trackId")({
+  validateSearch: z.object({
+    range: z.enum(["7d", "30d", "90d", "365d", "all"]).optional().catch("all"),
+  }),
   component: TrackPage,
 });
 
 function TrackPage() {
   const { trackId } = Route.useParams();
-  const { data, isLoading } = useTrackQuery(trackId);
+  const { range = "all" } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { data, isLoading } = useTrackQuery(trackId, range);
 
   if (isLoading) return <EntitySkeleton />;
   if (!data) return <Page>Track not found.</Page>;
@@ -43,6 +52,7 @@ function TrackPage() {
                 key={item.artist.id}
                 to="/artists/$artistId"
                 params={{ artistId: item.artist.id }}
+                search={{ range }}
                 className="inline-flex items-center gap-2 hover:text-foreground"
               >
                 <Avatar size="sm">
@@ -78,6 +88,7 @@ function TrackPage() {
             <Link
               to="/albums/$albumId"
               params={{ albumId: data.track.album.id }}
+              search={{ range }}
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
             >
               <span>On</span>
@@ -85,6 +96,12 @@ function TrackPage() {
               {data.track.album.releaseDate ? <span>• {data.track.album.releaseDate}</span> : null}
             </Link>
           ) : null}
+        </div>
+        <div className="lg:ml-auto">
+          <TimeRangeSelect
+            value={range}
+            onChange={(nextRange) => navigate({ search: { range: nextRange }, resetScroll: false })}
+          />
         </div>
       </section>
 
@@ -161,21 +178,35 @@ function TrackPage() {
           </section>
         </div>
 
-        <section className="flex min-w-0 flex-col gap-4">
-          <h2 className="text-xl font-semibold">Recent plays</h2>
-          <ItemGroup>
-            {data.recentPlays.map((play: { playedAt: string }) => (
-              <Item key={play.playedAt} size="sm">
-                <ItemMedia variant={albumImageUrl ? "image" : "icon"}>
-                  {albumImageUrl ? <img src={albumImageUrl} alt="" /> : <Music2 />}
-                </ItemMedia>
-                <ItemContent>
-                  <ItemTitle>{new Date(play.playedAt).toLocaleString()}</ItemTitle>
-                </ItemContent>
-              </Item>
-            ))}
-          </ItemGroup>
-        </section>
+        <div className="flex min-w-0 flex-col gap-6">
+          <Card size="sm">
+            <CardHeader>
+              <CardTitle>Listening by year</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {data.scrobblesByYear.length ? (
+                <ListeningByYearChart data={data.scrobblesByYear} />
+              ) : (
+                <p className="py-8 text-sm text-muted-foreground">No plays in this range.</p>
+              )}
+            </CardContent>
+          </Card>
+          <section className="flex min-w-0 flex-col gap-4">
+            <h2 className="text-xl font-semibold">Recent plays</h2>
+            <ItemGroup>
+              {data.recentPlays.map((play: { playedAt: string }) => (
+                <Item key={play.playedAt} size="sm">
+                  <ItemMedia variant={albumImageUrl ? "image" : "icon"}>
+                    {albumImageUrl ? <img src={albumImageUrl} alt="" /> : <Music2 />}
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{new Date(play.playedAt).toLocaleString()}</ItemTitle>
+                  </ItemContent>
+                </Item>
+              ))}
+            </ItemGroup>
+          </section>
+        </div>
       </div>
     </Page>
   );

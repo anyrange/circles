@@ -130,11 +130,12 @@ export const libraryController = new Hono<{ Variables: AuthVariables }>()
       return ctx.json(page);
     },
   )
-  .get("/artists/:id", async (ctx) => {
+  .get("/artists/:id", zValidator("query", z.object({ range: rangeSchema })), async (ctx) => {
     const userId = ctx.get("userId");
     const id = ctx.req.param("id");
+    const since = sinceFromRange(ctx.req.valid("query").range);
 
-    const detail = await db.artist.findDetailForUser(userId, id);
+    const detail = await db.artist.findDetailForUser(userId, id, since);
     if (!detail) {
       throw new HTTPException(404, { message: "Artist not found" });
     }
@@ -155,22 +156,24 @@ export const libraryController = new Hono<{ Variables: AuthVariables }>()
       isHydrating: shouldHydrate,
     });
   })
-  .get("/albums/:id", async (ctx) => {
+  .get("/albums/:id", zValidator("query", z.object({ range: rangeSchema })), async (ctx) => {
     const userId = ctx.get("userId");
     const id = ctx.req.param("id");
+    const since = sinceFromRange(ctx.req.valid("query").range);
 
-    const detail = await db.album.findDetailForUser(userId, id);
+    const detail = await db.album.findDetailForUser(userId, id, since);
     if (!detail) {
       throw new HTTPException(404, { message: "Album not found" });
     }
 
     return ctx.json(detail);
   })
-  .get("/tracks/:id", async (ctx) => {
+  .get("/tracks/:id", zValidator("query", z.object({ range: rangeSchema })), async (ctx) => {
     const userId = ctx.get("userId");
     const id = ctx.req.param("id");
+    const since = sinceFromRange(ctx.req.valid("query").range);
 
-    const detail = await db.track.findDetailForUser(userId, id);
+    const detail = await db.track.findDetailForUser(userId, id, since);
     if (!detail) {
       throw new HTTPException(404, { message: "Track not found" });
     }

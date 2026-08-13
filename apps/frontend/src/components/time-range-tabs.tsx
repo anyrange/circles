@@ -14,9 +14,18 @@ const RANGES: { value: Range; label: string }[] = [
   { value: "all", label: "All time" },
 ];
 
+function isRange(value: string): value is Range {
+  return RANGES.some((range) => range.value === value);
+}
+
 export function TimeRangeTabs({ value, onChange }: TimeRangeTabsProps) {
   return (
-    <Tabs value={value} onValueChange={(v) => onChange?.(v as Range)}>
+    <Tabs
+      value={value}
+      onValueChange={(nextValue) => {
+        if (isRange(nextValue)) onChange?.(nextValue);
+      }}
+    >
       <TabsList>
         {RANGES.map((r) => (
           <TabsTrigger key={r.value} value={r.value}>

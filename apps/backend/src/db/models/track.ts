@@ -79,7 +79,10 @@ export class TrackModel {
     return this.db.select().from(tracks).where(inArray(tracks.spotifyId, spotifyIds));
   }
 
-  async findDetailForUser(userId: string, trackId: string) {
+  async findDetailForUser(userId: string, trackId: string, since?: Date) {
+    const playConditions = [eq(history.userId, userId)];
+    if (since) playConditions.push(gte(history.playedAt, since));
+
     const [track] = await this.db
       .select({
         id: tracks.id,
@@ -112,7 +115,7 @@ export class TrackModel {
       .from(tracks)
       .leftJoin(albums, eq(tracks.albumId, albums.id))
       .leftJoin(audioFeatures, eq(audioFeatures.trackId, tracks.id))
-      .leftJoin(history, and(eq(history.trackId, tracks.id), eq(history.userId, userId)))
+      .leftJoin(history, and(eq(history.trackId, tracks.id), ...playConditions))
       .where(eq(tracks.id, trackId))
       .groupBy(
         tracks.id,
@@ -141,7 +144,7 @@ export class TrackModel {
       return null;
     }
 
-    const [trackArtistsList, recentPlays] = await Promise.all([
+    const [trackArtistsList, recentPlays, scrobblesByYear] = await Promise.all([
       this.db
         .select({
           artist: {
@@ -159,15 +162,28 @@ export class TrackModel {
       this.db
         .select({ playedAt: history.playedAt })
         .from(history)
-        .where(and(eq(history.userId, userId), eq(history.trackId, trackId)))
+        .where(and(eq(history.trackId, trackId), ...playConditions))
         .orderBy(desc(history.playedAt))
         .limit(20),
+      this.db.execute<{ year: string; count: string }>(sql`
+        SELECT EXTRACT(YEAR FROM ${history.playedAt})::int AS year, count(*)::int AS count
+        FROM ${history}
+        WHERE ${history.userId} = ${userId}
+          AND ${history.trackId} = ${trackId}
+          ${since ? sql`AND ${history.playedAt} >= ${since}` : sql``}
+        GROUP BY year
+        ORDER BY year
+      `),
     ]);
 
     return {
       track,
       artists: trackArtistsList,
       recentPlays,
+      scrobblesByYear: scrobblesByYear.rows.map((row) => ({
+        year: Number(row.year),
+        count: Number(row.count),
+      })),
     };
   }
 

@@ -50,7 +50,9 @@ processImport.task({
       if (obj.ContentLength && obj.ContentLength > MAX_IMPORT_BYTES) {
         throw new Error("Import file is too large");
       }
-      const bodyBytes = await streamToBuffer(obj.Body as NodeJS.ReadableStream, MAX_IMPORT_BYTES);
+      if (!obj.Body) throw new Error("Import file is empty");
+      const bodyBytes = await obj.Body.transformToByteArray();
+      if (bodyBytes.byteLength > MAX_IMPORT_BYTES) throw new Error("Import file is too large");
       const valid = parseSpotifyImport(bodyBytes);
 
       logger.worker.info({ userId, total: valid.length }, "parsed import, spawning batches");
@@ -99,20 +101,3 @@ processImport.task({
     }
   },
 });
-
-async function streamToBuffer(
-  stream: NodeJS.ReadableStream,
-  maxBytes: number,
-): Promise<Uint8Array> {
-  const chunks: Buffer[] = [];
-  let size = 0;
-  for await (const chunk of stream) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string);
-    size += buffer.byteLength;
-    if (size > maxBytes) {
-      throw new Error("Import file is too large");
-    }
-    chunks.push(buffer);
-  }
-  return Buffer.concat(chunks);
-}

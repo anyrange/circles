@@ -1,10 +1,10 @@
 import { createRouter } from "@tanstack/react-router";
-import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
 import * as TanstackQuery from "./integrations/tanstack-query/root-provider";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
+  // Router initialization intentionally creates one query client per router.
   const rqContext = TanstackQuery.getContext();
 
   const router = createRouter({
@@ -16,13 +16,6 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
     scrollRestoration: true,
     defaultStructuralSharing: true,
-  });
-
-  setupRouterSsrQueryIntegration({
-    router,
-    queryClient: rqContext.queryClient,
-    handleRedirects: true,
-    wrapQueryClient: true,
   });
 
   return router;

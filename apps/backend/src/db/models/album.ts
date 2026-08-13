@@ -41,7 +41,11 @@ export class AlbumModel {
     return this.db.select().from(albums).where(inArray(albums.spotifyId, spotifyIds));
   }
 
-  async findDetailForUser(userId: string, albumId: string) {
+  async findDetailForUser(userId: string, albumId: string, since?: Date) {
+    const playConditions = [eq(history.userId, userId)];
+    if (since) playConditions.push(gte(history.playedAt, since));
+    const albumPlayConditions = [...playConditions, eq(tracks.albumId, albumId)];
+
     const [album] = await this.db
       .select({
         id: albums.id,
@@ -51,12 +55,12 @@ export class AlbumModel {
         releaseDate: albums.releaseDate,
         images: albums.images,
         playCount: count(history.id),
-        trackCount: sql<number>`count(distinct ${tracks.id})`,
+        trackCount: sql<number>`count(distinct ${history.trackId})`,
         lastPlayedAt: sql<Date | null>`max(${history.playedAt})`,
       })
       .from(albums)
       .leftJoin(tracks, eq(tracks.albumId, albums.id))
-      .leftJoin(history, and(eq(history.trackId, tracks.id), eq(history.userId, userId)))
+      .leftJoin(history, and(eq(history.trackId, tracks.id), ...playConditions))
       .where(eq(albums.id, albumId))
       .groupBy(
         albums.id,
@@ -72,7 +76,7 @@ export class AlbumModel {
       return null;
     }
 
-    const [albumArtists, albumTracks, recentPlays] = await Promise.all([
+    const [albumArtists, albumTracks, recentPlays, scrobblesByYear] = await Promise.all([
       this.db
         .select({
           artist: {
@@ -100,7 +104,7 @@ export class AlbumModel {
           playCount: count(history.id),
         })
         .from(tracks)
-        .leftJoin(history, and(eq(history.trackId, tracks.id), eq(history.userId, userId)))
+        .leftJoin(history, and(eq(history.trackId, tracks.id), ...playConditions))
         .where(eq(tracks.albumId, albumId))
         .groupBy(tracks.id, tracks.spotifyId, tracks.name, tracks.durationMs, tracks.explicit)
         .orderBy(desc(count(history.id)), tracks.name),
@@ -114,9 +118,19 @@ export class AlbumModel {
         })
         .from(history)
         .innerJoin(tracks, eq(history.trackId, tracks.id))
-        .where(and(eq(history.userId, userId), eq(tracks.albumId, albumId)))
+        .where(and(...albumPlayConditions))
         .orderBy(desc(history.playedAt))
         .limit(12),
+      this.db.execute<{ year: string; count: string }>(sql`
+        SELECT EXTRACT(YEAR FROM ${history.playedAt})::int AS year, count(*)::int AS count
+        FROM ${history}
+        INNER JOIN ${tracks} ON ${history.trackId} = ${tracks.id}
+        WHERE ${history.userId} = ${userId}
+          AND ${tracks.albumId} = ${albumId}
+          ${since ? sql`AND ${history.playedAt} >= ${since}` : sql``}
+        GROUP BY year
+        ORDER BY year
+      `),
     ]);
 
     return {
@@ -124,6 +138,10 @@ export class AlbumModel {
       artists: albumArtists,
       tracks: albumTracks,
       recentPlays,
+      scrobblesByYear: scrobblesByYear.rows.map((row) => ({
+        year: Number(row.year),
+        count: Number(row.count),
+      })),
     };
   }
 

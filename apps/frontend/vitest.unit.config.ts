@@ -32,4 +32,6 @@ const unitProject = {
   },
 };
 
+// SAFETY: Vite+ currently types defineProject's cross-package config input as never even though
+// this object is composed exclusively from its supported project options.
 export default defineProject(unitProject as never);

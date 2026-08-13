@@ -21,4 +21,13 @@ export class UserModel {
     const [row] = await this.db.select().from(user).where(eq(user.username, username)).limit(1);
     return row ?? null;
   }
+
+  async delete(id: string): Promise<boolean> {
+    const [deletedUser] = await this.db
+      .delete(user)
+      .where(eq(user.id, id))
+      .returning({ id: user.id });
+
+    return Boolean(deletedUser);
+  }
 }

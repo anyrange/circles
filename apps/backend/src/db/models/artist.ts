@@ -41,7 +41,11 @@ export class ArtistModel {
     return this.db.select().from(artists).where(inArray(artists.spotifyId, spotifyIds));
   }
 
-  async findDetailForUser(userId: string, artistId: string) {
+  async findDetailForUser(userId: string, artistId: string, since?: Date) {
+    const playConditions = [eq(history.userId, userId)];
+    if (since) playConditions.push(gte(history.playedAt, since));
+    const artistPlayConditions = [...playConditions, eq(trackArtists.artistId, artistId)];
+
     const [artist] = await this.db
       .select({
         id: artists.id,
@@ -51,15 +55,15 @@ export class ArtistModel {
         images: artists.images,
         popularity: artists.popularity,
         playCount: count(history.id),
-        trackCount: sql<number>`count(distinct ${tracks.id})`,
-        albumCount: sql<number>`count(distinct ${albums.id})`,
+        trackCount: sql<number>`count(distinct ${history.trackId})`,
+        albumCount: sql<number>`count(distinct case when ${history.id} is not null then ${albums.id} end)`,
         lastPlayedAt: sql<Date | null>`max(${history.playedAt})`,
       })
       .from(artists)
       .leftJoin(trackArtists, eq(trackArtists.artistId, artists.id))
       .leftJoin(tracks, eq(trackArtists.trackId, tracks.id))
       .leftJoin(albums, eq(tracks.albumId, albums.id))
-      .leftJoin(history, and(eq(history.trackId, tracks.id), eq(history.userId, userId)))
+      .leftJoin(history, and(eq(history.trackId, tracks.id), ...playConditions))
       .where(eq(artists.id, artistId))
       .groupBy(
         artists.id,
@@ -75,7 +79,7 @@ export class ArtistModel {
       return null;
     }
 
-    const [topTracks, albumsByArtist, recentPlays] = await Promise.all([
+    const [topTracks, albumsByArtist, recentPlays, scrobblesByYear] = await Promise.all([
       this.db
         .select({
           trackId: tracks.id,
@@ -91,7 +95,7 @@ export class ArtistModel {
         .innerJoin(tracks, eq(history.trackId, tracks.id))
         .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
         .leftJoin(albums, eq(tracks.albumId, albums.id))
-        .where(and(eq(history.userId, userId), eq(trackArtists.artistId, artistId)))
+        .where(and(...artistPlayConditions))
         .groupBy(
           tracks.id,
           tracks.spotifyId,
@@ -138,7 +142,7 @@ export class ArtistModel {
         .innerJoin(tracks, eq(history.trackId, tracks.id))
         .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
         .innerJoin(albums, eq(tracks.albumId, albums.id))
-        .where(and(eq(history.userId, userId), eq(trackArtists.artistId, artistId)))
+        .where(and(...artistPlayConditions))
         .groupBy(
           albums.id,
           albums.spotifyId,
@@ -162,9 +166,20 @@ export class ArtistModel {
         .innerJoin(tracks, eq(history.trackId, tracks.id))
         .innerJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
         .leftJoin(albums, eq(tracks.albumId, albums.id))
-        .where(and(eq(history.userId, userId), eq(trackArtists.artistId, artistId)))
+        .where(and(...artistPlayConditions))
         .orderBy(desc(history.playedAt))
         .limit(12),
+      this.db.execute<{ year: string; count: string }>(sql`
+        SELECT EXTRACT(YEAR FROM ${history.playedAt})::int AS year, count(*)::int AS count
+        FROM ${history}
+        INNER JOIN ${tracks} ON ${history.trackId} = ${tracks.id}
+        INNER JOIN ${trackArtists} ON ${tracks.id} = ${trackArtists.trackId}
+        WHERE ${history.userId} = ${userId}
+          AND ${trackArtists.artistId} = ${artistId}
+          ${since ? sql`AND ${history.playedAt} >= ${since}` : sql``}
+        GROUP BY year
+        ORDER BY year
+      `),
     ]);
 
     return {
@@ -172,6 +187,10 @@ export class ArtistModel {
       topTracks,
       albums: albumsByArtist,
       recentPlays,
+      scrobblesByYear: scrobblesByYear.rows.map((row) => ({
+        year: Number(row.year),
+        count: Number(row.count),
+      })),
     };
   }
 

@@ -1,14 +1,13 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ArrowRight, Music2, Sparkles } from "lucide-react";
 
-import { authClient } from "@/lib/auth";
+import { getInitialAuthFn, startSpotifySignInFn } from "@/lib/auth-session";
 
 export const Route = createFileRoute("/")({
-  ssr: false,
   beforeLoad: async () => {
-    const { data: session } = await authClient.getSession();
+    const auth = await getInitialAuthFn();
 
-    if (session) {
+    if (auth) {
       throw redirect({ to: "/dashboard" });
     }
   },
@@ -16,11 +15,10 @@ export const Route = createFileRoute("/")({
 });
 
 function LoginPage() {
-  const signIn = () =>
-    authClient.signIn.social({
-      provider: "spotify",
-      callbackURL: `${window.location.origin}/dashboard`,
-    });
+  const signIn = async () => {
+    const url = await startSpotifySignInFn();
+    window.location.assign(url);
+  };
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080a0c] text-white">

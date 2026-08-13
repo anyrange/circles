@@ -48,7 +48,9 @@ function DashboardPage() {
       <TimeRangeTabs
         value={range}
         onChange={(nextRange: Range) =>
-          navigate({ search: (previous) => ({ ...previous, range: nextRange }) })
+          navigate({
+            search: (previous) => ({ ...previous, range: nextRange }),
+          })
         }
       />
 

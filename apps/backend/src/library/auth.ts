@@ -1,6 +1,11 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { betterAuth } from "better-auth";
-import { testUtils } from "better-auth/plugins";
+import {
+  oauthProvider,
+  oauthProviderAuthServerMetadata,
+  oauthProviderOpenIdConfigMetadata,
+} from "@better-auth/oauth-provider";
+import { betterAuth, type BetterAuthOptions } from "better-auth";
+import { jwt } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 import { config } from "../config";
@@ -8,10 +13,13 @@ import { db as drizzleDb } from "../db/postgres";
 import * as schema from "../db/postgres/schema";
 import { syncHistory } from "../worker/workflows/sync-history";
 
+const oauthScopes = ["openid", "profile", "email", "offline_access"];
+
 export const auth = betterAuth({
   secret: config.auth.secret,
   baseURL: config.http.url,
   trustedOrigins: [config.frontend.url],
+  disabledPaths: ["/token"],
   advanced: {
     useSecureCookies: !config.isDevelopment,
     defaultCookieAttributes: {
@@ -19,9 +27,8 @@ export const auth = betterAuth({
       secure: !config.isDevelopment,
     },
   },
-  account: {
-    skipStateCookieCheck: true,
-  },
+  // SAFETY: Better Auth's Drizzle adapter returns its database contract, but its generic
+  // schema inference is not assignable to the broader option type across these package versions.
   database: drizzleAdapter(drizzleDb, {
     provider: "pg",
     schema: {
@@ -29,9 +36,36 @@ export const auth = betterAuth({
       session: schema.session,
       account: schema.account,
       verification: schema.verification,
+      jwks: schema.jwks,
+      oauthClient: schema.oauthClient,
+      oauthRefreshToken: schema.oauthRefreshToken,
+      oauthAccessToken: schema.oauthAccessToken,
+      oauthConsent: schema.oauthConsent,
     },
-  }),
-  plugins: config.e2e.enableAuth ? [testUtils()] : [],
+  }) as BetterAuthOptions["database"],
+  plugins: [
+    jwt({
+      disableSettingJwtHeader: true,
+      jwt: {
+        issuer: config.http.url,
+        audience: config.http.url,
+        expirationTime: "15m",
+      },
+    }),
+    oauthProvider({
+      loginPage: `${config.frontend.url}/auth/login`,
+      consentPage: `${config.frontend.url}/auth/consent`,
+      scopes: oauthScopes,
+      validAudiences: [config.http.url],
+      cachedTrustedClients: new Set([config.auth.clientId]),
+      accessTokenExpiresIn: 15 * 60,
+      refreshTokenExpiresIn: 30 * 24 * 60 * 60,
+      silenceWarnings: {
+        oauthAuthServerConfig: true,
+        openidConfig: true,
+      },
+    }),
+  ],
   socialProviders: {
     spotify: {
       clientId: config.spotify.clientId,
@@ -68,7 +102,6 @@ export const auth = betterAuth({
     session: {
       create: {
         after: async (session) => {
-          // Auto-generate username if not set
           const [existingUser] = await drizzleDb
             .select({ username: schema.user.username, name: schema.user.name })
             .from(schema.user)
@@ -112,5 +145,42 @@ export const auth = betterAuth({
     },
   },
 });
+
+export async function ensureFrontendOAuthClient() {
+  const now = new Date();
+  await drizzleDb
+    .insert(schema.oauthClient)
+    .values({
+      id: config.auth.clientId,
+      clientId: config.auth.clientId,
+      name: "Circles frontend",
+      redirectUris: [`${config.frontend.url}/auth/callback`],
+      tokenEndpointAuthMethod: "none",
+      grantTypes: ["authorization_code", "refresh_token"],
+      responseTypes: ["code"],
+      scopes: [...oauthScopes],
+      public: true,
+      type: "web",
+      requirePKCE: true,
+      skipConsent: true,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: schema.oauthClient.clientId,
+      set: {
+        redirectUris: [`${config.frontend.url}/auth/callback`],
+        scopes: [...oauthScopes],
+        updatedAt: now,
+      },
+    });
+}
+
+export function verifyOAuthAccessToken(token: string) {
+  return auth.api.verifyJWT({ body: { token } });
+}
+
+export const oauthAuthorizationServerMetadata = oauthProviderAuthServerMetadata(auth);
+export const oauthOpenIdConfiguration = oauthProviderOpenIdConfigMetadata(auth);
 
 export type Auth = typeof auth;

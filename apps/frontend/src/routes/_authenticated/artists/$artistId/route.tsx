@@ -1,9 +1,13 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Disc3, Music2, UserRound } from "lucide-react";
+import { z } from "zod";
 
+import { ListeningByYearChart } from "@/components/listening-by-year-chart";
 import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
+import { TimeRangeSelect } from "@/components/time-range-select";
 import { TrackRow } from "@/components/track-row";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Item,
   ItemContent,
@@ -16,12 +20,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useArtistQuery } from "@/lib/queries/artists";
 
 export const Route = createFileRoute("/_authenticated/artists/$artistId")({
+  validateSearch: z.object({
+    range: z.enum(["7d", "30d", "90d", "365d", "all"]).optional().catch("all"),
+  }),
   component: ArtistPage,
 });
 
 function ArtistPage() {
   const { artistId } = Route.useParams();
-  const { data, isLoading } = useArtistQuery(artistId);
+  const { range = "all" } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { data, isLoading } = useArtistQuery(artistId, range);
 
   if (isLoading) return <EntitySkeleton />;
   if (!data) return <Page>Artist not found.</Page>;
@@ -67,6 +76,12 @@ function ArtistPage() {
             <p className="text-sm text-muted-foreground">Refreshing artist profile...</p>
           ) : null}
         </div>
+        <div className="lg:ml-auto">
+          <TimeRangeSelect
+            value={range}
+            onChange={(nextRange) => navigate({ search: { range: nextRange }, resetScroll: false })}
+          />
+        </div>
       </section>
 
       <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
@@ -87,6 +102,7 @@ function ArtistPage() {
                         <Link
                           to="/tracks/$trackId"
                           params={{ trackId: item.track.id }}
+                          search={{ range }}
                           className="hover:text-muted-foreground"
                         >
                           {item.track.name}
@@ -97,6 +113,7 @@ function ArtistPage() {
                           <Link
                             to="/albums/$albumId"
                             params={{ albumId: item.track.album.id }}
+                            search={{ range }}
                             className="hover:text-foreground"
                           >
                             {item.track.album.name}
@@ -116,7 +133,11 @@ function ArtistPage() {
             <ItemGroup>
               {data.albums.map((item: ArtistAlbum) => (
                 <Item key={item.album.id} asChild size="sm">
-                  <Link to="/albums/$albumId" params={{ albumId: item.album.id }}>
+                  <Link
+                    to="/albums/$albumId"
+                    params={{ albumId: item.album.id }}
+                    search={{ range }}
+                  >
                     <ItemMedia variant={item.album.imageUrl ? "image" : "icon"}>
                       {item.album.imageUrl ? <img src={item.album.imageUrl} alt="" /> : <Disc3 />}
                     </ItemMedia>
@@ -134,28 +155,46 @@ function ArtistPage() {
           </PageSection>
         </div>
 
-        <section className="flex min-w-0 flex-col gap-3">
-          <h2 className="text-base font-semibold">Recent plays</h2>
-          <ItemGroup>
-            {data.recentPlays.map((play: ArtistRecentPlay) => (
-              <Item key={`${play.track.id}-${play.playedAt}`} asChild size="sm">
-                <Link to="/tracks/$trackId" params={{ trackId: play.track.id }}>
-                  <ItemMedia variant={play.track.albumImageUrl ? "image" : "icon"}>
-                    {play.track.albumImageUrl ? (
-                      <img src={play.track.albumImageUrl} alt="" />
-                    ) : (
-                      <Music2 />
-                    )}
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{play.track.name}</ItemTitle>
-                    <ItemDescription>{new Date(play.playedAt).toLocaleString()}</ItemDescription>
-                  </ItemContent>
-                </Link>
-              </Item>
-            ))}
-          </ItemGroup>
-        </section>
+        <div className="flex min-w-0 flex-col gap-6">
+          <Card size="sm">
+            <CardHeader>
+              <CardTitle>Listening by year</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {data.scrobblesByYear.length ? (
+                <ListeningByYearChart data={data.scrobblesByYear} />
+              ) : (
+                <p className="py-8 text-sm text-muted-foreground">No plays in this range.</p>
+              )}
+            </CardContent>
+          </Card>
+          <section className="flex min-w-0 flex-col gap-3">
+            <h2 className="text-base font-semibold">Recent plays</h2>
+            <ItemGroup>
+              {data.recentPlays.map((play: ArtistRecentPlay) => (
+                <Item key={`${play.track.id}-${play.playedAt}`} asChild size="sm">
+                  <Link
+                    to="/tracks/$trackId"
+                    params={{ trackId: play.track.id }}
+                    search={{ range }}
+                  >
+                    <ItemMedia variant={play.track.albumImageUrl ? "image" : "icon"}>
+                      {play.track.albumImageUrl ? (
+                        <img src={play.track.albumImageUrl} alt="" />
+                      ) : (
+                        <Music2 />
+                      )}
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{play.track.name}</ItemTitle>
+                      <ItemDescription>{new Date(play.playedAt).toLocaleString()}</ItemDescription>
+                    </ItemContent>
+                  </Link>
+                </Item>
+              ))}
+            </ItemGroup>
+          </section>
+        </div>
       </div>
     </Page>
   );

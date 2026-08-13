@@ -11,11 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedToolsRouteRouteImport } from './routes/_authenticated/tools/route'
+import { Route as AuthLoginRouteRouteImport } from './routes/auth/login/route'
+import { Route as AuthConsentRouteRouteImport } from './routes/auth/consent/route'
+import { Route as AuthCallbackRouteRouteImport } from './routes/auth/callback/route'
 import { Route as AuthenticatedTimeMachineRouteRouteImport } from './routes/_authenticated/time-machine/route'
 import { Route as AuthenticatedSocialRouteRouteImport } from './routes/_authenticated/social/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
-import { Route as AuthenticatedLibraryRouteRouteImport } from './routes/_authenticated/library/route'
 import { Route as AuthenticatedHistoryRouteRouteImport } from './routes/_authenticated/history/route'
 import { Route as AuthenticatedDashboardRouteRouteImport } from './routes/_authenticated/dashboard/route'
 import { Route as AuthenticatedUUsernameRouteRouteImport } from './routes/_authenticated/u/$username/route'
@@ -33,10 +34,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedToolsRouteRoute = AuthenticatedToolsRouteRouteImport.update({
-  id: '/tools',
-  path: '/tools',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const AuthLoginRouteRoute = AuthLoginRouteRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConsentRouteRoute = AuthConsentRouteRouteImport.update({
+  id: '/auth/consent',
+  path: '/auth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRouteRoute = AuthCallbackRouteRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTimeMachineRouteRoute =
   AuthenticatedTimeMachineRouteRouteImport.update({
@@ -54,12 +65,6 @@ const AuthenticatedSettingsRouteRoute =
   AuthenticatedSettingsRouteRouteImport.update({
     id: '/settings',
     path: '/settings',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedLibraryRouteRoute =
-  AuthenticatedLibraryRouteRouteImport.update({
-    id: '/library',
-    path: '/library',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedHistoryRouteRoute =
@@ -109,11 +114,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRouteRoute
   '/history': typeof AuthenticatedHistoryRouteRoute
-  '/library': typeof AuthenticatedLibraryRouteRoute
   '/settings': typeof AuthenticatedSettingsRouteRoute
   '/social': typeof AuthenticatedSocialRouteRoute
   '/time-machine': typeof AuthenticatedTimeMachineRouteRoute
-  '/tools': typeof AuthenticatedToolsRouteRoute
+  '/auth/callback': typeof AuthCallbackRouteRoute
+  '/auth/consent': typeof AuthConsentRouteRoute
+  '/auth/login': typeof AuthLoginRouteRoute
   '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
   '/data/import': typeof AuthenticatedDataImportRouteRoute
@@ -124,11 +130,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRouteRoute
   '/history': typeof AuthenticatedHistoryRouteRoute
-  '/library': typeof AuthenticatedLibraryRouteRoute
   '/settings': typeof AuthenticatedSettingsRouteRoute
   '/social': typeof AuthenticatedSocialRouteRoute
   '/time-machine': typeof AuthenticatedTimeMachineRouteRoute
-  '/tools': typeof AuthenticatedToolsRouteRoute
+  '/auth/callback': typeof AuthCallbackRouteRoute
+  '/auth/consent': typeof AuthConsentRouteRoute
+  '/auth/login': typeof AuthLoginRouteRoute
   '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
   '/data/import': typeof AuthenticatedDataImportRouteRoute
@@ -141,11 +148,12 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRouteRoute
-  '/_authenticated/library': typeof AuthenticatedLibraryRouteRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRoute
   '/_authenticated/social': typeof AuthenticatedSocialRouteRoute
   '/_authenticated/time-machine': typeof AuthenticatedTimeMachineRouteRoute
-  '/_authenticated/tools': typeof AuthenticatedToolsRouteRoute
+  '/auth/callback': typeof AuthCallbackRouteRoute
+  '/auth/consent': typeof AuthConsentRouteRoute
+  '/auth/login': typeof AuthLoginRouteRoute
   '/_authenticated/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/_authenticated/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
   '/_authenticated/data/import': typeof AuthenticatedDataImportRouteRoute
@@ -158,11 +166,12 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/history'
-    | '/library'
     | '/settings'
     | '/social'
     | '/time-machine'
-    | '/tools'
+    | '/auth/callback'
+    | '/auth/consent'
+    | '/auth/login'
     | '/albums/$albumId'
     | '/artists/$artistId'
     | '/data/import'
@@ -173,11 +182,12 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/history'
-    | '/library'
     | '/settings'
     | '/social'
     | '/time-machine'
-    | '/tools'
+    | '/auth/callback'
+    | '/auth/consent'
+    | '/auth/login'
     | '/albums/$albumId'
     | '/artists/$artistId'
     | '/data/import'
@@ -189,11 +199,12 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/_authenticated/dashboard'
     | '/_authenticated/history'
-    | '/_authenticated/library'
     | '/_authenticated/settings'
     | '/_authenticated/social'
     | '/_authenticated/time-machine'
-    | '/_authenticated/tools'
+    | '/auth/callback'
+    | '/auth/consent'
+    | '/auth/login'
     | '/_authenticated/albums/$albumId'
     | '/_authenticated/artists/$artistId'
     | '/_authenticated/data/import'
@@ -204,6 +215,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthCallbackRouteRoute: typeof AuthCallbackRouteRoute
+  AuthConsentRouteRoute: typeof AuthConsentRouteRoute
+  AuthLoginRouteRoute: typeof AuthLoginRouteRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -222,12 +236,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/tools': {
-      id: '/_authenticated/tools'
-      path: '/tools'
-      fullPath: '/tools'
-      preLoaderRoute: typeof AuthenticatedToolsRouteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/consent': {
+      id: '/auth/consent'
+      path: '/auth/consent'
+      fullPath: '/auth/consent'
+      preLoaderRoute: typeof AuthConsentRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/time-machine': {
       id: '/_authenticated/time-machine'
@@ -248,13 +276,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/library': {
-      id: '/_authenticated/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof AuthenticatedLibraryRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/history': {
@@ -312,11 +333,9 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRouteRoute: typeof AuthenticatedDashboardRouteRoute
   AuthenticatedHistoryRouteRoute: typeof AuthenticatedHistoryRouteRoute
-  AuthenticatedLibraryRouteRoute: typeof AuthenticatedLibraryRouteRoute
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRoute
   AuthenticatedSocialRouteRoute: typeof AuthenticatedSocialRouteRoute
   AuthenticatedTimeMachineRouteRoute: typeof AuthenticatedTimeMachineRouteRoute
-  AuthenticatedToolsRouteRoute: typeof AuthenticatedToolsRouteRoute
   AuthenticatedAlbumsAlbumIdRouteRoute: typeof AuthenticatedAlbumsAlbumIdRouteRoute
   AuthenticatedArtistsArtistIdRouteRoute: typeof AuthenticatedArtistsArtistIdRouteRoute
   AuthenticatedDataImportRouteRoute: typeof AuthenticatedDataImportRouteRoute
@@ -327,11 +346,9 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRouteRoute: AuthenticatedDashboardRouteRoute,
   AuthenticatedHistoryRouteRoute: AuthenticatedHistoryRouteRoute,
-  AuthenticatedLibraryRouteRoute: AuthenticatedLibraryRouteRoute,
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRoute,
   AuthenticatedSocialRouteRoute: AuthenticatedSocialRouteRoute,
   AuthenticatedTimeMachineRouteRoute: AuthenticatedTimeMachineRouteRoute,
-  AuthenticatedToolsRouteRoute: AuthenticatedToolsRouteRoute,
   AuthenticatedAlbumsAlbumIdRouteRoute: AuthenticatedAlbumsAlbumIdRouteRoute,
   AuthenticatedArtistsArtistIdRouteRoute:
     AuthenticatedArtistsArtistIdRouteRoute,
@@ -346,6 +363,9 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthCallbackRouteRoute: AuthCallbackRouteRoute,
+  AuthConsentRouteRoute: AuthConsentRouteRoute,
+  AuthLoginRouteRoute: AuthLoginRouteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

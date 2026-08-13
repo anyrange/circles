@@ -30,7 +30,12 @@ function SocialPage() {
         </TabsList>
 
         <TabsContent value="leaderboard" className="mt-4 flex flex-col gap-4">
-          <Tabs value={period} onValueChange={(value) => setPeriod(value as "week" | "all")}>
+          <Tabs
+            value={period}
+            onValueChange={(value) => {
+              if (value === "week" || value === "all") setPeriod(value);
+            }}
+          >
             <TabsList>
               <TabsTrigger value="all">All time</TabsTrigger>
               <TabsTrigger value="week">This week</TabsTrigger>

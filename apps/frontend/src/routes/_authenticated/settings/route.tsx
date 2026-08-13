@@ -1,5 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { Database, UserRound } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Database, Trash2, UserRound } from "lucide-react";
 
 import {
   Page,
@@ -9,6 +10,17 @@ import {
   PageSectionTitle,
   PageTitle,
 } from "@/components/page-shell";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +32,9 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { useMeQuery } from "@/lib/queries/me";
+import { setAccessToken } from "@/lib/access-token";
+import { clearAppSessionFn } from "@/lib/auth-session";
+import { useDeleteAccount, useMeQuery } from "@/lib/queries/me";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -28,6 +42,23 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 function SettingsPage() {
   const { data: me } = useMeQuery();
+  const deleteAccount = useDeleteAccount();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  async function handleDeleteAccount(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+
+    try {
+      await deleteAccount.mutateAsync();
+      await clearAppSessionFn();
+      setAccessToken(null);
+      queryClient.clear();
+      await navigate({ to: "/", replace: true });
+    } catch {
+      // The mutation exposes the server error in the confirmation dialog.
+    }
+  }
 
   return (
     <Page className="max-w-5xl">
@@ -52,7 +83,18 @@ function SettingsPage() {
             </div>
           </div>
           <Button asChild variant="outline">
-            <Link to="/u/$username" params={{ username: me?.username ?? "" }}>
+            <Link
+              to="/u/$username"
+              params={{ username: me?.username ?? "" }}
+              search={{
+                view: "overview",
+                tab: "artists",
+                range: "30d",
+                artistsRange: "30d",
+                albumsRange: "30d",
+                tracksRange: "30d",
+              }}
+            >
               <UserRound />
               Profile
             </Link>
@@ -79,6 +121,52 @@ function SettingsPage() {
             </Link>
           </Item>
         </ItemGroup>
+      </PageSection>
+
+      <Separator />
+
+      <PageSection className="gap-4">
+        <PageSectionTitle>Delete account</PageSectionTitle>
+        <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium">Permanently delete your account</p>
+            <p className="text-sm text-muted-foreground">
+              Remove your profile, listening history, follows, playlists, and imported data.
+            </p>
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 data-icon="inline-start" />
+                Delete account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently deletes your Circles account and all of its data. This action
+                  cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              {deleteAccount.error ? (
+                <p role="alert" className="text-sm text-destructive">
+                  We couldn&apos;t delete your account. Please try again.
+                </p>
+              ) : null}
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleteAccount.isPending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  disabled={deleteAccount.isPending}
+                  onClick={handleDeleteAccount}
+                >
+                  {deleteAccount.isPending ? "Deleting…" : "Delete account"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </PageSection>
     </Page>
   );

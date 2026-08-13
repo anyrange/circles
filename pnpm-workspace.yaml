@@ -4,14 +4,13 @@ packages:
   - tools/*
 
 catalog:
-  "@anthropic-ai/sdk": ^0.78.0
   "@aws-sdk/client-s3": ^3.1009.0
   "@aws-sdk/s3-request-presigner": ^3.1009.0
-  "@better-auth/drizzle-adapter": ^1.5.5
+  "@better-auth/drizzle-adapter": 1.5.5
+  "@better-auth/oauth-provider": 1.5.5
   "@cloudflare/vite-plugin": ^1.28.0
   "@hatchet-dev/typescript-sdk": ^1.16.0
   "@hookform/resolvers": ^5.2.2
-  "@playwright/test": ^1.52.0
   "@scalar/hono-api-reference": ^0.9.20
   "@t3-oss/env-core": ^0.13.11
   "@tailwindcss/vite": ^4.2.1
@@ -35,7 +34,7 @@ catalog:
   "@types/react-dom": ^19.2.3
   "@vitejs/plugin-react": ^6.0.1
   "@vitest/coverage-v8": ^4.1.8
-  better-auth: ^1.5.5
+  better-auth: 1.5.5
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
   dayjs: ^1.11.20
