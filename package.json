@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "ready": "vp check",
-    "verify": "vp check && vp test && vp run -r build",
+    "verify": "vp check && vp run -r test && vp run -r build",
     "coverage": "run-p coverage:backend coverage:frontend",
     "coverage:backend": "vp run @circles/backend#test:coverage",
     "coverage:frontend": "vp run @circles/frontend#test:coverage",
