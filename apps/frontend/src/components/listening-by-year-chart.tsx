@@ -15,10 +15,22 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function ListeningByYearChart({ data }: { data: Array<{ year: number; count: number }> }) {
+  if (data.length === 1) {
+    const [item] = data;
+    return (
+      <p className="text-sm text-muted-foreground">
+        <span className="font-medium text-foreground tabular-nums">
+          {item?.count.toLocaleString()} {item?.count === 1 ? "play" : "plays"}
+        </span>{" "}
+        in {item?.year}
+      </p>
+    );
+  }
+
   const chartData = data.map(({ year, count }) => ({ year: String(year), streams: count }));
 
   return (
-    <ChartContainer config={chartConfig} className="h-64 w-full">
+    <ChartContainer config={chartConfig} className="h-40 w-full">
       <BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ right: 8 }}>
         <CartesianGrid horizontal={false} />
         <XAxis type="number" hide />

@@ -1,6 +1,6 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import { CalendarDays, Clock3, Disc3, Music2, Radio, UserCheck, UserPlus } from "lucide-react";
+import { CalendarDays, Clock3, Disc3, Gem, Music2, Radio, UserCheck, UserPlus } from "lucide-react";
 import type React from "react";
 import { z } from "zod";
 
@@ -8,18 +8,12 @@ import { ProfileLibrary } from "@/components/profile-library";
 import { RankedList } from "@/components/ranked-list";
 import { TimeRangeSelect } from "@/components/time-range-select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMeQuery } from "@/lib/queries/me";
@@ -28,6 +22,7 @@ import type { Range } from "@/lib/queries/stats";
 import {
   useUserByUsernameQuery,
   useUserExtendedStatsQuery,
+  useUserPlatinumAlbumsQuery,
   useUserStatsQuery,
 } from "@/lib/queries/users";
 
@@ -59,6 +54,7 @@ function ProfilePage() {
   const artistStats = useUserStatsQuery(user?.id, search.artistsRange);
   const albumStats = useUserStatsQuery(user?.id, search.albumsRange);
   const trackStats = useUserStatsQuery(user?.id, search.tracksRange);
+  const platinumAlbums = useUserPlatinumAlbumsQuery(user?.id);
 
   if (isLoading) return <ProfileSkeleton />;
   if (isError || !user) return <ProfileUnavailable />;
@@ -95,6 +91,9 @@ function ProfilePage() {
                 <ProfileMetric label="Following" value={follows?.following.length ?? 0} />
                 <ProfileMetric label="Followers" value={follows?.followers.length ?? 0} />
               </div>
+              {user.bio ? (
+                <p className="mt-4 max-w-2xl text-sm text-muted-foreground">{user.bio}</p>
+              ) : null}
             </div>
           </div>
 
@@ -154,8 +153,6 @@ function ProfilePage() {
           />
         ) : (
           <ProfileOverview
-            bio={user.bio}
-            createdAt={user.createdAt}
             artistsRange={search.artistsRange}
             albumsRange={search.albumsRange}
             tracksRange={search.tracksRange}
@@ -180,9 +177,11 @@ function ProfilePage() {
             artistStats={artistStats.data}
             albumStats={albumStats.data}
             trackStats={trackStats.data}
+            platinumAlbums={platinumAlbums.data}
             artistStatsLoading={artistStats.isLoading}
             albumStatsLoading={albumStats.isLoading}
             trackStatsLoading={trackStats.isLoading}
+            platinumAlbumsLoading={platinumAlbums.isLoading}
             extended={extended}
             extendedLoading={extendedLoading}
             listeningHours={listeningHours}
@@ -196,8 +195,6 @@ function ProfilePage() {
 }
 
 interface ProfileOverviewProps {
-  bio?: string | null;
-  createdAt: string | Date;
   artistsRange: Range;
   albumsRange: Range;
   tracksRange: Range;
@@ -207,9 +204,11 @@ interface ProfileOverviewProps {
   artistStats?: UserStats;
   albumStats?: UserStats;
   trackStats?: UserStats;
+  platinumAlbums?: PlatinumAlbums;
   artistStatsLoading: boolean;
   albumStatsLoading: boolean;
   trackStatsLoading: boolean;
+  platinumAlbumsLoading: boolean;
   extended?: ExtendedStats;
   extendedLoading: boolean;
   listeningHours: number;
@@ -218,8 +217,6 @@ interface ProfileOverviewProps {
 }
 
 function ProfileOverview({
-  bio,
-  createdAt,
   artistsRange,
   albumsRange,
   tracksRange,
@@ -229,9 +226,11 @@ function ProfileOverview({
   artistStats,
   albumStats,
   trackStats,
+  platinumAlbums,
   artistStatsLoading,
   albumStatsLoading,
   trackStatsLoading,
+  platinumAlbumsLoading,
   extended,
   extendedLoading,
   listeningHours,
@@ -268,6 +267,22 @@ function ProfileOverview({
         )}
       </MediaSection>
 
+      {platinumAlbumsLoading || platinumAlbums?.length ? (
+        <MediaSection>
+          <MediaSection.Header>
+            <div>
+              <h2 className="text-xl font-semibold">Platinum albums</h2>
+              <p className="text-sm text-muted-foreground">Every track is saved to Liked Songs.</p>
+            </div>
+          </MediaSection.Header>
+          {platinumAlbumsLoading && !platinumAlbums ? (
+            <MediaGridSkeleton square />
+          ) : platinumAlbums?.length ? (
+            <PlatinumAlbumGrid albums={platinumAlbums} />
+          ) : null}
+        </MediaSection>
+      ) : null}
+
       <div className="grid items-start gap-10 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <MediaSection>
           <MediaSection.Header>
@@ -283,80 +298,40 @@ function ProfileOverview({
           )}
         </MediaSection>
 
-        <div className="flex min-w-0 flex-col gap-6">
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>About</CardTitle>
-              <CardDescription>{bio || "No bio yet."}</CardDescription>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground">
-              Member since {dayjs(createdAt).format("MMMM YYYY")}
-            </CardContent>
-          </Card>
+        <aside className="flex min-w-0 flex-col gap-6">
+          <section className="flex flex-col gap-3">
+            <h2 className="text-lg font-semibold">Taste profile</h2>
+            {extendedLoading && !extended ? (
+              <Skeleton className="h-28" />
+            ) : (
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
+                <TasteMetric icon={Music2} label="Streams">
+                  {(extended?.totalScrobbles ?? 0).toLocaleString()}
+                </TasteMetric>
+                <TasteMetric icon={Clock3} label="Listening hours">
+                  {listeningHours.toLocaleString()}
+                </TasteMetric>
+                <TasteMetric icon={Radio} label="Peak hour">
+                  {peakHour ? formatHour(peakHour.key) : "No data"}
+                </TasteMetric>
+                <TasteMetric icon={CalendarDays} label="Peak day">
+                  {peakDay ? DAY_NAMES[peakDay.key] : "No data"}
+                </TasteMetric>
+              </dl>
+            )}
+          </section>
 
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>Taste profile</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {extendedLoading && !extended ? (
-                <Skeleton className="h-56" />
-              ) : (
-                <ItemGroup>
-                  <Item size="sm">
-                    <ItemMedia variant="icon" className="rounded-full">
-                      <Music2 />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{(extended?.totalScrobbles ?? 0).toLocaleString()}</ItemTitle>
-                      <ItemDescription>Streams</ItemDescription>
-                    </ItemContent>
-                  </Item>
-                  <Item size="sm">
-                    <ItemMedia variant="icon" className="rounded-full">
-                      <Clock3 />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{listeningHours.toLocaleString()}</ItemTitle>
-                      <ItemDescription>Listening hours</ItemDescription>
-                    </ItemContent>
-                  </Item>
-                  <Item size="sm">
-                    <ItemMedia variant="icon" className="rounded-full">
-                      <Radio />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{peakHour ? formatHour(peakHour.key) : "No data"}</ItemTitle>
-                      <ItemDescription>Peak hour</ItemDescription>
-                    </ItemContent>
-                  </Item>
-                  <Item size="sm">
-                    <ItemMedia variant="icon" className="rounded-full">
-                      <CalendarDays />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{peakDay ? DAY_NAMES[peakDay.key] : "No data"}</ItemTitle>
-                      <ItemDescription>Peak day</ItemDescription>
-                    </ItemContent>
-                  </Item>
-                </ItemGroup>
-              )}
-            </CardContent>
-          </Card>
+          <Separator />
 
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>Top genres</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {extended?.topGenres.length ? (
-                <GenreList genres={extended.topGenres} />
-              ) : (
-                <p className="text-sm text-muted-foreground">No genre data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">Top genres</h2>
+            {extended?.topGenres.length ? (
+              <GenreList genres={extended.topGenres} />
+            ) : (
+              <p className="text-sm text-muted-foreground">No genre data yet.</p>
+            )}
+          </section>
+        </aside>
       </div>
     </div>
   );
@@ -436,6 +411,43 @@ function AlbumGrid({ albums }: { albums: UserStats["topAlbums"] }) {
   );
 }
 
+function PlatinumAlbumGrid({ albums }: { albums: PlatinumAlbums }) {
+  return (
+    <div className="grid grid-cols-2 gap-1 sm:grid-cols-4 xl:grid-cols-8">
+      {albums.map(({ album, artistNames }) => (
+        <Link
+          key={album.id}
+          to="/albums/$albumId"
+          params={{ albumId: album.id }}
+          className="group relative aspect-square overflow-hidden bg-muted"
+        >
+          {album.images?.[0]?.url ? (
+            <img
+              src={album.images[0].url}
+              alt=""
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center">
+              <Disc3 />
+            </div>
+          )}
+          <Badge variant="secondary" className="absolute top-2 right-2">
+            <Gem data-icon="inline-start" />
+            Platinum
+          </Badge>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-3 pt-10 text-white">
+            <p className="truncate text-sm font-semibold">{album.name}</p>
+            <p className="truncate text-xs text-white/75">
+              {artistNames} · {album.totalTracks?.toLocaleString()} tracks
+            </p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function TopTracks({ tracks }: { tracks: UserStats["topTracks"] }) {
   const max = Math.max(...tracks.map((item) => item.playCount), 1);
   return (
@@ -491,6 +503,26 @@ function ProfileMetric({ label, value }: { label: string; value: number }) {
   );
 }
 
+function TasteMetric({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid min-w-0 grid-cols-[1.75rem_minmax(0,1fr)] gap-x-2">
+      <Icon className="mt-0.5 size-4 text-muted-foreground" />
+      <div className="flex min-w-0 flex-col">
+        <dt className="order-2 truncate text-xs text-muted-foreground">{label}</dt>
+        <dd className="order-1 truncate text-sm font-semibold">{children}</dd>
+      </div>
+    </div>
+  );
+}
+
 function ProfileUnavailable() {
   return (
     <div className="p-6">
@@ -534,7 +566,7 @@ function ListSkeleton() {
   return (
     <div className="flex flex-col gap-2">
       {[1, 2, 3, 4, 5, 6].map((item) => (
-        <Skeleton key={item} className="h-20" />
+        <Skeleton key={item} className="h-16" />
       ))}
     </div>
   );
@@ -574,3 +606,4 @@ const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frid
 type Peak = { key: number; count: number };
 type UserStats = NonNullable<ReturnType<typeof useUserStatsQuery>["data"]>;
 type ExtendedStats = NonNullable<ReturnType<typeof useUserExtendedStatsQuery>["data"]>;
+type PlatinumAlbums = NonNullable<ReturnType<typeof useUserPlatinumAlbumsQuery>["data"]>;

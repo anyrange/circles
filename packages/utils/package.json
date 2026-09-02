@@ -27,14 +27,14 @@
     "test": "vp test",
     "test:coverage": "vp test run --coverage",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "vp run build"
   },
   "devDependencies": {
     "@types/node": "^25.3.5",
     "@typescript/native-preview": "7.0.0-dev.20260309.1",
     "bumpp": "^10.4.1",
     "typescript": "^5.9.3",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
   }
 }

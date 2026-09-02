@@ -164,6 +164,7 @@ export const albums = pgTable("albums", {
   spotifyId: varchar("spotify_id", { length: 255 }).notNull().unique(),
   name: varchar({ length: 500 }).notNull(),
   albumType: varchar("album_type", { length: 50 }),
+  totalTracks: integer("total_tracks"),
   releaseDate: varchar("release_date", { length: 20 }),
   images: jsonb().$type<{ url: string; width: number; height: number }[]>(),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
@@ -242,6 +243,23 @@ export const history = pgTable(
     index("history_track_id_idx").on(table.trackId),
     index("history_played_at_idx").on(table.playedAt),
     index("history_user_played_at_desc_idx").on(table.userId, table.playedAt),
+  ],
+);
+
+export const savedTracks = pgTable(
+  "saved_tracks",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    trackId: bigint("track_id", { mode: "string" })
+      .notNull()
+      .references(() => tracks.id, { onDelete: "cascade" }),
+    addedAt: timestamp("added_at", { mode: "date" }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.trackId] }),
+    index("saved_tracks_track_id_idx").on(table.trackId),
   ],
 );
 

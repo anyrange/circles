@@ -297,6 +297,26 @@ export const openApiDocument = {
         },
       },
     },
+    "/users/{id}/platinum-albums": {
+      get: {
+        summary: "Get a user's platinum albums",
+        description: "Returns albums for which the user has saved every track.",
+        tags: ["Users"],
+        parameters: [{ $ref: "#/components/parameters/userIdPath" }],
+        responses: {
+          200: {
+            description: "Platinum albums ordered by completion date.",
+            content: {
+              "application/json": {
+                schema: { type: "array", items: { type: "object" } },
+              },
+            },
+          },
+          403: { $ref: "#/components/responses/Forbidden" },
+          404: { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
     "/users/{id}/stats/extended": {
       get: {
         summary: "Get public user extended stats",

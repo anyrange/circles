@@ -51,7 +51,7 @@ export const config = {
   spotify: {
     clientId: env.SPOTIFY_CLIENT_ID,
     clientSecret: env.SPOTIFY_CLIENT_SECRET,
-    scopes: ["user-read-private", "user-read-recently-played"],
+    scopes: ["user-read-private", "user-read-recently-played", "user-library-read"],
   },
   hatchet: {
     token: env.HATCHET_CLIENT_TOKEN,

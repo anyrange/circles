@@ -70,6 +70,7 @@ syncHistory.task({
         spotifyId: album.id,
         name: album.name,
         albumType: album.album_type,
+        totalTracks: album.total_tracks,
         releaseDate: album.release_date,
         images: album.images,
       })),

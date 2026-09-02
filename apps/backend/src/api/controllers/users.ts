@@ -46,6 +46,14 @@ export const usersController = new Hono()
       createdAt: user.createdAt,
     });
   })
+  .get("/:id/platinum-albums", async (ctx) => {
+    const id = ctx.req.param("id");
+    const user = await db.user.findById(id);
+    if (!user) throw new HTTPException(404, { message: "User not found" });
+    if (!user.isPublic) throw new HTTPException(403, { message: "Profile is private" });
+
+    return ctx.json(await db.album.getPlatinumAlbums(id));
+  })
   .get(
     "/:id/stats",
     zValidator(

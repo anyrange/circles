@@ -4,11 +4,9 @@ import type { ComponentPropsWithoutRef } from "react";
 import { z } from "zod";
 
 import { ListeningByYearChart } from "@/components/listening-by-year-chart";
-import { Page } from "@/components/page-shell";
+import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
 import { TimeRangeSelect } from "@/components/time-range-select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Item, ItemContent, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackQuery } from "@/lib/queries/tracks";
 
@@ -29,20 +27,22 @@ function TrackPage() {
   if (!data) return <Page>Track not found.</Page>;
 
   const albumImageUrl = data.track.album?.imageUrl;
+  const hasAudioFeatures = Object.values(data.track.audioFeatures ?? {}).some(
+    (value) => value !== null && value !== undefined,
+  );
 
   return (
-    <Page className="gap-10">
-      <section className="flex flex-col gap-6 lg:flex-row lg:items-end">
-        <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted text-muted-foreground lg:size-48">
+    <Page className="mx-auto max-w-6xl">
+      <section className="flex flex-col gap-5 sm:flex-row sm:items-end">
+        <div className="flex size-32 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-muted-foreground">
           {albumImageUrl ? (
             <img src={albumImageUrl} alt="" className="size-full object-cover" />
           ) : (
-            <Music2 className="size-16" />
+            <Music2 className="size-10" />
           )}
         </div>
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">Track</p>
-          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance lg:text-5xl">
+          <h1 className="max-w-4xl text-3xl font-semibold tracking-tight text-balance lg:text-4xl">
             {data.track.name}
           </h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -97,7 +97,7 @@ function TrackPage() {
             </Link>
           ) : null}
         </div>
-        <div className="lg:ml-auto">
+        <div className="sm:ml-auto">
           <TimeRangeSelect
             value={range}
             onChange={(nextRange) => navigate({ search: { range: nextRange }, resetScroll: false })}
@@ -105,59 +105,65 @@ function TrackPage() {
         </div>
       </section>
 
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="flex min-w-0 flex-col gap-10">
-          <section className="flex flex-col gap-4">
-            <h2 className="text-xl font-semibold">Audio features</h2>
-            <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
-              <Metric>
-                <Metric.Label>Danceability</Metric.Label>
-                <Metric.Value>
-                  {formatAudioFeature(data.track.audioFeatures?.danceability)}
-                </Metric.Value>
-              </Metric>
-              <Metric>
-                <Metric.Label>Energy</Metric.Label>
-                <Metric.Value>{formatAudioFeature(data.track.audioFeatures?.energy)}</Metric.Value>
-              </Metric>
-              <Metric>
-                <Metric.Label>Valence</Metric.Label>
-                <Metric.Value>{formatAudioFeature(data.track.audioFeatures?.valence)}</Metric.Value>
-              </Metric>
-              <Metric>
-                <Metric.Label>Acousticness</Metric.Label>
-                <Metric.Value>
-                  {formatAudioFeature(data.track.audioFeatures?.acousticness)}
-                </Metric.Value>
-              </Metric>
-              <Metric>
-                <Metric.Label>Instrumentalness</Metric.Label>
-                <Metric.Value>
-                  {formatAudioFeature(data.track.audioFeatures?.instrumentalness)}
-                </Metric.Value>
-              </Metric>
-              <Metric>
-                <Metric.Label>Speechiness</Metric.Label>
-                <Metric.Value>
-                  {formatAudioFeature(data.track.audioFeatures?.speechiness)}
-                </Metric.Value>
-              </Metric>
-              <Metric>
-                <Metric.Label>Liveness</Metric.Label>
-                <Metric.Value>
-                  {formatAudioFeature(data.track.audioFeatures?.liveness)}
-                </Metric.Value>
-              </Metric>
-              <Metric>
-                <Metric.Label>Tempo</Metric.Label>
-                <Metric.Value>{formatTempo(data.track.audioFeatures?.tempo)}</Metric.Value>
-              </Metric>
-            </dl>
-          </section>
+      <div className="grid items-start gap-12 xl:grid-cols-[minmax(0,44rem)_18rem] xl:justify-between">
+        <div className="flex min-w-0 flex-col gap-8">
+          {hasAudioFeatures ? (
+            <PageSection>
+              <PageSectionTitle>Audio features</PageSectionTitle>
+              <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+                <Metric>
+                  <Metric.Label>Danceability</Metric.Label>
+                  <Metric.Value>
+                    {formatAudioFeature(data.track.audioFeatures?.danceability)}
+                  </Metric.Value>
+                </Metric>
+                <Metric>
+                  <Metric.Label>Energy</Metric.Label>
+                  <Metric.Value>
+                    {formatAudioFeature(data.track.audioFeatures?.energy)}
+                  </Metric.Value>
+                </Metric>
+                <Metric>
+                  <Metric.Label>Valence</Metric.Label>
+                  <Metric.Value>
+                    {formatAudioFeature(data.track.audioFeatures?.valence)}
+                  </Metric.Value>
+                </Metric>
+                <Metric>
+                  <Metric.Label>Acousticness</Metric.Label>
+                  <Metric.Value>
+                    {formatAudioFeature(data.track.audioFeatures?.acousticness)}
+                  </Metric.Value>
+                </Metric>
+                <Metric>
+                  <Metric.Label>Instrumentalness</Metric.Label>
+                  <Metric.Value>
+                    {formatAudioFeature(data.track.audioFeatures?.instrumentalness)}
+                  </Metric.Value>
+                </Metric>
+                <Metric>
+                  <Metric.Label>Speechiness</Metric.Label>
+                  <Metric.Value>
+                    {formatAudioFeature(data.track.audioFeatures?.speechiness)}
+                  </Metric.Value>
+                </Metric>
+                <Metric>
+                  <Metric.Label>Liveness</Metric.Label>
+                  <Metric.Value>
+                    {formatAudioFeature(data.track.audioFeatures?.liveness)}
+                  </Metric.Value>
+                </Metric>
+                <Metric>
+                  <Metric.Label>Tempo</Metric.Label>
+                  <Metric.Value>{formatTempo(data.track.audioFeatures?.tempo)}</Metric.Value>
+                </Metric>
+              </dl>
+            </PageSection>
+          ) : null}
 
-          <section className="flex flex-col gap-4">
-            <h2 className="text-xl font-semibold">Playback window</h2>
-            <dl className="grid gap-4 sm:grid-cols-2">
+          <PageSection>
+            <PageSectionTitle>Playback window</PageSectionTitle>
+            <dl className="grid gap-6 sm:grid-cols-2">
               <div className="flex flex-col gap-1">
                 <dt className="text-sm text-muted-foreground">First play</dt>
                 <dd className="text-sm">
@@ -175,38 +181,38 @@ function TrackPage() {
                 </dd>
               </div>
             </dl>
-          </section>
+          </PageSection>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-6">
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>Listening by year</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {data.scrobblesByYear.length ? (
-                <ListeningByYearChart data={data.scrobblesByYear} />
-              ) : (
-                <p className="py-8 text-sm text-muted-foreground">No plays in this range.</p>
-              )}
-            </CardContent>
-          </Card>
-          <section className="flex min-w-0 flex-col gap-4">
-            <h2 className="text-xl font-semibold">Recent plays</h2>
-            <ItemGroup>
-              {data.recentPlays.map((play: { playedAt: string }) => (
-                <Item key={play.playedAt} size="sm">
-                  <ItemMedia variant={albumImageUrl ? "image" : "icon"}>
-                    {albumImageUrl ? <img src={albumImageUrl} alt="" /> : <Music2 />}
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{new Date(play.playedAt).toLocaleString()}</ItemTitle>
-                  </ItemContent>
-                </Item>
-              ))}
-            </ItemGroup>
+        <aside className="flex min-w-0 flex-col gap-6">
+          <section className="flex min-w-0 flex-col gap-3">
+            <h2 className="text-base font-semibold">Listening by year</h2>
+            {data.scrobblesByYear.length ? (
+              <ListeningByYearChart data={data.scrobblesByYear} />
+            ) : (
+              <p className="text-sm text-muted-foreground">No plays in this range.</p>
+            )}
           </section>
-        </div>
+          <section className="flex min-w-0 flex-col gap-3">
+            <h2 className="text-base font-semibold">Recent plays</h2>
+            <ol className="flex flex-col">
+              {data.recentPlays.map((play: { playedAt: string }) => (
+                <li
+                  key={play.playedAt}
+                  className="flex items-center justify-between gap-4 py-1.5 text-sm"
+                >
+                  <span>{new Date(play.playedAt).toLocaleDateString()}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {new Date(play.playedAt).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </aside>
       </div>
     </Page>
   );
@@ -225,7 +231,7 @@ function MetricLabel(props: ComponentPropsWithoutRef<"dt">) {
 }
 
 function MetricValue(props: ComponentPropsWithoutRef<"dd">) {
-  return <dd className="text-xl font-semibold" {...props} />;
+  return <dd className="text-base font-semibold" {...props} />;
 }
 
 const Metric = Object.assign(MetricRoot, {

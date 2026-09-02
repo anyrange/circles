@@ -26,6 +26,19 @@ export function useUserStatsQuery(userId: string | undefined, range: Range = "al
   });
 }
 
+export function useUserPlatinumAlbumsQuery(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["users", userId, "platinum-albums"],
+    queryFn: () =>
+      parseResponse(
+        api.users[":id"]["platinum-albums"].$get({
+          param: { id: userId! },
+        }),
+      ),
+    enabled: !!userId,
+  });
+}
+
 export function useUserExtendedStatsQuery(userId: string | undefined, range: Range = "all") {
   return useQuery({
     queryKey: ["users", userId, "stats", "extended", range],

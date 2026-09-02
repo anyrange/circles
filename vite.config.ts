@@ -1,8 +1,14 @@
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
+  defaultPackage: "./apps/frontend",
   test: {
-    exclude: ["**/node_modules/**", "apps/**"],
+    projects: [
+      "./apps/backend/vite.config.ts",
+      "./apps/frontend/vitest.unit.config.ts",
+      "./apps/frontend/vitest.browser.config.ts",
+      "./packages/utils/vite.config.ts",
+    ],
   },
   fmt: {
     ignorePatterns: [

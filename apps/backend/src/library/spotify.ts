@@ -23,6 +23,10 @@ export function createSpotifyClient(accessToken: string) {
   });
 }
 
+export function hasSpotifyScope(scope: string | null, requiredScope: string) {
+  return new Set(scope?.split(/[\s,]+/).filter(Boolean)).has(requiredScope);
+}
+
 export async function refreshAccessToken(refreshToken: string): Promise<{
   accessToken: string;
   refreshToken: string;

@@ -12,6 +12,7 @@ import { config } from "../config";
 import { db as drizzleDb } from "../db/postgres";
 import * as schema from "../db/postgres/schema";
 import { syncHistory } from "../worker/workflows/sync-history";
+import { syncSavedTracks } from "../worker/workflows/sync-saved-tracks";
 
 const oauthScopes = ["openid", "profile", "email", "offline_access"];
 
@@ -140,6 +141,7 @@ export const auth = betterAuth({
           }
 
           await syncHistory.runNoWait({ userId: session.userId });
+          await syncSavedTracks.runNoWait({ userId: session.userId });
         },
       },
     },

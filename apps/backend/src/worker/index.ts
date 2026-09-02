@@ -7,6 +7,7 @@ import { processImport } from "./workflows/process-import";
 import { refreshTokens } from "./workflows/refresh-tokens";
 import { syncAllUsers } from "./workflows/sync-all-users";
 import { syncHistory } from "./workflows/sync-history";
+import { syncSavedTracks } from "./workflows/sync-saved-tracks";
 
 async function main() {
   const worker = await hatchet.worker("circles-worker", {
@@ -18,6 +19,7 @@ async function main() {
       processImport,
       importBatch,
       hydrateArtist,
+      syncSavedTracks,
     ],
   });
 

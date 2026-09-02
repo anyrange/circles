@@ -7,15 +7,6 @@ import { Page, PageSection, PageSectionTitle } from "@/components/page-shell";
 import { TimeRangeSelect } from "@/components/time-range-select";
 import { TrackRow } from "@/components/track-row";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAlbumQuery } from "@/lib/queries/albums";
 
@@ -38,18 +29,17 @@ function AlbumPage() {
   const albumImageUrl = data.album.images?.[0]?.url;
 
   return (
-    <Page className="gap-10">
-      <section className="flex flex-col gap-6 lg:flex-row lg:items-end">
-        <div className="flex size-40 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted text-muted-foreground lg:size-48">
+    <Page className="mx-auto max-w-6xl">
+      <section className="flex flex-col gap-5 sm:flex-row sm:items-end">
+        <div className="flex size-36 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-muted-foreground">
           {albumImageUrl ? (
             <img src={albumImageUrl} alt="" className="size-full object-cover" />
           ) : (
-            <Disc3 className="size-16" />
+            <Disc3 className="size-12" />
           )}
         </div>
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">{data.album.albumType ?? "Album"}</p>
-          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-balance lg:text-5xl">
+          <h1 className="max-w-4xl text-3xl font-semibold tracking-tight text-balance lg:text-4xl">
             {data.album.name}
           </h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -82,7 +72,7 @@ function AlbumPage() {
             ) : null}
           </div>
         </div>
-        <div className="lg:ml-auto">
+        <div className="sm:ml-auto">
           <TimeRangeSelect
             value={range}
             onChange={(nextRange) => navigate({ search: { range: nextRange }, resetScroll: false })}
@@ -90,69 +80,65 @@ function AlbumPage() {
         </div>
       </section>
 
-      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <PageSection>
+      <div className="grid items-start gap-12 xl:grid-cols-[minmax(0,44rem)_18rem] xl:justify-between">
+        <PageSection className="max-w-3xl">
           <PageSectionTitle>Tracklist</PageSectionTitle>
-          <ol className="flex flex-col gap-2">
+          <ol className="flex flex-col">
             {data.tracks.map((item: AlbumTrack, index: number) => (
               <li key={item.track.id}>
-                <TrackRow.Compact asChild>
-                  <Link
-                    to="/tracks/$trackId"
-                    params={{ trackId: item.track.id }}
-                    search={{ range }}
-                  >
-                    <TrackRow.Leading>{index + 1}</TrackRow.Leading>
-                    <TrackRow.Artwork>
-                      {albumImageUrl ? <TrackRow.Image src={albumImageUrl} alt="" /> : null}
-                    </TrackRow.Artwork>
-                    <TrackRow.Content>
-                      <TrackRow.Title>{item.track.name}</TrackRow.Title>
-                    </TrackRow.Content>
-                    <TrackRow.Trailing>{item.playCount} plays</TrackRow.Trailing>
-                  </Link>
-                </TrackRow.Compact>
+                <Link
+                  to="/tracks/$trackId"
+                  params={{ trackId: item.track.id }}
+                  search={{ range }}
+                  className="grid min-h-11 grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-md px-2 text-sm transition-colors hover:bg-muted/50"
+                >
+                  <span className="text-right text-xs text-muted-foreground tabular-nums">
+                    {index + 1}
+                  </span>
+                  <span className="truncate font-medium">{item.track.name}</span>
+                  <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
+                    {item.playCount} plays
+                  </span>
+                </Link>
               </li>
             ))}
           </ol>
         </PageSection>
 
-        <div className="flex min-w-0 flex-col gap-6">
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>Listening by year</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {data.scrobblesByYear.length ? (
-                <ListeningByYearChart data={data.scrobblesByYear} />
-              ) : (
-                <p className="py-8 text-sm text-muted-foreground">No plays in this range.</p>
-              )}
-            </CardContent>
-          </Card>
+        <aside className="flex min-w-0 flex-col gap-6">
+          <section className="flex min-w-0 flex-col gap-3">
+            <h2 className="text-base font-semibold">Listening by year</h2>
+            {data.scrobblesByYear.length ? (
+              <ListeningByYearChart data={data.scrobblesByYear} />
+            ) : (
+              <p className="text-sm text-muted-foreground">No plays in this range.</p>
+            )}
+          </section>
           <section className="flex min-w-0 flex-col gap-3">
             <h2 className="text-base font-semibold">Recent plays</h2>
-            <ItemGroup>
+            <div className="flex flex-col">
               {data.recentPlays.map((play: AlbumRecentPlay) => (
-                <Item key={`${play.track.id}-${play.playedAt}`} asChild size="sm">
+                <TrackRow.Compact key={`${play.track.id}-${play.playedAt}`} asChild>
                   <Link
                     to="/tracks/$trackId"
                     params={{ trackId: play.track.id }}
                     search={{ range }}
                   >
-                    <ItemMedia variant={albumImageUrl ? "image" : "icon"}>
-                      {albumImageUrl ? <img src={albumImageUrl} alt="" /> : <Music2 />}
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{play.track.name}</ItemTitle>
-                      <ItemDescription>{new Date(play.playedAt).toLocaleString()}</ItemDescription>
-                    </ItemContent>
+                    <TrackRow.Artwork>
+                      {albumImageUrl ? <TrackRow.Image src={albumImageUrl} alt="" /> : <Music2 />}
+                    </TrackRow.Artwork>
+                    <TrackRow.Content>
+                      <TrackRow.Title>{play.track.name}</TrackRow.Title>
+                      <TrackRow.Subtitle>
+                        {new Date(play.playedAt).toLocaleString()}
+                      </TrackRow.Subtitle>
+                    </TrackRow.Content>
                   </Link>
-                </Item>
+                </TrackRow.Compact>
               ))}
-            </ItemGroup>
+            </div>
           </section>
-        </div>
+        </aside>
       </div>
     </Page>
   );

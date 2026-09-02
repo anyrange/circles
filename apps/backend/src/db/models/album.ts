@@ -1,7 +1,7 @@
 import { and, count, desc, eq, gte, inArray, or, sql } from "drizzle-orm";
 
 import type { Database } from "../postgres";
-import { albums, artists, history, trackArtists, tracks } from "../postgres/schema";
+import { albums, artists, history, savedTracks, trackArtists, tracks } from "../postgres/schema";
 
 export type Album = typeof albums.$inferSelect;
 export type NewAlbum = typeof albums.$inferInsert;
@@ -26,6 +26,7 @@ export class AlbumModel {
         set: {
           name: albums.name,
           albumType: albums.albumType,
+          totalTracks: sql`COALESCE(EXCLUDED.total_tracks, ${albums.totalTracks})`,
           releaseDate: albums.releaseDate,
           images: albums.images,
         },
@@ -211,5 +212,40 @@ export class AlbumModel {
       nextCursor:
         hasMore && lastItem ? { playCount: lastItem.playCount, id: lastItem.album.id } : null,
     };
+  }
+
+  async getPlatinumAlbums(userId: string, limit = 8) {
+    return this.db
+      .select({
+        album: {
+          id: albums.id,
+          spotifyId: albums.spotifyId,
+          name: albums.name,
+          albumType: albums.albumType,
+          totalTracks: albums.totalTracks,
+          releaseDate: albums.releaseDate,
+          images: albums.images,
+        },
+        artistNames: sql<string>`string_agg(distinct ${artists.name}, ', ' order by ${artists.name})`,
+        completedAt: sql<Date>`max(${savedTracks.addedAt})`,
+      })
+      .from(savedTracks)
+      .innerJoin(tracks, eq(savedTracks.trackId, tracks.id))
+      .innerJoin(albums, eq(tracks.albumId, albums.id))
+      .leftJoin(trackArtists, eq(trackArtists.trackId, tracks.id))
+      .leftJoin(artists, eq(trackArtists.artistId, artists.id))
+      .where(and(eq(savedTracks.userId, userId), sql`${albums.totalTracks} > 0`))
+      .groupBy(
+        albums.id,
+        albums.spotifyId,
+        albums.name,
+        albums.albumType,
+        albums.totalTracks,
+        albums.releaseDate,
+        albums.images,
+      )
+      .having(sql`count(distinct ${savedTracks.trackId}) = ${albums.totalTracks}`)
+      .orderBy(desc(sql`max(${savedTracks.addedAt})`), albums.name)
+      .limit(limit);
   }
 }
