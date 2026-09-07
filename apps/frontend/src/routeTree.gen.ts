@@ -11,9 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthLoginRouteRouteImport } from './routes/auth/login/route'
-import { Route as AuthConsentRouteRouteImport } from './routes/auth/consent/route'
-import { Route as AuthCallbackRouteRouteImport } from './routes/auth/callback/route'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AuthenticatedTimeMachineRouteRouteImport } from './routes/_authenticated/time-machine/route'
 import { Route as AuthenticatedSocialRouteRouteImport } from './routes/_authenticated/social/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
@@ -34,19 +32,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthLoginRouteRoute = AuthLoginRouteRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthConsentRouteRoute = AuthConsentRouteRouteImport.update({
-  id: '/auth/consent',
-  path: '/auth/consent',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthCallbackRouteRoute = AuthCallbackRouteRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTimeMachineRouteRoute =
@@ -117,9 +105,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRouteRoute
   '/social': typeof AuthenticatedSocialRouteRoute
   '/time-machine': typeof AuthenticatedTimeMachineRouteRoute
-  '/auth/callback': typeof AuthCallbackRouteRoute
-  '/auth/consent': typeof AuthConsentRouteRoute
-  '/auth/login': typeof AuthLoginRouteRoute
+  '/api/$': typeof ApiSplatRoute
   '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
   '/data/import': typeof AuthenticatedDataImportRouteRoute
@@ -133,9 +119,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRouteRoute
   '/social': typeof AuthenticatedSocialRouteRoute
   '/time-machine': typeof AuthenticatedTimeMachineRouteRoute
-  '/auth/callback': typeof AuthCallbackRouteRoute
-  '/auth/consent': typeof AuthConsentRouteRoute
-  '/auth/login': typeof AuthLoginRouteRoute
+  '/api/$': typeof ApiSplatRoute
   '/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
   '/data/import': typeof AuthenticatedDataImportRouteRoute
@@ -151,9 +135,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRoute
   '/_authenticated/social': typeof AuthenticatedSocialRouteRoute
   '/_authenticated/time-machine': typeof AuthenticatedTimeMachineRouteRoute
-  '/auth/callback': typeof AuthCallbackRouteRoute
-  '/auth/consent': typeof AuthConsentRouteRoute
-  '/auth/login': typeof AuthLoginRouteRoute
+  '/api/$': typeof ApiSplatRoute
   '/_authenticated/albums/$albumId': typeof AuthenticatedAlbumsAlbumIdRouteRoute
   '/_authenticated/artists/$artistId': typeof AuthenticatedArtistsArtistIdRouteRoute
   '/_authenticated/data/import': typeof AuthenticatedDataImportRouteRoute
@@ -169,9 +151,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/time-machine'
-    | '/auth/callback'
-    | '/auth/consent'
-    | '/auth/login'
+    | '/api/$'
     | '/albums/$albumId'
     | '/artists/$artistId'
     | '/data/import'
@@ -185,9 +165,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/time-machine'
-    | '/auth/callback'
-    | '/auth/consent'
-    | '/auth/login'
+    | '/api/$'
     | '/albums/$albumId'
     | '/artists/$artistId'
     | '/data/import'
@@ -202,9 +180,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/social'
     | '/_authenticated/time-machine'
-    | '/auth/callback'
-    | '/auth/consent'
-    | '/auth/login'
+    | '/api/$'
     | '/_authenticated/albums/$albumId'
     | '/_authenticated/artists/$artistId'
     | '/_authenticated/data/import'
@@ -215,9 +191,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthCallbackRouteRoute: typeof AuthCallbackRouteRoute
-  AuthConsentRouteRoute: typeof AuthConsentRouteRoute
-  AuthLoginRouteRoute: typeof AuthLoginRouteRoute
+  ApiSplatRoute: typeof ApiSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -236,25 +210,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/consent': {
-      id: '/auth/consent'
-      path: '/auth/consent'
-      fullPath: '/auth/consent'
-      preLoaderRoute: typeof AuthConsentRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteRouteImport
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/time-machine': {
@@ -363,9 +323,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthCallbackRouteRoute: AuthCallbackRouteRoute,
-  AuthConsentRouteRoute: AuthConsentRouteRoute,
-  AuthLoginRouteRoute: AuthLoginRouteRoute,
+  ApiSplatRoute: ApiSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

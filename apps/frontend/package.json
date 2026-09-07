@@ -16,7 +16,6 @@
     "test:coverage": "vp test run --config vitest.unit.config.ts --coverage --passWithNoTests"
   },
   "dependencies": {
-    "@better-auth/oauth-provider": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@t3-oss/env-core": "catalog:",
     "@tanstack/react-devtools": "catalog:",

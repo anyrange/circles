@@ -30,4 +30,4 @@ ENV SERVICE_NAME=api
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "case \"$SERVICE_NAME\" in api) pnpm --filter @circles/backend start:api ;; worker) pnpm --filter @circles/backend start:worker ;; migrate) pnpm --filter @circles/backend pg:migrate ;; *) echo \"Unknown SERVICE_NAME=$SERVICE_NAME\" >&2; exit 1 ;; esac"]
+CMD ["sh", "-c", "case \"$SERVICE_NAME\" in api) pnpm --filter @circles/backend start:api ;; worker) pnpm --filter @circles/backend start:worker ;; migrate) pnpm --filter @circles/backend db:migrate ;; *) echo \"Unknown SERVICE_NAME=$SERVICE_NAME\" >&2; exit 1 ;; esac"]

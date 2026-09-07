@@ -4,12 +4,7 @@ import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 
 import { config } from "../config";
-import {
-  auth,
-  ensureFrontendOAuthClient,
-  oauthAuthorizationServerMetadata,
-  oauthOpenIdConfiguration,
-} from "../library/auth";
+import { auth } from "../library/auth";
 import { logger } from "../library/logger";
 import { createDocsController } from "./controllers/docs";
 import { importController } from "./controllers/import";
@@ -33,10 +28,6 @@ const app = new Hono<ApiEnv>()
     }),
   )
   .get("/health", (ctx) => ctx.json({ status: "ok" }))
-  .get("/.well-known/oauth-authorization-server", (ctx) =>
-    oauthAuthorizationServerMetadata(ctx.req.raw),
-  )
-  .get("/.well-known/openid-configuration", (ctx) => oauthOpenIdConfiguration(ctx.req.raw))
   .route("/docs", createDocsController())
   .on(["GET", "POST"], "/api/auth/*", async (ctx) => auth.handler(ctx.req.raw))
   .route("/me", meController)
@@ -52,7 +43,6 @@ app.onError(errorHandler);
 export type AppType = typeof app;
 
 const run = async () => {
-  await ensureFrontendOAuthClient();
   logger.api.info(`starting server on http://${config.http.host}:${config.http.port}`);
 
   const server = serve({

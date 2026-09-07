@@ -1,0 +1,2 @@
+# Backend origin, reachable from the frontend server. Never exposed to the browser.
+API_URL=http://127.0.0.1:8000

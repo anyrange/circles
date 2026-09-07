@@ -4,9 +4,9 @@ export const openApiDocument = {
     title: "Circles API",
     version: "1.0.0",
     description:
-      "Circles backend API. Protected routes require a Better Auth OAuth access token in the Authorization header.",
+      "Circles backend API. Protected routes use the Better Auth session cookie. Mutations require an Origin header matching the frontend.",
   },
-  servers: [{ url: "/" }],
+  servers: [{ url: "/api" }],
   tags: [
     { name: "System" },
     { name: "Me" },

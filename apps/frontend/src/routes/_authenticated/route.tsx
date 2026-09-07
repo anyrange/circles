@@ -4,7 +4,6 @@ import type { CSSProperties } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { RightPanel } from "@/components/right-panel";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { setAccessToken } from "@/lib/access-token";
 import { getInitialAuthFn } from "@/lib/auth-session";
 
 interface SidebarLayoutStyle extends CSSProperties {
@@ -24,14 +23,10 @@ export const Route = createFileRoute("/_authenticated")({
     context.queryClient.setQueryData(["me"], auth.user);
     return { auth };
   },
-  loader: ({ context }) => context.auth,
   component: AppLayout,
 });
 
 function AppLayout() {
-  const { accessToken } = Route.useLoaderData();
-  setAccessToken(accessToken);
-
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });

@@ -3,5 +3,6 @@
   "name": "circles",
   "compatibility_date": "2026-05-10",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": { "API_URL": "https://circles-api.wsehl.dev" },
   "main": "@tanstack/react-start/server-entry",
 }

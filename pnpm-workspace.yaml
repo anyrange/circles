@@ -7,7 +7,6 @@ catalog:
   "@aws-sdk/client-s3": ^3.1009.0
   "@aws-sdk/s3-request-presigner": ^3.1009.0
   "@better-auth/drizzle-adapter": 1.5.5
-  "@better-auth/oauth-provider": 1.5.5
   "@cloudflare/vite-plugin": ^1.28.0
   "@hatchet-dev/typescript-sdk": ^1.16.0
   "@hookform/resolvers": ^5.2.2

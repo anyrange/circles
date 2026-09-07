@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   ChevronsUpDown,
@@ -9,6 +10,7 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -32,8 +34,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { setAccessToken } from "@/lib/access-token";
-import { clearAppSessionFn } from "@/lib/auth-session";
+import { authClient } from "@/lib/auth";
 import { useMeQuery } from "@/lib/queries/me";
 
 const NAV = [
@@ -49,13 +50,18 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: me } = useMeQuery();
 
   async function logout() {
-    await clearAppSessionFn();
-    setAccessToken(null);
-    await navigate({ to: "/" });
+    const { error } = await authClient.signOut();
+    if (error) {
+      toast.error(error.message ?? "Unable to sign out");
+      return;
+    }
+    queryClient.clear();
+    await navigate({ to: "/", replace: true });
   }
 
   return (

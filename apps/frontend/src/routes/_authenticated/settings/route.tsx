@@ -32,8 +32,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { setAccessToken } from "@/lib/access-token";
-import { clearAppSessionFn } from "@/lib/auth-session";
+import { authClient } from "@/lib/auth";
 import { useDeleteAccount, useMeQuery } from "@/lib/queries/me";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -51,8 +50,8 @@ function SettingsPage() {
 
     try {
       await deleteAccount.mutateAsync();
-      await clearAppSessionFn();
-      setAccessToken(null);
+      const { error } = await authClient.signOut();
+      if (error) throw new Error(error.message ?? "Unable to sign out");
       queryClient.clear();
       await navigate({ to: "/", replace: true });
     } catch {

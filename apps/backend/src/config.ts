@@ -17,8 +17,7 @@ export const env = cleanEnv(process.env, {
     default: "postgres://circles:password@127.0.0.1:5432/circles_dev",
   }),
 
-  BETTER_AUTH_SECRET: str({ default: "dev-secret-change-in-production-32ch" }),
-  OAUTH_CLIENT_ID: str({ default: "circles-frontend" }),
+  BETTER_AUTH_SECRET: str({ devDefault: "dev-secret-change-in-production-32ch" }),
   SPOTIFY_CLIENT_ID: str({ default: "" }),
   SPOTIFY_CLIENT_SECRET: str({ default: "" }),
 
@@ -46,7 +45,6 @@ export const config = {
   },
   auth: {
     secret: env.BETTER_AUTH_SECRET,
-    clientId: env.OAUTH_CLIENT_ID,
   },
   spotify: {
     clientId: env.SPOTIFY_CLIENT_ID,

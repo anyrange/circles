@@ -1,7 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ArrowRight, Music2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
-import { getInitialAuthFn, startSpotifySignInFn } from "@/lib/auth-session";
+import { authClient } from "@/lib/auth";
+import { getInitialAuthFn } from "@/lib/auth-session";
 
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
@@ -16,8 +18,11 @@ export const Route = createFileRoute("/")({
 
 function LoginPage() {
   const signIn = async () => {
-    const url = await startSpotifySignInFn();
-    window.location.assign(url);
+    const { error } = await authClient.signIn.social({
+      provider: "spotify",
+      callbackURL: "/dashboard",
+    });
+    if (error) toast.error(error.message ?? "Unable to sign in");
   };
 
   return (
