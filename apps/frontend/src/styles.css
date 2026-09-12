@@ -145,3 +145,9 @@
     @apply font-sans;
   }
 }
+
+/* Keep the public landing monochrome in either theme. */
+.landing-page {
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+}

@@ -44,35 +44,34 @@ function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-svh max-w-7xl flex-col px-6 sm:px-10">
-      <header className="flex h-24 shrink-0 items-center justify-between gap-6">
+    <div className="landing-page mx-auto flex min-h-svh max-w-5xl flex-col px-6 sm:px-10">
+      <header className="flex h-20 shrink-0 items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
             className="size-8 bg-foreground"
             style={{ mask: "url(/logo-icon.svg) center / contain no-repeat" }}
           />
-          <span className="text-lg font-semibold tracking-tight">Circles</span>
+          <span className="text-lg font-medium tracking-tight">Circles</span>
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col justify-center gap-16 py-12 sm:gap-20 sm:py-16">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
+      <main className="flex flex-col gap-8 pt-6 pb-8 sm:pt-8">
+        <div className="grid items-center gap-10 md:grid-cols-[1.2fr_1fr] md:gap-16">
           <section aria-labelledby="landing-title" className="flex flex-col items-start">
             <h1
               id="landing-title"
-              className="max-w-2xl text-5xl leading-[0.98] font-medium tracking-tighter text-balance sm:text-7xl xl:text-8xl"
+              className="max-w-md text-3xl leading-tight font-medium tracking-tight text-balance sm:text-4xl"
             >
-              Good music.
+              Your Spotify listening,
               <br />
-              <span className="font-serif text-primary italic">Long memory.</span>
+              all in one place.
             </h1>
-            <p className="mt-6 max-w-md text-base leading-7 text-muted-foreground">
-              Keep the songs, phases, and late-night repeats close. Explore your Spotify history and
-              find out what’s playing in your circle.
+            <p className="mt-4 max-w-sm text-sm leading-6 text-muted-foreground">
+              View your listening stats, browse your history, and see what your friends are playing.
             </p>
-            <div className="mt-9 flex flex-col items-start gap-3">
-              <Button size="lg" onClick={signIn} disabled={isSigningIn}>
+            <div className="mt-6 flex flex-col items-start gap-3">
+              <Button onClick={signIn} disabled={isSigningIn}>
                 <SpotifyIcon />
                 {isSigningIn ? "Connecting to Spotify…" : "Continue with Spotify"}
                 <ArrowRight data-icon="inline-end" />
@@ -88,41 +87,40 @@ function LoginPage() {
           <LandingRecord />
         </div>
 
-        <section aria-label="Inside Circles" className="grid gap-3 md:grid-cols-[1.2fr_1fr]">
-          <Card className="justify-end bg-primary/10 py-8 ring-0 sm:py-10 md:row-span-2">
-            <CardHeader className="gap-5 px-8 sm:px-10">
+        <section aria-label="Inside Circles" className="grid gap-3 sm:grid-cols-[1.1fr_1fr]">
+          <Card size="sm" className="ring-0 sm:row-span-2">
+            <CardHeader>
               <CardTitle>
-                <h2 className="text-4xl leading-[1.1] font-normal tracking-tight sm:text-5xl">
-                  The soundtrack
-                  <br />
-                  <span className="font-serif text-primary italic">to your days.</span>
-                </h2>
+                <h2>Your listening habits</h2>
               </CardTitle>
-              <CardDescription className="max-w-sm leading-6">
-                Get to know your listening habits through your top artists, most-played tracks, and
-                time spent listening.
+              <CardDescription>
+                <ul className="list-disc pl-4 leading-6">
+                  <li>Top artists</li>
+                  <li>Most-played tracks</li>
+                  <li>Time spent listening</li>
+                </ul>
               </CardDescription>
             </CardHeader>
           </Card>
-          <Card className="bg-muted/50 py-7 ring-0">
-            <CardHeader className="gap-3 px-8">
+          <Card size="sm" className="ring-0">
+            <CardHeader>
               <CardTitle>
-                <h2 className="text-2xl font-normal tracking-tight">Pick up where you left off.</h2>
+                <h2>Listening history</h2>
               </CardTitle>
-              <CardDescription className="max-w-sm leading-6">
-                Find what you played on this day. Bring in your Spotify history and revisit a
-                different year.
+              <CardDescription>
+                <p className="leading-6">
+                  Import your Spotify history to browse your past listening.
+                </p>
               </CardDescription>
             </CardHeader>
           </Card>
-          <Card className="bg-muted/50 py-7 ring-0">
-            <CardHeader className="gap-3 px-8">
+          <Card size="sm" className="ring-0">
+            <CardHeader>
               <CardTitle>
-                <h2 className="text-2xl font-normal tracking-tight">Good taste travels.</h2>
+                <h2>Friends' listening</h2>
               </CardTitle>
-              <CardDescription className="max-w-sm leading-6">
-                Follow your friends. See what’s on repeat in their world, and find your next
-                favorite.
+              <CardDescription>
+                <p className="leading-6">Follow friends to see their recently played tracks.</p>
               </CardDescription>
             </CardHeader>
           </Card>
