@@ -19,7 +19,7 @@
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",
     "infra:logs": "docker compose logs -f",
-    "infra:reset": "pnpm infra:down && docker run --rm -v \"$PWD/data:/data\" alpine:3.22 rm -rf /data/postgres /data/rustfs && pnpm infra:up",
+    "infra:reset": "docker compose down --volumes && vp run infra:up",
     "db:generate": "pnpm --filter @circles/backend db:generate",
     "db:migrate": "pnpm --filter @circles/backend db:migrate",
     "db:seed": "pnpm --filter @circles/backend db:seed",

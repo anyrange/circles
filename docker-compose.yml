@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d circles_dev -U circles"]
       interval: 10s
@@ -19,21 +19,11 @@ services:
       retries: 5
       start_period: 10s
 
-  rustfs-permissions:
-    image: alpine:3.22
-    user: root
-    volumes:
-      - ./data/rustfs:/data
-    command: chown -R 10001:10001 /data
-
   rustfs:
     image: rustfs/rustfs:latest
     container_name: circles-rustfs
     command: /data
     restart: always
-    depends_on:
-      rustfs-permissions:
-        condition: service_completed_successfully
     environment:
       RUSTFS_ACCESS_KEY: circles
       RUSTFS_SECRET_KEY: password
@@ -42,7 +32,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - ./data/rustfs:/data
+      - rustfs-data:/data
     healthcheck:
       test:
         [
@@ -53,3 +43,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+
+volumes:
+  postgres-data:
+  rustfs-data:

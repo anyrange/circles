@@ -29,7 +29,7 @@ Build with `vp run -r build`, then run the compiled backend with `vp run start:a
 | `vp run infra:logs`  | Follow infrastructure logs                                              |
 | `vp run infra:reset` | Stop infrastructure, delete local Postgres and RustFS data, and restart |
 
-Postgres listens on `localhost:5432`, using `postgres://circles:password@127.0.0.1:5432/circles_dev`. RustFS exposes its S3 API on `localhost:9000` and console on `localhost:9001`, using `circles` / `password`. Data lives in `data/postgres` and `data/rustfs`.
+Postgres listens on `localhost:5432`, using `postgres://circles:password@127.0.0.1:5432/circles_dev`. RustFS exposes its S3 API on `localhost:9000` and console on `localhost:9001`, using `circles` / `password`. Docker stores their data in the `postgres-data` and `rustfs-data` named volumes.
 
 After `infra:reset`, run `db:migrate` and `db:seed` and recreate any S3 buckets you need.
 
