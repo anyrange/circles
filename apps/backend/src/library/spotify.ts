@@ -79,7 +79,9 @@ export async function refreshAndStoreToken(
     return accountRow.accessToken;
   }
 
-  if (!accountRow.refreshToken) throw new Error("Spotify account has no refresh token");
+  if (!accountRow.refreshToken) {
+    throw new Error("Spotify account has no refresh token");
+  }
   const refreshed = await refreshAccessToken(accountRow.refreshToken);
 
   await drizzleDb

@@ -11,7 +11,9 @@ import { LandingRecord } from "./-components/landing-record";
 
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
-    if (await getInitialAuthFn()) throw redirect({ to: "/dashboard" });
+    if (await getInitialAuthFn()) {
+      throw redirect({ to: "/dashboard" });
+    }
   },
   component: LoginPage,
 });
@@ -21,7 +23,9 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   async function signIn() {
-    if (isSigningIn) return;
+    if (isSigningIn) {
+      return;
+    }
     setIsSigningIn(true);
     setError(null);
     try {

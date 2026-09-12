@@ -24,8 +24,12 @@ export class HistoryModel {
   async findByUser(userId: string, opts: { limit?: number; before?: Date; after?: Date } = {}) {
     const { limit = 50, before, after } = opts;
     const conditions = [eq(history.userId, userId)];
-    if (before) conditions.push(sql`${history.playedAt} < ${before}`);
-    if (after) conditions.push(gte(history.playedAt, after));
+    if (before) {
+      conditions.push(sql`${history.playedAt} < ${before}`);
+    }
+    if (after) {
+      conditions.push(gte(history.playedAt, after));
+    }
 
     const pageRows = await this.db
       .select({
@@ -103,7 +107,9 @@ export class HistoryModel {
 
   async getLibraryOverview(userId: string, since?: Date) {
     const conditions = [eq(history.userId, userId)];
-    if (since) conditions.push(gte(history.playedAt, since));
+    if (since) {
+      conditions.push(gte(history.playedAt, since));
+    }
 
     const [totals, scrobblesByYear] = await Promise.all([
       this.db
@@ -168,7 +174,9 @@ export class HistoryModel {
   ) {
     const { limit = 50, before, since } = opts;
     const totalConditions = [eq(history.userId, userId)];
-    if (since) totalConditions.push(gte(history.playedAt, since));
+    if (since) {
+      totalConditions.push(gte(history.playedAt, since));
+    }
 
     const page = await this.findByUser(userId, { limit, before, after: since });
     const [{ totalCount }] = await this.db
@@ -184,7 +192,9 @@ export class HistoryModel {
 
   async getTopTracks(userId: string, limit = 10, since?: Date) {
     const conditions = [eq(history.userId, userId)];
-    if (since) conditions.push(gte(history.playedAt, since));
+    if (since) {
+      conditions.push(gte(history.playedAt, since));
+    }
 
     return this.db
       .select({
@@ -207,7 +217,9 @@ export class HistoryModel {
 
   async getTopArtists(userId: string, limit = 10, since?: Date) {
     const conditions = [eq(history.userId, userId)];
-    if (since) conditions.push(gte(history.playedAt, since));
+    if (since) {
+      conditions.push(gte(history.playedAt, since));
+    }
 
     return this.db
       .select({
@@ -231,7 +243,9 @@ export class HistoryModel {
 
   async getExtendedStats(userId: string, since?: Date) {
     const conditions = [eq(history.userId, userId)];
-    if (since) conditions.push(gte(history.playedAt, since));
+    if (since) {
+      conditions.push(gte(history.playedAt, since));
+    }
     const whereClause = and(...conditions);
 
     // Total scrobbles + listening time + mainstream score
@@ -364,7 +378,9 @@ export class HistoryModel {
 
     for (const row of rows.rows) {
       const year = Number(row.year);
-      if (!byYear.has(year)) byYear.set(year, []);
+      if (!byYear.has(year)) {
+        byYear.set(year, []);
+      }
       byYear.get(year)!.push({
         track: {
           id: row.track_id,

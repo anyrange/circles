@@ -16,7 +16,9 @@ export const meController = new Hono<{ Variables: AuthVariables }>()
   .get("/", async (ctx) => {
     const userId = ctx.get("userId");
     const user = await db.user.findById(userId);
-    if (!user) throw new HTTPException(404, { message: "User not found" });
+    if (!user) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
 
     return ctx.json({
       id: user.id,
@@ -32,7 +34,9 @@ export const meController = new Hono<{ Variables: AuthVariables }>()
   })
   .delete("/", async (ctx) => {
     const deleted = await db.user.delete(ctx.get("userId"));
-    if (!deleted) throw new HTTPException(404, { message: "User not found" });
+    if (!deleted) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
 
     return ctx.json({ ok: true });
   })

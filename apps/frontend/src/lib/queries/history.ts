@@ -18,7 +18,9 @@ export function useHistoryQuery() {
     initialPageParam: initialCursor(),
     queryFn: ({ pageParam }) => {
       const query: HistoryQuery = { limit: "50" };
-      if (pageParam) query.before = pageParam;
+      if (pageParam) {
+        query.before = pageParam;
+      }
       return parseResponse(api.me.history.$get({ query }));
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,

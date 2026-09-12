@@ -33,7 +33,9 @@ function SocialPage() {
           <Tabs
             value={period}
             onValueChange={(value) => {
-              if (value === "week" || value === "all") setPeriod(value);
+              if (value === "week" || value === "all") {
+                setPeriod(value);
+              }
             }}
           >
             <TabsList>

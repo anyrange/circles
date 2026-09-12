@@ -12,7 +12,9 @@ export const usersController = new Hono()
   .get("/by-username/:username", async (ctx) => {
     const username = ctx.req.param("username");
     const user = await db.user.findByUsername(username);
-    if (!user) throw new HTTPException(404, { message: "User not found" });
+    if (!user) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
 
     if (!user.isPublic) {
       throw new HTTPException(403, { message: "Profile is private" });
@@ -31,7 +33,9 @@ export const usersController = new Hono()
     const id = ctx.req.param("id");
 
     const user = await db.user.findById(id);
-    if (!user) throw new HTTPException(404, { message: "User not found" });
+    if (!user) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
 
     if (!user.isPublic) {
       throw new HTTPException(403, { message: "Profile is private" });
@@ -49,8 +53,12 @@ export const usersController = new Hono()
   .get("/:id/platinum-albums", async (ctx) => {
     const id = ctx.req.param("id");
     const user = await db.user.findById(id);
-    if (!user) throw new HTTPException(404, { message: "User not found" });
-    if (!user.isPublic) throw new HTTPException(403, { message: "Profile is private" });
+    if (!user) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
+    if (!user.isPublic) {
+      throw new HTTPException(403, { message: "Profile is private" });
+    }
 
     return ctx.json(await db.album.getPlatinumAlbums(id));
   })
@@ -67,8 +75,12 @@ export const usersController = new Hono()
       const { range } = ctx.req.valid("query");
 
       const user = await db.user.findById(id);
-      if (!user) throw new HTTPException(404, { message: "User not found" });
-      if (!user.isPublic) throw new HTTPException(403, { message: "Profile is private" });
+      if (!user) {
+        throw new HTTPException(404, { message: "User not found" });
+      }
+      if (!user.isPublic) {
+        throw new HTTPException(403, { message: "Profile is private" });
+      }
 
       const since = sinceFromRange(range);
       const [topTracks, topArtists, topAlbums] = await Promise.all([
@@ -88,8 +100,12 @@ export const usersController = new Hono()
       const { range } = ctx.req.valid("query");
 
       const user = await db.user.findById(id);
-      if (!user) throw new HTTPException(404, { message: "User not found" });
-      if (!user.isPublic) throw new HTTPException(403, { message: "Profile is private" });
+      if (!user) {
+        throw new HTTPException(404, { message: "User not found" });
+      }
+      if (!user.isPublic) {
+        throw new HTTPException(403, { message: "Profile is private" });
+      }
 
       const since = sinceFromRange(range);
       const extended = await db.history.getExtendedStats(id, since);

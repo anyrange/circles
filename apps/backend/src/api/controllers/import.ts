@@ -89,7 +89,9 @@ export const importController = new Hono<{ Variables: AuthVariables }>()
       .orderBy(desc(importJobs.createdAt))
       .limit(1);
 
-    if (!job) return ctx.json(null);
+    if (!job) {
+      return ctx.json(null);
+    }
 
     return ctx.json({
       id: job.id,

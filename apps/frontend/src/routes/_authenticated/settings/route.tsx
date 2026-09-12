@@ -51,7 +51,9 @@ function SettingsPage() {
     try {
       await deleteAccount.mutateAsync();
       const { error } = await authClient.signOut();
-      if (error) throw new Error(error.message ?? "Unable to sign out");
+      if (error) {
+        throw new Error(error.message ?? "Unable to sign out");
+      }
       queryClient.clear();
       await navigate({ to: "/", replace: true });
     } catch {

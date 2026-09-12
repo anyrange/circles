@@ -35,7 +35,9 @@ const spotifyExportEntrySchema = z.object({
 
 function requiredId(ids: Record<string, string>, spotifyId: string, entity: string) {
   const id = ids[spotifyId];
-  if (!id) throw new Error(`Missing saved ${entity} for Spotify ID ${spotifyId}`);
+  if (!id) {
+    throw new Error(`Missing saved ${entity} for Spotify ID ${spotifyId}`);
+  }
   return id;
 }
 
@@ -59,7 +61,9 @@ importBatch.task({
     });
 
     const obj = await s3.send(new GetObjectCommand({ Bucket: config.s3.bucket, Key: batchKey }));
-    if (!obj.Body) throw new Error("Import batch is empty");
+    if (!obj.Body) {
+      throw new Error("Import batch is empty");
+    }
     const bodyBytes = await obj.Body.transformToByteArray();
     const chunk = z
       .array(spotifyExportEntrySchema)
@@ -71,7 +75,9 @@ importBatch.task({
       .where(and(eq(account.userId, userId), eq(account.providerId, "spotify")))
       .limit(1);
 
-    if (!spotifyAccount) throw new Error("No Spotify account found");
+    if (!spotifyAccount) {
+      throw new Error("No Spotify account found");
+    }
 
     const accessToken = await refreshAndStoreToken(spotifyAccount);
     const spotify = createSpotifyClient(accessToken);
@@ -142,7 +148,9 @@ importBatch.task({
           ? trackIdFromUri(entry.spotify_track_uri)
           : undefined;
         const trackId = spotifyId ? trackIdBySpotifyId[spotifyId] : undefined;
-        if (!trackId) return null;
+        if (!trackId) {
+          return null;
+        }
         return { userId, trackId, playedAt: new Date(entry.ts) };
       })
       .filter((row): row is { userId: string; trackId: string; playedAt: Date } => row !== null);

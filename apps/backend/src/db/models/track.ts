@@ -81,7 +81,9 @@ export class TrackModel {
 
   async findDetailForUser(userId: string, trackId: string, since?: Date) {
     const playConditions = [eq(history.userId, userId)];
-    if (since) playConditions.push(gte(history.playedAt, since));
+    if (since) {
+      playConditions.push(gte(history.playedAt, since));
+    }
 
     const [track] = await this.db
       .select({
@@ -193,7 +195,9 @@ export class TrackModel {
   ) {
     const { since, limit = 50, cursor } = opts;
     const conditions = [eq(history.userId, userId)];
-    if (since) conditions.push(gte(history.playedAt, since));
+    if (since) {
+      conditions.push(gte(history.playedAt, since));
+    }
 
     const baseQuery = this.db
       .select({

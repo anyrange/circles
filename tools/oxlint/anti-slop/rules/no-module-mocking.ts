@@ -1,20 +1,9 @@
 import { defineRule } from "@oxlint/plugins";
-import type { ESTree, Scope, SourceCode, Variable } from "@oxlint/plugins";
+import type { ESTree, SourceCode } from "@oxlint/plugins";
+
+import { resolveVariable } from "../shared/scope.ts";
 
 const moduleMockMethods = new Set(["doMock", "mock", "unstable_mockModule"]);
-
-function resolveVariable(
-  sourceCode: SourceCode,
-  identifier: ESTree.IdentifierReference,
-): Variable | null {
-  let scope: Scope | null = sourceCode.getScope(identifier);
-  while (scope !== null) {
-    const variable = scope.set.get(identifier.name);
-    if (variable !== undefined) return variable;
-    scope = scope.upper;
-  }
-  return null;
-}
 
 function importedName(node: ESTree.Node): string | null {
   if (node.type !== "ImportSpecifier") return null;
@@ -79,7 +68,7 @@ export const noModuleMockingRule = defineRule({
         "Replace module mocking with dependency injection through a real interface, service layer, or faithful test implementation.",
     },
   },
-  create(context) {
+  createOnce(context) {
     return {
       CallExpression(node) {
         if (node.callee.type === "Super" || node.callee.type === "V8IntrinsicExpression") return;

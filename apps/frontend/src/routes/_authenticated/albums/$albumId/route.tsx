@@ -23,8 +23,12 @@ function AlbumPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { data, isLoading } = useAlbumQuery(albumId, range);
 
-  if (isLoading) return <EntitySkeleton />;
-  if (!data) return <Page>Album not found.</Page>;
+  if (isLoading) {
+    return <EntitySkeleton />;
+  }
+  if (!data) {
+    return <Page>Album not found.</Page>;
+  }
 
   const albumImageUrl = data.album.images?.[0]?.url;
 

@@ -28,12 +28,16 @@ export function ImportUploader() {
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    if (file) {
+      handleFile(file);
+    }
   };
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (file) {
+      handleFile(file);
+    }
   };
 
   const isProcessing = status && "status" in status && status.status === "processing";

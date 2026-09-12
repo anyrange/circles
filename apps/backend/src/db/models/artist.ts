@@ -43,7 +43,9 @@ export class ArtistModel {
 
   async findDetailForUser(userId: string, artistId: string, since?: Date) {
     const playConditions = [eq(history.userId, userId)];
-    if (since) playConditions.push(gte(history.playedAt, since));
+    if (since) {
+      playConditions.push(gte(history.playedAt, since));
+    }
     const artistPlayConditions = [...playConditions, eq(trackArtists.artistId, artistId)];
 
     const [artist] = await this.db
@@ -200,7 +202,9 @@ export class ArtistModel {
   ) {
     const { since, limit = 50, cursor } = opts;
     const conditions = [eq(history.userId, userId)];
-    if (since) conditions.push(gte(history.playedAt, since));
+    if (since) {
+      conditions.push(gte(history.playedAt, since));
+    }
 
     const baseQuery = this.db
       .select({

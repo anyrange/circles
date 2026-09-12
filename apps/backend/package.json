@@ -54,6 +54,9 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "format": "vp fmt",
+    "lint": "vp lint",
+    "type-check": "vp exec tsc --noEmit",
     "build": "vp pack",
     "pack": "vp pack",
     "test": "vp test",

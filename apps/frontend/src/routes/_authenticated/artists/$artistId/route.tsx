@@ -23,8 +23,12 @@ function ArtistPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { data, isLoading } = useArtistQuery(artistId, range);
 
-  if (isLoading) return <EntitySkeleton />;
-  if (!data) return <Page>Artist not found.</Page>;
+  if (isLoading) {
+    return <EntitySkeleton />;
+  }
+  if (!data) {
+    return <Page>Artist not found.</Page>;
+  }
 
   return (
     <Page className="mx-auto max-w-7xl">

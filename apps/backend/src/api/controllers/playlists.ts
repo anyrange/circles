@@ -32,7 +32,9 @@ export const playlistsController = new Hono<{ Variables: AuthVariables }>()
     const id = ctx.req.param("id");
 
     const playlist = await db.playlist.findById(id, userId);
-    if (!playlist) throw new HTTPException(404, { message: "Playlist not found" });
+    if (!playlist) {
+      throw new HTTPException(404, { message: "Playlist not found" });
+    }
 
     await db.playlist.delete(id, userId);
     return ctx.json({ ok: true });
@@ -42,7 +44,9 @@ export const playlistsController = new Hono<{ Variables: AuthVariables }>()
     const id = ctx.req.param("id");
 
     const playlist = await db.playlist.findById(id, userId);
-    if (!playlist) throw new HTTPException(404, { message: "Playlist not found" });
+    if (!playlist) {
+      throw new HTTPException(404, { message: "Playlist not found" });
+    }
 
     const tracks = await db.playlist.getTracks(id);
     return ctx.json({ tracks });
@@ -56,7 +60,9 @@ export const playlistsController = new Hono<{ Variables: AuthVariables }>()
       const { trackId, position } = ctx.req.valid("json");
 
       const playlist = await db.playlist.findById(id, userId);
-      if (!playlist) throw new HTTPException(404, { message: "Playlist not found" });
+      if (!playlist) {
+        throw new HTTPException(404, { message: "Playlist not found" });
+      }
 
       await db.playlist.addTrack(id, trackId, position);
       return ctx.json({ ok: true }, 201);
@@ -68,7 +74,9 @@ export const playlistsController = new Hono<{ Variables: AuthVariables }>()
     const trackId = ctx.req.param("trackId");
 
     const playlist = await db.playlist.findById(id, userId);
-    if (!playlist) throw new HTTPException(404, { message: "Playlist not found" });
+    if (!playlist) {
+      throw new HTTPException(404, { message: "Playlist not found" });
+    }
 
     await db.playlist.removeTrack(id, trackId);
     return ctx.json({ ok: true });

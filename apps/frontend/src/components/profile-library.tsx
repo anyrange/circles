@@ -85,7 +85,9 @@ export function ProfileLibrary({ range, tab, onRangeChange, onTabChange }: Profi
       <Tabs
         value={tab}
         onValueChange={(value) => {
-          if (isLibraryTab(value)) onTabChange(value);
+          if (isLibraryTab(value)) {
+            onTabChange(value);
+          }
         }}
       >
         <TabsList variant="line">

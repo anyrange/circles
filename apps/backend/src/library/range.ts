@@ -1,7 +1,9 @@
 export type Range = "7d" | "30d" | "90d" | "365d" | "all";
 
 export function sinceFromRange(range: Range): Date | undefined {
-  if (range === "all") return undefined;
+  if (range === "all") {
+    return undefined;
+  }
 
   const days = {
     "7d": 7,

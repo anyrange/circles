@@ -28,13 +28,14 @@ export default defineConfig({
     },
   },
   lint: {
-    ignorePatterns: ["dist/**", ".agents/**"],
+    ignorePatterns: ["dist/**", ".agents/**", "tools/oxlint/anti-slop/**"],
     jsPlugins: [{ name: "anti-slop", specifier: "./tools/oxlint/anti-slop/index.ts" }],
     options: {
       typeAware: true,
       typeCheck: true,
     },
     rules: {
+      curly: "error",
       "anti-slop/no-chained-type-assertions": "error",
       "anti-slop/no-conditional-empty-object-spread": "error",
       "anti-slop/no-known-value-widening": "error",

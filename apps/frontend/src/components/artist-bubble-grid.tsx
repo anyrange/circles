@@ -10,7 +10,9 @@ interface Props {
 }
 
 export function ArtistBubbleGrid({ artists }: Props) {
-  if (artists.length === 0) return null;
+  if (artists.length === 0) {
+    return null;
+  }
 
   const maxPlayCount = Math.max(...artists.map((a) => a.playCount));
   const maxSize = 120;

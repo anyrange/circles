@@ -24,7 +24,9 @@ function HistoryPage() {
       month: "long",
       day: "numeric",
     });
-    if (!grouped.has(date)) grouped.set(date, []);
+    if (!grouped.has(date)) {
+      grouped.set(date, []);
+    }
     grouped.get(date)!.push(item);
   }
 

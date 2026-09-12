@@ -15,7 +15,9 @@ export async function proxyApiRequest(request: Request, backendOrigin: string) {
   const forwardedHeaders = Array.from(headers.keys()).filter((name) =>
     name.startsWith("x-forwarded-"),
   );
-  for (const name of forwardedHeaders) headers.delete(name);
+  for (const name of forwardedHeaders) {
+    headers.delete(name);
+  }
 
   // Preserve redirects and every Set-Cookie header, including Spotify's state cookie.
   const init: RequestInit & { duplex: "half" } = {

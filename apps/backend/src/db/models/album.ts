@@ -44,7 +44,9 @@ export class AlbumModel {
 
   async findDetailForUser(userId: string, albumId: string, since?: Date) {
     const playConditions = [eq(history.userId, userId)];
-    if (since) playConditions.push(gte(history.playedAt, since));
+    if (since) {
+      playConditions.push(gte(history.playedAt, since));
+    }
     const albumPlayConditions = [...playConditions, eq(tracks.albumId, albumId)];
 
     const [album] = await this.db
@@ -152,7 +154,9 @@ export class AlbumModel {
   ) {
     const { since, limit = 50, cursor } = opts;
     const conditions = [eq(history.userId, userId)];
-    if (since) conditions.push(gte(history.playedAt, since));
+    if (since) {
+      conditions.push(gte(history.playedAt, since));
+    }
 
     const baseQuery = this.db
       .select({

@@ -23,7 +23,9 @@ export function TimeRangeTabs({ value, onChange }: TimeRangeTabsProps) {
     <Tabs
       value={value}
       onValueChange={(nextValue) => {
-        if (isRange(nextValue)) onChange?.(nextValue);
+        if (isRange(nextValue)) {
+          onChange?.(nextValue);
+        }
       }}
     >
       <TabsList>

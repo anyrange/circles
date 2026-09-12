@@ -19,7 +19,9 @@ export const socialController = new Hono<{ Variables: AuthVariables }>()
     }
 
     const target = await db.user.findById(targetUserId);
-    if (!target) throw new HTTPException(404, { message: "User not found" });
+    if (!target) {
+      throw new HTTPException(404, { message: "User not found" });
+    }
 
     await db.follows.follow(currentUserId, targetUserId);
     return ctx.json({ ok: true });

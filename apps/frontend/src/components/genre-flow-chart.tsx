@@ -36,7 +36,9 @@ export function GenreFlowChart({ data }: Props) {
 
   for (const row of data) {
     genreSet.add(row.genre);
-    if (!weekMap.has(row.week)) weekMap.set(row.week, {});
+    if (!weekMap.has(row.week)) {
+      weekMap.set(row.week, {});
+    }
     weekMap.get(row.week)![row.genre] = row.count;
   }
 

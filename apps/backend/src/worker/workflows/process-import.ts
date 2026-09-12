@@ -50,9 +50,13 @@ processImport.task({
       if (obj.ContentLength && obj.ContentLength > MAX_IMPORT_BYTES) {
         throw new Error("Import file is too large");
       }
-      if (!obj.Body) throw new Error("Import file is empty");
+      if (!obj.Body) {
+        throw new Error("Import file is empty");
+      }
       const bodyBytes = await obj.Body.transformToByteArray();
-      if (bodyBytes.byteLength > MAX_IMPORT_BYTES) throw new Error("Import file is too large");
+      if (bodyBytes.byteLength > MAX_IMPORT_BYTES) {
+        throw new Error("Import file is too large");
+      }
       const valid = parseSpotifyImport(bodyBytes);
 
       logger.worker.info({ userId, total: valid.length }, "parsed import, spawning batches");

@@ -9,7 +9,9 @@ export function useImportStatus() {
     queryFn: () => parseResponse(api.me.import.status.$get()),
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (data && "status" in data && data.status === "processing") return 3000;
+      if (data && "status" in data && data.status === "processing") {
+        return 3000;
+      }
       return false;
     },
   });
@@ -25,7 +27,9 @@ export function useTriggerImport() {
         method: "PUT",
         body: file,
       });
-      if (!s3Res.ok) throw new Error("Failed to upload file");
+      if (!s3Res.ok) {
+        throw new Error("Failed to upload file");
+      }
 
       return parseResponse(api.me.import.process.$post({ json: { jobId } }));
     },

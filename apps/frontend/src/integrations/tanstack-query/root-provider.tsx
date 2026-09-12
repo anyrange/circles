@@ -12,7 +12,9 @@ function isUnauthorizedError(error: Error) {
 }
 
 function handleAuthError(error: Error) {
-  if (isUnauthorizedError(error)) globalThis.window?.location.replace("/");
+  if (isUnauthorizedError(error)) {
+    globalThis.window?.location.replace("/");
+  }
 }
 
 export function getContext() {

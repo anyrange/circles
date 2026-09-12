@@ -56,8 +56,12 @@ function ProfilePage() {
   const trackStats = useUserStatsQuery(user?.id, search.tracksRange);
   const platinumAlbums = useUserPlatinumAlbumsQuery(user?.id);
 
-  if (isLoading) return <ProfileSkeleton />;
-  if (isError || !user) return <ProfileUnavailable />;
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
+  if (isError || !user) {
+    return <ProfileUnavailable />;
+  }
 
   const isOwnProfile = me?.id === user.id;
   const activeView = search.view === "library" && !isOwnProfile ? "overview" : search.view;
@@ -584,10 +588,14 @@ function SectionEmpty({ title }: { title: string }) {
 }
 
 function getPeak(items?: Array<{ count: number; dow?: number; hour?: number }>) {
-  if (!items?.length) return null;
+  if (!items?.length) {
+    return null;
+  }
   return items.reduce<Peak | null>((peak, item) => {
     const key = item.hour ?? item.dow;
-    if (key === undefined) return peak;
+    if (key === undefined) {
+      return peak;
+    }
     return !peak || item.count > peak.count ? { key, count: item.count } : peak;
   }, null);
 }

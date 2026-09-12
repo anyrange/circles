@@ -23,8 +23,12 @@ function TrackPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { data, isLoading } = useTrackQuery(trackId, range);
 
-  if (isLoading) return <EntitySkeleton />;
-  if (!data) return <Page>Track not found.</Page>;
+  if (isLoading) {
+    return <EntitySkeleton />;
+  }
+  if (!data) {
+    return <Page>Track not found.</Page>;
+  }
 
   const albumImageUrl = data.track.album?.imageUrl;
   const hasAudioFeatures = Object.values(data.track.audioFeatures ?? {}).some(

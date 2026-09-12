@@ -30,7 +30,9 @@ export function TimeRangeSelect({ value, onChange }: TimeRangeSelectProps) {
     <Select
       value={value}
       onValueChange={(nextValue) => {
-        if (isRange(nextValue)) onChange(nextValue);
+        if (isRange(nextValue)) {
+          onChange(nextValue);
+        }
       }}
     >
       <SelectTrigger size="sm" aria-label="Date range">

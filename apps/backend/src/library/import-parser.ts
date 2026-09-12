@@ -41,7 +41,9 @@ function parseZipImport(bodyBytes: Uint8Array): SpotifyExportEntry[] {
       throw new Error("Import archive is too large after extraction");
     }
 
-    if (!filename.endsWith(".json")) continue;
+    if (!filename.endsWith(".json")) {
+      continue;
+    }
     const parsed = parseJsonEntries(data);
     for (const entry of parsed) {
       entries.push(entry);

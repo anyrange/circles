@@ -16,7 +16,9 @@ const backend = createServer(async (request, response) => {
     return;
   }
   let body = "";
-  for await (const chunk of request) body += chunk;
+  for await (const chunk of request) {
+    body += chunk;
+  }
   response.setHeader("Content-Type", "application/json");
   response.end(
     JSON.stringify({
