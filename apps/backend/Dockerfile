@@ -12,7 +12,7 @@ COPY packages/utils/package.json ./packages/utils/package.json
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm --filter @circles/backend pack
+RUN pnpm --filter @circles/backend run pack
 
 FROM node:22-alpine AS runner
 ENV PNPM_HOME="/pnpm"
